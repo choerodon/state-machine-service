@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 public class MachineFactory {
     private static Logger logger = LoggerFactory.getLogger(MachineFactory.class);
 
+    private static final String INSTANCE_ID = "instanceId";
+    private static final String EXECUTE_RESULT = "executeResult";
     @Autowired
     private StateMachineService stateMachineService;
     @Autowired
@@ -89,7 +91,7 @@ public class MachineFactory {
         return builder;
     }
 
-    private StateMachine<String, String> buildInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId) {
+    private StateMachine<String, String> buildInstance(Long organizationId, String serviceCode, Long stateMachineId) {
         StateMachineBuilder.Builder<String, String> builder = builderMaps.get(stateMachineId);
         if (builder == null) {
             io.choerodon.statemachine.domain.StateMachine sm = stateMachineMapper.selectByPrimaryKey(stateMachineId);
@@ -114,14 +116,14 @@ public class MachineFactory {
      * @return
      */
     public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId) {
-        StateMachine<String, String> instance = buildInstance(organizationId, serviceCode, stateMachineId, instanceId);
+        StateMachine<String, String> instance = buildInstance(organizationId, serviceCode, stateMachineId);
         //存入instanceId，以便执行guard和action
-        instance.getExtendedState().getVariables().put("instanceId", instanceId);
+        instance.getExtendedState().getVariables().put(INSTANCE_ID, instanceId);
         //执行初始转换
         Long initTransfId = transfService.getInitTransf(stateMachineId);
         instance.sendEvent(initTransfId.toString());
 
-        ExecuteResult result = instance.getExtendedState().getVariables().get("executeResult") == null ? new ExecuteResult(false, null, null) : (ExecuteResult) instance.getExtendedState().getVariables().get("executeResult");
+        ExecuteResult result = instance.getExtendedState().getVariables().get(EXECUTE_RESULT) == null ? new ExecuteResult(false, null, null) : (ExecuteResult) instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
         return result;
     }
 
@@ -142,14 +144,14 @@ public class MachineFactory {
         String instanceCode = serviceCode + ":" + stateMachineId + ":" + instanceId;
         StateMachine<String, String> instance = stateMachineMap.get(instanceCode);
         if (instance == null) {
-            instance = buildInstance(organizationId, serviceCode, stateMachineId, instanceId);
+            instance = buildInstance(organizationId, serviceCode, stateMachineId);
             //恢复节点
             String id = instance.getId();
             instance.getStateMachineAccessor()
                     .doWithAllRegions(access ->
                             access.resetStateMachine(new DefaultStateMachineContext<>(currentNodeId.toString(), null, null, null, null, id)));
             //存入instanceId，以便执行guard和action
-            instance.getExtendedState().getVariables().put("instanceId", instanceId);
+            instance.getExtendedState().getVariables().put(INSTANCE_ID, instanceId);
             logger.info("restore stateMachine instance successful,stateMachineId:{}", stateMachineId);
             stateMachineMap.put(instanceCode, instance);
         }
@@ -158,7 +160,7 @@ public class MachineFactory {
 
         //节点转状态
         Long stateId = nodeMapper.getNodeById(Long.parseLong(instance.getState().getId())).getStateId();
-        Object executeResult = instance.getExtendedState().getVariables().get("executeResult");
+        Object executeResult = instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
         if (executeResult == null) {
             executeResult = new ExecuteResult(true, stateId, null);
         }
@@ -193,7 +195,7 @@ public class MachineFactory {
             @Override
             public void execute(StateContext<String, String> context) {
                 Long transfId = Long.parseLong(context.getEvent());
-                Long instanceId = (Long) context.getExtendedState().getVariables().get("instanceId");
+                Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
                 logger.info("stateMachine instance execute transform action,instanceId:{},transfId:{}", instanceId, transfId);
                 Boolean result = instanceService.postpositionAction(organizationId, serviceCode, transfId, instanceId, context);
                 if (!result) {
@@ -214,7 +216,7 @@ public class MachineFactory {
             @Override
             public void execute(StateContext<String, String> context) {
                 Long transfId = Long.parseLong(context.getEvent());
-                Long instanceId = (Long) context.getExtendedState().getVariables().get("instanceId");
+                Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
                 logger.error("stateMachine instance execute transform error,instanceId:{},transfId:{}", instanceId, transfId);
                 // do something
             }
@@ -232,7 +234,7 @@ public class MachineFactory {
             @Override
             public boolean evaluate(StateContext<String, String> context) {
                 Long transfId = Long.parseLong(context.getEvent());
-                Long instanceId = (Long) context.getExtendedState().getVariables().get("instanceId");
+                Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
                 logger.info("stateMachine instance execute transform guard,instanceId:{},transfId:{}", instanceId, transfId);
                 return instanceService.validatorGuard(organizationId, serviceCode, transfId, instanceId, context);
             }
@@ -247,7 +249,8 @@ public class MachineFactory {
         builderMaps.remove(stateMachineId);
         //清理旧状态机实例
         for (Map.Entry<String, StateMachine<String, String>> entry : stateMachineMap.entrySet()) {
-            if (entry.getKey().split(":")[1].equals(stateMachineId)) {
+            Long entryStateMachineId = Long.parseLong(entry.getKey().split(":")[1]);
+            if (entryStateMachineId.equals(stateMachineId)) {
                 entry.setValue(null);
             }
         }

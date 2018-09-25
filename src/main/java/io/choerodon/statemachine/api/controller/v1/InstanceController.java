@@ -61,7 +61,7 @@ public class InstanceController extends BaseController {
         return new ResponseEntity<>(instanceService.transfList(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @GetMapping(value = "/test")
     public void getAllCustomers(@PathVariable("organization_id") Long organizationId) throws URISyntaxException {
         instanceService.test();
     }
