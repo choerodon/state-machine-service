@@ -1,4 +1,4 @@
-package io.choerodon.demo;
+package io.choerodon.statemachine;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,9 +11,9 @@ import io.choerodon.resource.annoation.EnableChoerodonResourceServer;
 @EnableFeignClients
 @EnableEurekaClient
 @EnableChoerodonResourceServer
-public class DemoServiceApplication {
+public class StateMachineServiceApplication {
     public static void main(String[] args){
-        SpringApplication.run(DemoServiceApplication.class, args);
+        SpringApplication.run(StateMachineServiceApplication.class, args);
     }
 }
 
