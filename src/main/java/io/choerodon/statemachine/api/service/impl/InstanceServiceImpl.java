@@ -123,7 +123,7 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, null, null, StateMachineConfigType.STATUS_VALIDATOR.value()), configs);
             //返回为空则调用对应服务，对应服务方法报错
-            if (executeResultEntity.getBody().getIsSuccess() != null) {
+            if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
             }
         } catch (Exception e) {
@@ -132,7 +132,7 @@ public class InstanceServiceImpl implements InstanceService {
 
         Map<Object, Object> variables = context.getExtendedState().getVariables();
         variables.put("executeResult", executeResult);
-        return executeResult.getIsSuccess();
+        return executeResult.getSuccess();
     }
 
     @Override
@@ -146,7 +146,7 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, targetStateId, null, StateMachineConfigType.STATUS_POSTPOSITION.value()), configs);
             //返回为空则调用对应服务，对应服务方法报错
-            if (executeResultEntity.getBody().getIsSuccess() != null) {
+            if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
             }
         } catch (Exception e) {
@@ -155,7 +155,7 @@ public class InstanceServiceImpl implements InstanceService {
 
         Map<Object, Object> variables = context.getExtendedState().getVariables();
         variables.put("executeResult", executeResult);
-        return executeResult.getIsSuccess();
+        return executeResult.getSuccess();
     }
 
     @Override
