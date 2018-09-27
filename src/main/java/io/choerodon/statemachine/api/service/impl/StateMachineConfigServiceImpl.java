@@ -107,6 +107,7 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
      */
     @Override
     public List<ConfigEnumDTO> buildConfigEnum(String type) {
+        //todo 条件验证动作code，用数据库实现
         List<ConfigEnumDTO> configEnumDTOS = new ArrayList<>();
         if (type.equals(StateMachineConfigType.STATUS_CONDITION.value())) {
             ConfigEnumDTO reporter = new ConfigEnumDTO();

@@ -95,9 +95,7 @@ public class InstanceServiceImpl implements InstanceService {
     public List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long stateId) {
         List<StateMachineTransfDTO> list = transfService.queryListByStateId(organizationId, stateMachineId, stateId);
         //获取转换的条件配置
-        for (StateMachineTransfDTO transfDTO : list) {
-            transfDTO.setConditions(condition(transfDTO.getId()));
-        }
+        list.forEach(stateMachineTransfDTO -> stateMachineTransfDTO.setConditions(condition(stateMachineTransfDTO.getId())));
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
         list = list == null ? Collections.emptyList() : list;
         try {

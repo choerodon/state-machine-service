@@ -9,13 +9,14 @@ import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
 import io.choerodon.statemachine.api.service.StateMachineService;
+import io.choerodon.statemachine.app.assembler.StateMachineAssembler;
+import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.StateMachineConfigType;
 import io.choerodon.statemachine.infra.enums.StateMachineNodeStatus;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
-import io.choerodon.statemachine.infra.utils.ConvertUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,10 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Autowired
     private StateMachineConfigDeployMapper configDeployMapper;
+    @Autowired
+    private StateMachineNodeAssembler stateMachineNodeAssembler;
+    @Autowired
+    private StateMachineAssembler stateMachineAssembler;
 
     @Autowired
     private MachineFactory machineFactory;
@@ -208,7 +213,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         node.setStateMachineId(stateMachineId);
         List<StateMachineNode> nodes = nodeMapper.select(node);
         if (nodes != null && !nodes.isEmpty()) {
-            List<StateMachineNodeDeploy> nodeDeploys = ConvertUtils.convertNodesToNodeDeploys(nodes);
+            List<StateMachineNodeDeploy> nodeDeploys = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNodeDeploy.class);
             int nodeDeployInsert = nodeDeployMapper.insertList(nodeDeploys);
             if (nodeDeployInsert < 1) {
                 throw new CommonException("error.stateMachineNodeDeploy.create");
@@ -258,9 +263,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         stateMachineTransf.setStateMachineId(stateMachineId);
         List<StateMachineTransf> transfs = transfMapper.select(stateMachineTransf);
         stateMachine.setStateMachineTransfs(transfs);
-        StateMachineDTO dto = ConvertUtils.covertStateMachine(stateMachine);
+        StateMachineDTO dto = stateMachineAssembler.covertStateMachine(stateMachine);
         List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
-        for (StateMachineTransfDTO transfDTO:transfDTOS) {
+        for (StateMachineTransfDTO transfDTO : transfDTOS) {
             List<StateMachineConfigDTO> conditions = new ArrayList<>();
             List<StateMachineConfigDTO> validators = new ArrayList<>();
             List<StateMachineConfigDTO> triggers = new ArrayList<>();
@@ -269,16 +274,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             StateMachineConfig config = new StateMachineConfig();
             config.setTransfId(transfDTO.getId());
             List<StateMachineConfig> list = configMapper.select(config);
-            if (list != null && !list.isEmpty()){
-                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>(){}.getType());
-                for (StateMachineConfigDTO configDto:dtoList) {
-                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())){
+            if (list != null && !list.isEmpty()) {
+                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
+                }.getType());
+                for (StateMachineConfigDTO configDto : dtoList) {
+                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())) {
                         conditions.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())) {
                         validators.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())) {
                         triggers.add(configDto);
-                    }else {
+                    } else {
                         postpositions.add(configDto);
                     }
                 }
@@ -295,13 +301,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     @Override
     public StateMachine getOriginalById(Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
-        if(stateMachine==null){
+        if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notExist");
         }
         //获取原件节点
         List<StateMachineNodeDeploy> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
         if (nodeDeploys != null && !nodeDeploys.isEmpty()) {
-            List<StateMachineNode> nodes = ConvertUtils.convertNodeDeploysToNodes(nodeDeploys);
+            List<StateMachineNode> nodes = stateMachineNodeAssembler.toTargetList(nodeDeploys, StateMachineNode.class);
             stateMachine.setStateMachineNodes(nodes);
         }
         //获取原件转换
@@ -318,9 +324,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public StateMachineDTO queryOriginalById(Long stateMachineId) {
-        StateMachineDTO dto = ConvertUtils.covertStateMachine(getOriginalById(stateMachineId));
+        StateMachineDTO dto = stateMachineAssembler.covertStateMachine(getOriginalById(stateMachineId));
         List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
-        for (StateMachineTransfDTO transfDTO:transfDTOS) {
+        for (StateMachineTransfDTO transfDTO : transfDTOS) {
             List<StateMachineConfigDTO> conditions = new ArrayList<>();
             List<StateMachineConfigDTO> validators = new ArrayList<>();
             List<StateMachineConfigDTO> triggers = new ArrayList<>();
@@ -329,16 +335,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
             configDeploy.setTransfId(transfDTO.getId());
             List<StateMachineConfigDeploy> list = configDeployMapper.select(configDeploy);
-            if (list != null && !list.isEmpty()){
-                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>(){}.getType());
-                for (StateMachineConfigDTO configDto:dtoList) {
-                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())){
+            if (list != null && !list.isEmpty()) {
+                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
+                }.getType());
+                for (StateMachineConfigDTO configDto : dtoList) {
+                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())) {
                         conditions.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())) {
                         validators.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())) {
                         triggers.add(configDto);
-                    }else {
+                    } else {
                         postpositions.add(configDto);
                     }
                 }
@@ -383,7 +390,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         nodeDeploy.setStateMachineId(stateMachineId);
         List<StateMachineNodeDeploy> nodeDeploys = nodeDeployMapper.select(nodeDeploy);
         if (nodeDeploys != null && !nodeDeploys.isEmpty()) {
-            List<StateMachineNode> nodes = ConvertUtils.convertNodeDeploysToNodes(nodeDeploys);
+            List<StateMachineNode> nodes = stateMachineNodeAssembler.toTargetList(nodeDeploys, StateMachineNode.class);
             for (StateMachineNode insertNode : nodes) {
                 int nodeInsert = nodeMapper.insertWithId(insertNode);
                 if (nodeInsert < 1) {
@@ -438,6 +445,18 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<StateMachine> list = stateMachineMapper.select(stateMachine);
         return modelMapper.map(list, new TypeToken<List<StateMachineDTO>>() {
         }.getType());
+    }
+
+    @Override
+    public void updateStateMachineStatus(Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+        if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.STATUS_ACTIVE)) {
+            stateMachine.setStatus(StateMachineStatus.STATUS_DRAFT);
+            int stateMachineUpdate = stateMachineMapper.updateByPrimaryKey(stateMachine);
+            if (stateMachineUpdate != 1) {
+                throw new CommonException("error.stateMachine.update");
+            }
+        }
     }
 
     @Override
