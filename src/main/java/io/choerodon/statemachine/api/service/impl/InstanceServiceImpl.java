@@ -1,8 +1,5 @@
 package io.choerodon.statemachine.api.service.impl;
 
-import feign.*;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
@@ -16,8 +13,6 @@ import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.netflix.feign.FeignClientsConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
@@ -35,7 +30,6 @@ import java.util.Optional;
  * @date 2018/9/18
  */
 @Component
-@Import(FeignClientsConfiguration.class)
 @Transactional(rollbackFor = Exception.class)
 public class InstanceServiceImpl implements InstanceService {
 
@@ -47,6 +41,8 @@ public class InstanceServiceImpl implements InstanceService {
     private StateMachineTransfService transfService;
     @Autowired
     private MachineFactory machineFactory;
+    @Autowired
+    private CustomFeignClientAdaptor customFeignClientAdaptor;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
 
@@ -54,21 +50,6 @@ public class InstanceServiceImpl implements InstanceService {
     private static final String METHOD_EXECUTE_CONFIG = "execute_config";
     private static final String ERROR_VALIDATORGUARD = "error.customFeignClientAdaptor.executeConfig.validatorGuard";
     private static final String EXCEPTION = "Exception:{}";
-
-
-    /**
-     * 自定义FeignClient客户端
-     */
-    private CustomFeignClientAdaptor customFeignClientAdaptor;
-
-    @Autowired
-    public InstanceServiceImpl(Client client, Decoder decoder, Encoder encoder, RequestInterceptor interceptor) {
-        customFeignClientAdaptor = Feign.builder().encoder(encoder).decoder(decoder)
-                .client(client)
-                .contract(new Contract.Default())
-                .requestInterceptor(interceptor)
-                .target(Target.EmptyTarget.create(CustomFeignClientAdaptor.class));
-    }
 
     @Override
     public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId) {
