@@ -56,7 +56,7 @@ public class StateMachineController extends BaseController {
     @PostMapping
     public ResponseEntity<StateMachineDTO> create(@PathVariable("organization_id") Long organizationId, @RequestBody StateMachineDTO stateMachineDTO) {
         stateMachineValidator.createValidate(stateMachineDTO);
-        return new ResponseEntity<>(stateMachineService.create(organizationId,stateMachineDTO),HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.create(organizationId,stateMachineDTO),HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -72,7 +72,7 @@ public class StateMachineController extends BaseController {
     @ApiOperation(value = "删除状态机")
     @DeleteMapping(value = "/{state_machine_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.delete(organizationId, stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.delete(organizationId, stateMachineId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -106,7 +106,7 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<StateMachineDTO> deleteDraft(
             @PathVariable("organization_id") Long organizationId,
             @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.deleteDraft(stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.deleteDraft(stateMachineId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -131,5 +131,4 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<List<StateMachineDTO>> queryAll(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(stateMachineService.queryAll(organizationId), HttpStatus.OK);
     }
-
 }

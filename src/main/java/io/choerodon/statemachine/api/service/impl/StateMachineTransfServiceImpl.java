@@ -12,6 +12,7 @@ import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.StateMachineConfigType;
 import io.choerodon.statemachine.infra.enums.StateMachineNodeStatus;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
+import io.choerodon.statemachine.infra.enums.StateMachineTransfStatus;
 import io.choerodon.statemachine.infra.mapper.*;
 import io.choerodon.statemachine.infra.utils.ConvertUtils;
 import org.modelmapper.ModelMapper;
@@ -44,6 +45,8 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     private StateMachineConfigDeployMapper configDeployMapper;
     @Autowired
     private StateMachineConfigService configService;
+    @Autowired
+    private StateMapper stateMapper;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -55,7 +58,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
         }
-        transf = transfMapper.selectByPrimaryKey(transf);
+        transf = transfMapper.selectByPrimaryKey(transf.getId());
         updateStateMachineStatus(transf.getStateMachineId());
         return modelMapper.map(transf, StateMachineTransfDTO.class);
     }
@@ -207,4 +210,54 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
         return dtos;
     }
 
+    @Override
+    public StateMachineTransfDTO createAllStateTransf(Long organizationId, StateMachineTransfDTO transfDTO) {
+        Long endNodeId = transfDTO.getEndNodeId();
+        if (endNodeId != null) {
+            throw new CommonException("error.endNodeId.null");
+        }
+        StateMachineNode node = nodeMapper.getNodeById(endNodeId);
+        if (node != null) {
+            throw new CommonException("error.stateMachineNode.null");
+        }
+
+        //创建【全部转换到当前】的transf
+        State state = stateMapper.selectByPrimaryKey(node.getStateId());
+        transfDTO.setName(state.getName());
+        transfDTO.setDescription("全部转换");
+        transfDTO.setEndNodeId(endNodeId);
+        transfDTO.setStartNodeId(null);
+        transfDTO.setStatus(StateMachineNodeStatus.STATUS_CUSTOM);
+        transfDTO.setConditionStrategy(StateMachineTransfStatus.CONDITION_STRATEGY_ONE);
+        StateMachineTransf transf = modelMapper.map(transfDTO, StateMachineTransf.class);
+        int isInsert = transfMapper.insert(transf);
+        if (isInsert != 1) {
+            throw new CommonException("error.stateMachineTransf.create");
+        }
+
+        //更新node的【全部转换到当前】转换id
+        node.setAllStateTransfId(transf.getId());
+        nodeService.updateOptional(node,"allStateTransfId");
+
+        transf = transfMapper.selectByPrimaryKey(transf.getId());
+        updateStateMachineStatus(transf.getStateMachineId());
+        return modelMapper.map(transf, StateMachineTransfDTO.class);
+    }
+
+    @Override
+    public Boolean deleteAllStateTransf(Long organizationId, Long nodeId) {
+        StateMachineNode node = nodeMapper.getNodeById(nodeId);
+        if (node != null) {
+            throw new CommonException("error.stateMachineNode.null");
+        }
+
+        //删除【全部转换到当前】的转换
+        delete(organizationId,node.getAllStateTransfId());
+
+        //更新node的【全部转换到当前】转换id
+        node.setAllStateTransfId(null);
+        nodeService.updateOptional(node,"allStateTransfId");
+
+        return null;
+    }
 }

@@ -30,14 +30,14 @@ public class StateMachineConfigController extends BaseController {
     public ResponseEntity<StateMachineConfigDTO> create(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("state_machine_id") Long stateMachineId,
                                                         @RequestBody StateMachineConfigDTO configDTO) {
-        return new ResponseEntity<>(configService.create(stateMachineId, configDTO), HttpStatus.OK);
+        return new ResponseEntity<>(configService.create(stateMachineId, configDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除配置")
     @DeleteMapping(value = "/{config_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("config_id") Long configId) {
-        return new ResponseEntity<>(configService.delete(configId), HttpStatus.OK);
+        return new ResponseEntity<>(configService.delete(configId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

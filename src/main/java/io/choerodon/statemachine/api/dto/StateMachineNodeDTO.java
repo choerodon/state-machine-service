@@ -15,6 +15,7 @@ public class StateMachineNodeDTO {
     private Long height;
     private Long objectVersionNumber;
     private String status;
+    private Boolean allStateTransf;
 
     private StateDTO stateDTO;
 
@@ -115,5 +116,13 @@ public class StateMachineNodeDTO {
 
     public void setOutTransf(List<StateMachineTransfDTO> outTransf) {
         this.outTransf = outTransf;
+    }
+
+    public Boolean getAllStateTransf() {
+        return allStateTransf;
+    }
+
+    public void setAllStateTransf(Boolean allStateTransf) {
+        this.allStateTransf = allStateTransf;
     }
 }

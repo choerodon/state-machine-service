@@ -1,5 +1,6 @@
 package io.choerodon.statemachine.api.dto;
 
+import javax.persistence.Column;
 import java.util.List;
 
 /**
@@ -17,6 +18,9 @@ public class StateMachineTransfDTO {
     private String status;
     private String style;
     private String conditionStrategy;
+
+    //是否所有状态都转换此状态
+    private Boolean allStateTransf;
 
     private StateMachineNodeDTO startNodeDTO;
     private StateMachineNodeDTO endNodeDTO;

@@ -34,7 +34,7 @@ public class InstanceController extends BaseController {
                                                        @RequestParam("state_machine_id") Long stateMachineId,
                                                        @RequestParam("instance_id") Long instanceId) {
         ExecuteResult result = instanceService.startInstance(organizationId, serviceCode, stateMachineId, instanceId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
