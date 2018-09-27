@@ -73,17 +73,17 @@ public class StateMachineTransfController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点")
-    @PostMapping(value = "/create_all")
-    public ResponseEntity<StateMachineTransfDTO> createAllStateTransf(@PathVariable("organization_id") Long organizationId,
+    @PostMapping(value = "/create_type_all")
+    public ResponseEntity<StateMachineTransfDTO> createAllStatusTransf(@PathVariable("organization_id") Long organizationId,
                                                                       @RequestBody StateMachineTransfDTO transfDTO) {
-        return new ResponseEntity<>(transfService.createAllStateTransf(organizationId, transfDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(transfService.createAllStatusTransf(organizationId, transfDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除【全部】转换")
-    @DeleteMapping(value = "/delete_all/{node_id}")
-    public ResponseEntity<Boolean> deleteAllStateTransf(@PathVariable("organization_id") Long organizationId,
+    @DeleteMapping(value = "/delete_type_all/{node_id}")
+    public ResponseEntity<Boolean> deleteAllStatusTransf(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("node_id") Long nodeId) {
-        return new ResponseEntity<>(transfService.deleteAllStateTransf(organizationId, nodeId), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(transfService.deleteAllStatusTransf(organizationId, nodeId), HttpStatus.NO_CONTENT);
     }
 }

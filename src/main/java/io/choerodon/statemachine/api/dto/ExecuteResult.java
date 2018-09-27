@@ -7,15 +7,15 @@ package io.choerodon.statemachine.api.dto;
  */
 public class ExecuteResult {
     Boolean isSuccess;
-    Long resultStateId;
+    Long resultStatusId;
     String errorMessage;
 
     public ExecuteResult() {
     }
 
-    public ExecuteResult(Boolean isSuccess, Long resultStateId, String errorMessage) {
+    public ExecuteResult(Boolean isSuccess, Long resultStatusId, String errorMessage) {
         this.isSuccess = isSuccess;
-        this.resultStateId = resultStateId;
+        this.resultStatusId = resultStatusId;
         this.errorMessage = errorMessage;
     }
 
@@ -27,12 +27,12 @@ public class ExecuteResult {
         isSuccess = success;
     }
 
-    public Long getResultStateId() {
-        return resultStateId;
+    public Long getResultStatusId() {
+        return resultStatusId;
     }
 
-    public void setResultStateId(Long resultStateId) {
-        this.resultStateId = resultStateId;
+    public void setResultStatusId(Long resultStatusId) {
+        this.resultStatusId = resultStatusId;
     }
 
     public String getErrorMessage() {

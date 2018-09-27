@@ -12,7 +12,10 @@ public class StateMachineConfigDTO {
     private String type;
     private Long organizationId;
 
-    private String description; //条件描述
+    /**
+     * 条件描述
+     */
+    private String description;
 
     public Long getId() {
         return id;

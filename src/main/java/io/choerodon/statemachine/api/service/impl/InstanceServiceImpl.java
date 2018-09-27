@@ -9,7 +9,7 @@ import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineTransfService;
-import io.choerodon.statemachine.infra.enums.StateMachineConfigType;
+import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
@@ -25,7 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author shinan.chen
@@ -80,10 +83,10 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStateId, Long transfId) {
+    public ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transfId) {
         ExecuteResult executeResult;
         try {
-            executeResult = machineFactory.executeTransf(organizationId, serviceCode, stateMachineId, instanceId, currentStateId, transfId);
+            executeResult = machineFactory.executeTransf(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transfId);
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
             executeResult = new ExecuteResult(false, null, e.getMessage());
@@ -92,8 +95,8 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long stateId) {
-        List<StateMachineTransfDTO> list = transfService.queryListByStateId(organizationId, stateMachineId, stateId);
+    public List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId) {
+        List<StateMachineTransfDTO> list = transfService.queryListByStatusId(organizationId, stateMachineId, statusId);
         //获取转换的条件配置
         list.forEach(stateMachineTransfDTO -> stateMachineTransfDTO.setConditions(condition(stateMachineTransfDTO.getOrganizationId(), stateMachineTransfDTO.getId())));
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
@@ -114,7 +117,7 @@ public class InstanceServiceImpl implements InstanceService {
         ExecuteResult executeResult;
         //调用对应服务，执行验证，返回是否成功
         try {
-            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, null, null, StateMachineConfigType.STATUS_VALIDATOR.value()), configs);
+            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, null, null, ConfigType.VALIDATOR), configs);
             //返回为空则调用对应服务，对应服务方法报错
             if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
@@ -135,11 +138,11 @@ public class InstanceServiceImpl implements InstanceService {
     public Boolean postpositionAction(Long organizationId, String serviceCode, Long transfId, Long instanceId, StateContext<String, String> context) {
         List<StateMachineConfigDTO> configs = postposition(organizationId, transfId);
         //节点转状态
-        Long targetStateId = nodeMapper.getNodeById(Long.parseLong(context.getTarget().getId())).getStateId();
+        Long targetStatusId = nodeMapper.getNodeById(Long.parseLong(context.getTarget().getId())).getStatusId();
         ExecuteResult executeResult;
         //调用对应服务，执行动作，返回是否成功
         try {
-            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, targetStateId, null, StateMachineConfigType.STATUS_POSTPOSITION.value()), configs);
+            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, targetStatusId, null, ConfigType.POSTPOSITION), configs);
             //返回为空则调用对应服务，对应服务方法报错
             if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
@@ -157,25 +160,25 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public List<StateMachineConfigDTO> condition(Long organizationId, Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_CONDITION.value());
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, ConfigType.CONDITION);
         return configs == null ? Collections.emptyList() : configs;
     }
 
     @Override
     public List<StateMachineConfigDTO> validator(Long organizationId, Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_VALIDATOR.value());
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, ConfigType.VALIDATOR);
         return configs == null ? Collections.emptyList() : configs;
     }
 
     @Override
     public List<StateMachineConfigDTO> trigger(Long organizationId, Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_TRIGGER.value());
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, ConfigType.TRIGGER);
         return configs == null ? Collections.emptyList() : configs;
     }
 
     @Override
     public List<StateMachineConfigDTO> postposition(Long organizationId, Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_POSTPOSITION.value());
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, ConfigType.POSTPOSITION);
         return configs == null ? Collections.emptyList() : configs;
     }
 

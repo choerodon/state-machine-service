@@ -8,17 +8,17 @@ import java.util.List;
 public class StateMachineNodeDTO {
     private Long id;
     private Long stateMachineId;
-    private Long stateId;
+    private Long statusId;
     private Long positionX;
     private Long positionY;
     private Long width;
     private Long height;
     private Long objectVersionNumber;
-    private String status;
-    private Boolean allStateTransf;
+    private String type;
+    private Long allStatusTransfId;
     private Long organizationId;
 
-    private StateDTO stateDTO;
+    private StatusDTO stateDTO;
 
     private List<StateMachineTransfDTO> intoTransf;
     private List<StateMachineTransfDTO> outTransf;
@@ -39,12 +39,12 @@ public class StateMachineNodeDTO {
         this.stateMachineId = stateMachineId;
     }
 
-    public Long getStateId() {
-        return stateId;
+    public Long getStatusId() {
+        return statusId;
     }
 
-    public void setStateId(Long stateId) {
-        this.stateId = stateId;
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
     public Long getPositionX() {
@@ -87,20 +87,20 @@ public class StateMachineNodeDTO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public StateDTO getStateDTO() {
+    public StatusDTO getStateDTO() {
         return stateDTO;
     }
 
-    public void setStateDTO(StateDTO stateDTO) {
+    public void setStateDTO(StatusDTO stateDTO) {
         this.stateDTO = stateDTO;
     }
 
-    public String getStatus() {
-        return status;
+    public String getType() {
+        return type;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public List<StateMachineTransfDTO> getIntoTransf() {
@@ -119,12 +119,12 @@ public class StateMachineNodeDTO {
         this.outTransf = outTransf;
     }
 
-    public Boolean getAllStateTransf() {
-        return allStateTransf;
+    public Long getAllStatusTransfId() {
+        return allStatusTransfId;
     }
 
-    public void setAllStateTransf(Boolean allStateTransf) {
-        this.allStateTransf = allStateTransf;
+    public void setAllStatusTransfId(Long allStatusTransfId) {
+        this.allStatusTransfId = allStatusTransfId;
     }
 
     public Long getOrganizationId() {

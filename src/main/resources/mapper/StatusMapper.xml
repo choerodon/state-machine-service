@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.statemachine.infra.mapper.StatusMapper">
+
+    <select id="queryById" resultType="io.choerodon.statemachine.domain.Status">
+        SELECT *
+        FROM status
+        WHERE organization_id = #{organizationId}
+        and id = #{id}
+    </select>
+
+    <select id="fulltextSearch" resultType="io.choerodon.statemachine.domain.Status">
+        SELECT * FROM status
+        WHERE 1=1
+        <if test="status.organizationId != null">
+            AND organization_id = #{status.organizationId}
+        </if>
+        <if test="status.name != null">
+            AND name LIKE concat('%',#{status.name},'%')
+        </if>
+        <if test="status.type != null">
+            AND type LIKE concat('%',#{status.type},'%')
+        </if>
+        <if test="status.description != null">
+            AND description = #{status.description}
+        </if>
+        <if test="param != null">
+            AND ( name LIKE concat('%',#{param},'%')
+            OR description LIKE concat('%',#{param},'%')
+            )
+        </if>
+    </select>
+</mapper>

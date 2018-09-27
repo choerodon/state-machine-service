@@ -2,9 +2,9 @@ package io.choerodon.statemachine.api.controller.v1
 
 import io.choerodon.core.domain.Page
 import io.choerodon.statemachine.IntegrationTestConfiguration
-import io.choerodon.statemachine.api.dto.StateDTO
-import io.choerodon.statemachine.api.service.StateService
-import io.choerodon.statemachine.domain.State
+import io.choerodon.statemachine.api.dto.StatusDTO
+import io.choerodon.statemachine.api.service.StatusService
+import io.choerodon.statemachine.domain.Status
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -28,7 +28,7 @@ class StateControllerSpec extends Specification {
     TestRestTemplate restTemplate
 
     @Autowired
-    StateService service;
+    StatusService service;
 
     @Shared
     Long testOrginzationId = 1L;
@@ -37,18 +37,18 @@ class StateControllerSpec extends Specification {
     String baseUrl = '/v1/organizations/{organization_id}/state'
 
     @Shared
-    List<State> list = new ArrayList<>()
+    List<Status> list = new ArrayList<>()
 
     //初始化40条数据
     def setup() {
-        State del = new State();
+        Status del = new Status();
         service.delete(del);//清空数据
         list.clear();
         def testName = 'name'
         def testDescription = 'description'
         def testType = '1'
         for (int i = 0; i < 40; i++) {
-            State state = new State();
+            Status state = new Status();
             state.setName(testName + i)
             state.setDescription(testDescription + i)
             state.setOrganizationId(testOrginzationId)
@@ -62,14 +62,14 @@ class StateControllerSpec extends Specification {
 
     def "create"() {
         given: '创建状态'
-        StateDTO stateDTO = new StateDTO();
+        StatusDTO stateDTO = new StatusDTO();
         stateDTO.setName(testName)
         stateDTO.setDescription(testDescription)
         stateDTO.setOrganizationId(testOrginzationId)
         stateDTO.setType(testType)
         when: '状态写入数据库'
-        HttpEntity<StateDTO> httpEntity = new HttpEntity<>(stateDTO)
-        def entity = restTemplate.exchange(baseUrl, HttpMethod.POST, httpEntity, StateDTO, testOrginzationId)
+        HttpEntity<StatusDTO> httpEntity = new HttpEntity<>(stateDTO)
+        def entity = restTemplate.exchange(baseUrl, HttpMethod.POST, httpEntity, StatusDTO, testOrginzationId)
 
         then: '状态码为200，创建成功'
         entity.getStatusCode().is2xxSuccessful() == isSuccess
@@ -85,16 +85,16 @@ class StateControllerSpec extends Specification {
 
     def "update"() {
         given: '初始化一个状态'
-        State state = service.queryById(organizationId,list.get(0).getId());
+        Status state = service.queryById(organizationId,list.get(0).getId());
 
-        StateDTO stateDTO = new StateDTO();
+        StatusDTO stateDTO = new StatusDTO();
         stateDTO.setType(state.getType());
         stateDTO.setObjectVersionNumber(state.getObjectVersionNumber());
         stateDTO.setName(updateName)
 
         when: '更新状态'
-        HttpEntity<StateDTO> httpEntity = new HttpEntity<>(stateDTO)
-        def entity = restTemplate.exchange(baseUrl + '/{state_id}', HttpMethod.PUT, httpEntity, StateDTO, testOrginzationId, state.getId())
+        HttpEntity<StatusDTO> httpEntity = new HttpEntity<>(stateDTO)
+        def entity = restTemplate.exchange(baseUrl + '/{state_id}', HttpMethod.PUT, httpEntity, StatusDTO, testOrginzationId, state.getId())
 
         then: '状态码为200，更新成功'
         entity.getStatusCode().is2xxSuccessful() == isSuccess
@@ -122,7 +122,7 @@ class StateControllerSpec extends Specification {
         if (type != null) {
             url = url + "&type=" + type
         }
-        ParameterizedTypeReference<Page<StateDTO>> typeRef = new ParameterizedTypeReference<Page<StateDTO>>() {
+        ParameterizedTypeReference<Page<StatusDTO>> typeRef = new ParameterizedTypeReference<Page<StatusDTO>>() {
         };
         def entity = restTemplate.exchange(url, HttpMethod.GET, null, typeRef, testOrginzationId)
 
@@ -143,14 +143,14 @@ class StateControllerSpec extends Specification {
 
     def "delete"() {
         when: '发布状态机'
-        def stateId = list.get(0).getId()
-        def entity = restTemplate.exchange(baseUrl + '/{state_id}', HttpMethod.DELETE, null, Boolean, testOrginzationId, stateId)
+        def statusId = list.get(0).getId()
+        def entity = restTemplate.exchange(baseUrl + '/{state_id}', HttpMethod.DELETE, null, Boolean, testOrginzationId, statusId)
 
         then: '状态码为200，更新成功'
         entity.getStatusCode().is2xxSuccessful() == true
-        State state = new State();
-        state.setId(stateId);
-        State del = service.selectByPrimaryKey(state);
+        Status state = new Status();
+        state.setId(statusId);
+        Status del = service.selectByPrimaryKey(state);
         del == null;
 
     }

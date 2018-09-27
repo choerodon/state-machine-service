@@ -16,17 +16,20 @@ import javax.persistence.Transient;
 public class StateMachineNodeDeploy extends AuditDomain {
     private Long id;
     private Long stateMachineId;
-    private Long stateId;
+    private Long statusId;
     private Long positionX;
     private Long positionY;
     private Long width;
     private Long height;
-    private String status;
+    private String type;
     private Long organizationId;
+    /**
+     * 所有状态都转换此状态的转换id
+     */
+    private Long allStatusTransfId;
 
     @Transient
-    private State state;
-
+    private Status state;
 
 
     public Long getId() {
@@ -69,11 +72,11 @@ public class StateMachineNodeDeploy extends AuditDomain {
         this.height = height;
     }
 
-    public State getState() {
+    public Status getState() {
         return state;
     }
 
-    public void setState(State state) {
+    public void setState(Status state) {
         this.state = state;
     }
 
@@ -85,20 +88,20 @@ public class StateMachineNodeDeploy extends AuditDomain {
         this.stateMachineId = stateMachineId;
     }
 
-    public Long getStateId() {
-        return stateId;
+    public Long getStatusId() {
+        return statusId;
     }
 
-    public void setStateId(Long stateId) {
-        this.stateId = stateId;
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
-    public String getStatus() {
-        return status;
+    public String getType() {
+        return type;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Long getOrganizationId() {
@@ -107,5 +110,13 @@ public class StateMachineNodeDeploy extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getAllStatusTransfId() {
+        return allStatusTransfId;
+    }
+
+    public void setAllStatusTransfId(Long allStatusTransfId) {
+        this.allStatusTransfId = allStatusTransfId;
     }
 }

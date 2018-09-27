@@ -5,18 +5,18 @@
     <resultMap id="nodeDeployWithState" type="io.choerodon.statemachine.domain.StateMachineNodeDeploy">
         <id property="id" column="id"/>
         <result property="stateMachineId" column="state_machine_id"/>
-        <result property="stateId" column="state_id"/>
+        <result property="statusId" column="state_id"/>
         <result property="positionX" column="position_x"/>
         <result property="positionY" column="position_y"/>
         <result property="width" column="width"/>
         <result property="height" column="height"/>
-        <result property="status" column="status"/>
+        <result property="type" column="type"/>
         <result property="creationDate" column="creation_date"/>
         <result property="createdBy" column="created_by"/>
         <result property="lastUpdateDate" column="last_update_date"/>
         <result property="lastUpdatedBy" column="last_updated_by"/>
         <result property="objectVersionNumber" column="object_version_number"/>
-        <association property="state" javaType="io.choerodon.statemachine.domain.State">
+        <association property="state" javaType="io.choerodon.statemachine.domain.Status">
             <id property="id" column="s_id"/>
             <result property="name" column="s_name"/>
             <result property="description" column="s_description"/>
@@ -80,7 +80,7 @@
         state_machine_node_deploy SMN
         LEFT JOIN state_machine SM ON SMN.state_machine_id = SM.id
         WHERE
-        SMN.state_id = #{stateId}
+        SMN.state_id = #{statusId}
         AND SM.organization_id = #{organizationId}
     </select>
 

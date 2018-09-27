@@ -3,7 +3,7 @@ package io.choerodon.statemachine.api.dto;
 /**
  * @author peng.jiang@hand-china.com
  */
-public class StateDTO {
+public class StatusDTO {
 
     private Long id;
     private String name;
@@ -13,9 +13,9 @@ public class StateDTO {
     private Long objectVersionNumber;
     private Long associationMachine;
 
-    public StateDTO(){}
+    public StatusDTO(){}
 
-    public StateDTO(String name, String description, String type, Long organizationId) {
+    public StatusDTO(String name, String description, String type, Long organizationId) {
         this.name = name;
         this.description = description;
         this.type = type;
@@ -87,4 +87,6 @@ public class StateDTO {
     public void setCanDelete(Boolean canDelete) {
         this.canDelete = canDelete;
     }
+
+
 }

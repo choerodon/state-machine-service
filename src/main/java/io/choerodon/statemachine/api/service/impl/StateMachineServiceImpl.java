@@ -12,9 +12,10 @@ import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.app.assembler.StateMachineAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.domain.*;
-import io.choerodon.statemachine.infra.enums.StateMachineConfigType;
-import io.choerodon.statemachine.infra.enums.StateMachineNodeStatus;
+import io.choerodon.statemachine.infra.enums.ConfigType;
+import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
+import io.choerodon.statemachine.infra.enums.TransfType;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.modelmapper.ModelMapper;
@@ -84,7 +85,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     @Override
     public StateMachineDTO create(Long organizationId, StateMachineDTO stateMachineDTO) {
         stateMachineDTO.setId(null);
-        stateMachineDTO.setStatus(StateMachineStatus.STATUS_INACTIVE);
+        stateMachineDTO.setStatus(StateMachineStatus.CREATE);
         stateMachineDTO.setOrganizationId(organizationId);
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
         int isInsert = stateMachineMapper.insertSelective(stateMachine);
@@ -99,8 +100,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         startNode.setPositionY(0L);
         startNode.setWidth(50L);
         startNode.setHeight(50L);
-        startNode.setStateId(0L);
-        startNode.setStatus(StateMachineNodeStatus.STATUS_START);
+        startNode.setStatusId(0L);
+        startNode.setType(NodeType.START);
         int isStartNodeInsert = nodeMapper.insert(startNode);
         if (isStartNodeInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
@@ -110,12 +111,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         StateMachineNode node = new StateMachineNode();
         node.setStateMachineId(stateMachine.getId());
         //TODO 初始化默认状态
-        node.setStateId(1L);
+        node.setStatusId(1L);
         node.setPositionX(0L);
         node.setPositionY(120L);
         node.setWidth(100L);
         node.setHeight(50L);
-        node.setStatus(StateMachineNodeStatus.STATUS_DEFAULT);
+        node.setType(NodeType.INIT);
         int isNodeInsert = nodeMapper.insert(node);
         if (isNodeInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
@@ -125,7 +126,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         transf.setStateMachineId(stateMachine.getId());
         transf.setStartNodeId(startNode.getId());
         transf.setEndNodeId(node.getId());
-        transf.setStatus(StateMachineNodeStatus.STATUS_DEFAULT);
+        transf.setType(TransfType.INIT);
         int isTransfInsert = transfMapper.insert(transf);
         if (isTransfInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
@@ -188,10 +189,10 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (null == stateMachine) {
             throw new CommonException("stateMachine.deploy.no.found");
         }
-        if (StateMachineStatus.STATUS_ACTIVE.equals(stateMachine.getStatus())) {
+        if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
             throw new CommonException("stateMachine.status.deployed");
         }
-        stateMachine.setStatus(StateMachineStatus.STATUS_ACTIVE);
+        stateMachine.setStatus(StateMachineStatus.ACTIVE);
         int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeySelective(stateMachine);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deploy");
@@ -277,11 +278,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
                 }.getType());
                 for (StateMachineConfigDTO configDto : dtoList) {
-                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())) {
+                    if (ConfigType.CONDITION.equals(configDto.getType())) {
                         conditions.add(configDto);
-                    } else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())) {
+                    } else if (ConfigType.VALIDATOR.equals(configDto.getType())) {
                         validators.add(configDto);
-                    } else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())) {
+                    } else if (ConfigType.TRIGGER.equals(configDto.getType())) {
                         triggers.add(configDto);
                     } else {
                         postpositions.add(configDto);
@@ -338,11 +339,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
                 }.getType());
                 for (StateMachineConfigDTO configDto : dtoList) {
-                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())) {
+                    if (ConfigType.CONDITION.equals(configDto.getType())) {
                         conditions.add(configDto);
-                    } else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())) {
+                    } else if (ConfigType.VALIDATOR.equals(configDto.getType())) {
                         validators.add(configDto);
-                    } else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())) {
+                    } else if (ConfigType.TRIGGER.equals(configDto.getType())) {
                         triggers.add(configDto);
                     } else {
                         postpositions.add(configDto);
@@ -364,10 +365,10 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (null == stateMachine) {
             throw new CommonException("stateMachine.deleteDraft.no.found");
         }
-        if (!StateMachineStatus.STATUS_DRAFT.equals(stateMachine.getStatus())) {
+        if (!StateMachineStatus.DRAFT.equals(stateMachine.getStatus())) {
             throw new CommonException("stateMachine.status.is.not.draft");
         }
-        stateMachine.setStatus(StateMachineStatus.STATUS_ACTIVE);
+        stateMachine.setStatus(StateMachineStatus.DRAFT);
         int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeySelective(stateMachine);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deleteDraft");
@@ -449,8 +450,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     @Override
     public void updateStateMachineStatus(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
-        if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.STATUS_ACTIVE)) {
-            stateMachine.setStatus(StateMachineStatus.STATUS_DRAFT);
+        if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
+            stateMachine.setStatus(StateMachineStatus.DRAFT);
             int stateMachineUpdate = stateMachineMapper.updateByPrimaryKey(stateMachine);
             if (stateMachineUpdate != 1) {
                 throw new CommonException("error.stateMachine.update");

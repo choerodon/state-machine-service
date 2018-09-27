@@ -13,8 +13,8 @@ import javax.persistence.Table;
  */
 @ModifyAudit
 @VersionAudit
-@Table(name = "state")
-public class State extends AuditDomain {
+@Table(name = "status")
+public class Status extends AuditDomain {
     @Id
     @GeneratedValue
     private Long id;

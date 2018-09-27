@@ -43,9 +43,9 @@ public class InstanceController extends BaseController {
                                                        @RequestParam("service_code") String serviceCode,
                                                        @RequestParam("state_machine_id") Long stateMachineId,
                                                        @RequestParam("instance_id") Long instanceId,
-                                                       @RequestParam("current_state_id") Long currentStateId,
+                                                       @RequestParam("current_state_id") Long currentStatusId,
                                                        @RequestParam("transf_id") Long transfId) {
-        ExecuteResult result = instanceService.executeTransf(organizationId, serviceCode, stateMachineId, instanceId, currentStateId, transfId);
+        ExecuteResult result = instanceService.executeTransf(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transfId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

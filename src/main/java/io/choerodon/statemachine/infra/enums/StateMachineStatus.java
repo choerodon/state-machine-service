@@ -1,19 +1,20 @@
 package io.choerodon.statemachine.infra.enums;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author shinan.chen
+ * @date 2018/9/27
  */
-public interface StateMachineStatus {
+public final class StateMachineStatus {
     /**
-     * 草稿状态
+     * 草稿状态（发布后修改）
      */
-    String STATUS_DRAFT = "2";
+    public static final String DRAFT = "state_machine_draft";
     /**
-     * 活跃状态
+     * 活跃状态（发布、关联项目）
      */
-    String STATUS_ACTIVE = "1";
+    public static final String ACTIVE = "state_machine_active";
     /**
-     * 不活跃状态  新建
+     * 未活跃状态（新建）
      */
-    String STATUS_INACTIVE = "0";
+    public static final String CREATE = "state_machine_create";
 }

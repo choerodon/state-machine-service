@@ -1,7 +1,7 @@
 package script.db
 
 databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
-    changeSet(author: 'peng.jiang@hand-china.com', id: '2018-07-30-state-machine') {
+    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state-machine') {
         createTable(tableName: 'state_machine') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
@@ -10,7 +10,9 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
                 constraints(nullable: 'false')
             }
             column(name: 'description', type: 'VARCHAR(255)', remarks: '描述')
-            column(name: 'status', type: 'CHAR(1)', remarks: '状态', defaultValue: "0")
+            column(name: 'status', type: 'VARCHAR(30)', remarks: '状态机的状态') {
+                constraints(nullable: false)
+            }
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: 'false')
             }
@@ -31,5 +33,4 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             column(name: "organization_id", type: "BIGINT UNSIGNED")
         }
     }
-
 }

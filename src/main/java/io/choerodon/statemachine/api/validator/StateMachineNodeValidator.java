@@ -15,16 +15,16 @@ public class StateMachineNodeValidator {
         if (StringUtils.isEmpty(nodeDTO.getStateMachineId())) {
             throw new CommonException("error.stateMachineNode.stateMachineId.empty");
         }
-        if (StringUtils.isEmpty(nodeDTO.getStateId()) && nodeDTO.getStateDTO() == null) {
+        if (StringUtils.isEmpty(nodeDTO.getStatusId()) && nodeDTO.getStateDTO() == null) {
             throw new CommonException("error.stateMachineNode.state.null");
         }
-        if (StringUtils.isEmpty(nodeDTO.getStateId()) && nodeDTO.getStateDTO() != null && StringUtils.isEmpty(nodeDTO.getStateDTO().getName())) {
+        if (StringUtils.isEmpty(nodeDTO.getStatusId()) && nodeDTO.getStateDTO() != null && StringUtils.isEmpty(nodeDTO.getStateDTO().getName())) {
             throw new CommonException("error.stateMachineNode.state.name.empty");
         }
     }
 
     public void updateValidate(StateMachineNodeDTO nodeDTO) {
-        if (StringUtils.isEmpty(nodeDTO.getStateId()) && nodeDTO.getStateDTO() == null) {
+        if (StringUtils.isEmpty(nodeDTO.getStatusId()) && nodeDTO.getStateDTO() == null) {
             throw new CommonException("error.stateMachineNode.state.null");
         }
         if (nodeDTO.getStateDTO() != null && StringUtils.isEmpty(nodeDTO.getStateDTO().getName())) {

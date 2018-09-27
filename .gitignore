@@ -31,3 +31,4 @@ gitlabci/.generated
 
 /bin
 src/main/resources/application-default.yml
+init-local-database-csn.sh
