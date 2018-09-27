@@ -30,14 +30,14 @@ public class StateMachineConfigController extends BaseController {
     public ResponseEntity<StateMachineConfigDTO> create(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("state_machine_id") Long stateMachineId,
                                                         @RequestBody StateMachineConfigDTO configDTO) {
-        return new ResponseEntity<>(configService.create(stateMachineId, configDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(configService.create(organizationId, stateMachineId, configDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除配置")
     @DeleteMapping(value = "/{config_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("config_id") Long configId) {
-        return new ResponseEntity<>(configService.delete(configId), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(configService.delete(organizationId, configId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -46,7 +46,7 @@ public class StateMachineConfigController extends BaseController {
     public ResponseEntity<List<StateMachineConfigDTO>> queryByTransfId(@PathVariable("organization_id") Long organizationId,
                                                                        @RequestParam Long transfId,
                                                                        @RequestParam String type) {
-        return new ResponseEntity<>(configService.queryByTransfId(transfId, type), HttpStatus.OK);
+        return new ResponseEntity<>(configService.queryByTransfId(organizationId,transfId, type), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -55,7 +55,7 @@ public class StateMachineConfigController extends BaseController {
     public ResponseEntity<List<ConfigEnumDTO>> queryConfig(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("transf_id") Long transfId,
                                                            @RequestParam String type) {
-        return new ResponseEntity<>(configService.queryConfig(transfId, type), HttpStatus.OK);
+        return new ResponseEntity<>(configService.queryConfig(organizationId, transfId, type), HttpStatus.OK);
     }
 
 }

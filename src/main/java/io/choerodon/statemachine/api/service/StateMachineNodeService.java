@@ -40,7 +40,7 @@ public interface StateMachineNodeService extends BaseService<StateMachineNode> {
      * @param stateMachineId
      * @return
      */
-    Long getInitNode(Long stateMachineId);
+    Long getInitNode(Long organizationId,Long stateMachineId);
 
     /**
      * 根据id获取转换

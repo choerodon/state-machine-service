@@ -40,9 +40,10 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
     @Override
     public Page<StateDTO> pageQuery(PageRequest pageRequest, StateDTO stateDTO, String param) {
         State state = modelMapper.map(stateDTO, State.class);
-        Page<State> page = PageHelper.doPageAndSort(pageRequest,() -> stateMapper.fulltextSearch(state, param));
+        Page<State> page = PageHelper.doPageAndSort(pageRequest, () -> stateMapper.fulltextSearch(state, param));
         List<State> states = page.getContent();
-        List<StateDTO> stateDTOS = modelMapper.map(states, new TypeToken<List<StateDTO>>() {}.getType());
+        List<StateDTO> stateDTOS = modelMapper.map(states, new TypeToken<List<StateDTO>>() {
+        }.getType());
         for (StateDTO dto : stateDTOS) {
             //该状态已被草稿状态机使用个数
             Long draftUsed = nodeMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
@@ -72,7 +73,7 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
         if (isInsert != 1) {
             throw new CommonException("error.state.create");
         }
-        state = stateMapper.selectByPrimaryKey(state);
+        state = stateMapper.queryById(organizationId, state.getId());
         return modelMapper.map(state, StateDTO.class);
     }
 
@@ -83,13 +84,13 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
         if (isUpdate != 1) {
             throw new CommonException("error.state.update");
         }
-        state = stateMapper.selectByPrimaryKey(state);
+        state = stateMapper.queryById(state.getOrganizationId(), state.getId());
         return modelMapper.map(state, StateDTO.class);
     }
 
     @Override
     public Boolean delete(Long organizationId, Long stateId) {
-        State state = stateMapper.selectByPrimaryKey(stateId);
+        State state = stateMapper.queryById(organizationId, stateId);
         if (state == null) {
             throw new CommonException("error.state.delete.nofound");
         }
@@ -107,13 +108,8 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
 
     @Override
     public StateDTO queryStateById(Long organizationId, Long stateId) {
-        State state = new State();
-        state.setId(stateId);
-        state = stateMapper.selectByPrimaryKey(state);
-        if (state != null) {
-            return modelMapper.map(state, StateDTO.class);
-        }
-        return null;
+        State state = stateMapper.queryById(organizationId, stateId);
+        return state != null ? modelMapper.map(state, StateDTO.class) : null;
     }
 
     @Override

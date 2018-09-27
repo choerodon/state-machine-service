@@ -130,7 +130,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (isTransfInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
         }
-        return queryStateMachineWithConfigById(stateMachine.getId());
+        return queryStateMachineWithConfigById(organizationId, stateMachine.getId());
     }
 
     @Override
@@ -141,13 +141,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachine.update");
         }
-        stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachine.getId());
+        stateMachine = stateMachineMapper.queryById(organizationId, stateMachine.getId());
         return modelMapper.map(stateMachine, StateMachineDTO.class);
     }
 
     @Override
     public Boolean delete(Long organizationId, Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.delete.noFound");
         }
@@ -184,7 +184,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public StateMachineDTO deploy(Long organizationId, Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (null == stateMachine) {
             throw new CommonException("stateMachine.deploy.no.found");
         }
@@ -245,13 +245,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         }
         //清理内存中的旧状态机构建器与实例
         machineFactory.deployStateMachine(stateMachineId);
-
-        return queryStateMachineWithConfigById(stateMachine.getId());
+        return queryStateMachineWithConfigById(organizationId, stateMachine.getId());
     }
 
     @Override
-    public StateMachineDTO queryStateMachineWithConfigById(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.nofound");
         }
@@ -299,8 +298,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public StateMachine getOriginalById(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public StateMachine getOriginalById(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notExist");
         }
@@ -323,8 +322,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public StateMachineDTO queryOriginalById(Long stateMachineId) {
-        StateMachineDTO dto = stateMachineAssembler.covertStateMachine(getOriginalById(stateMachineId));
+    public StateMachineDTO queryOriginalById(Long organizationId, Long stateMachineId) {
+        StateMachineDTO dto = stateMachineAssembler.covertStateMachine(getOriginalById(organizationId, stateMachineId));
         List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
         for (StateMachineTransfDTO transfDTO : transfDTOS) {
             List<StateMachineConfigDTO> conditions = new ArrayList<>();
@@ -360,8 +359,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public StateMachineDTO deleteDraft(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public StateMachineDTO deleteDraft(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (null == stateMachine) {
             throw new CommonException("stateMachine.deleteDraft.no.found");
         }
@@ -426,12 +425,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 }
             }
         }
-        return queryStateMachineWithConfigById(stateMachine.getId());
+        return queryStateMachineWithConfigById(organizationId, stateMachine.getId());
     }
 
     @Override
-    public StateMachineDTO getStateMachineById(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public StateMachineDTO queryStateMachineById(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine != null) {
             return modelMapper.map(stateMachine, StateMachineDTO.class);
         }
@@ -448,8 +447,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public void updateStateMachineStatus(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public void updateStateMachineStatus(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.STATUS_ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.STATUS_DRAFT);
             int stateMachineUpdate = stateMachineMapper.updateByPrimaryKey(stateMachine);

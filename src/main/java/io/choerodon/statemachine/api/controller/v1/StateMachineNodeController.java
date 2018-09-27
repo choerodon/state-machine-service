@@ -57,7 +57,7 @@ public class StateMachineNodeController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取节点")
-    @GetMapping(value = "/getById/{node_id}")
+    @GetMapping(value = "/{node_id}")
     public ResponseEntity<StateMachineNodeDTO> queryById(@PathVariable("organization_id") Long organizationId,
                                                          @PathVariable("node_id") Long nodeId) {
         return new ResponseEntity<>(nodeService.queryById(organizationId, nodeId), HttpStatus.OK);

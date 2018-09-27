@@ -60,7 +60,7 @@ public class MachineFactory {
     private static Map<String, StateMachine<String, String>> stateMachineMap = new ConcurrentHashMap<>();
 
     private StateMachineBuilder.Builder<String, String> getBuilder(Long organizationId, String serviceCode, Long stateMachineId) {
-        io.choerodon.statemachine.domain.StateMachine stateMachine = stateMachineService.getOriginalById(stateMachineId);
+        io.choerodon.statemachine.domain.StateMachine stateMachine = stateMachineService.getOriginalById(organizationId,stateMachineId);
         List<StateMachineNode> nodes = stateMachine.getStateMachineNodes();
         List<StateMachineTransf> transfs = stateMachine.getStateMachineTransfs();
 
@@ -71,7 +71,7 @@ public class MachineFactory {
                     .machineId(stateMachineId.toString());
             builder.configureStates()
                     .withStates()
-                    .initial(nodeService.getInitNode(stateMachineId).toString(), initialAction(organizationId, serviceCode))
+                    .initial(nodeService.getInitNode(organizationId,stateMachineId).toString(), initialAction(organizationId, serviceCode))
                     .states(nodes.stream().map(x -> x.getId().toString()).collect(Collectors.toSet()));
             for (StateMachineTransf transf : transfs) {
                 if(transf.getAllStateTransf()!=null&&transf.getAllStateTransf()){
@@ -110,7 +110,7 @@ public class MachineFactory {
     private StateMachine<String, String> buildInstance(Long organizationId, String serviceCode, Long stateMachineId) {
         StateMachineBuilder.Builder<String, String> builder = builderMaps.get(stateMachineId);
         if (builder == null) {
-            io.choerodon.statemachine.domain.StateMachine sm = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+            io.choerodon.statemachine.domain.StateMachine sm = stateMachineMapper.queryById(organizationId,stateMachineId);
             if (sm.getStatus().equals(StateMachineStatus.STATUS_INACTIVE)) {
                 throw new CommonException("error.buildInstance.stateMachine.inActive");
             }
@@ -136,7 +136,7 @@ public class MachineFactory {
         //存入instanceId，以便执行guard和action
         instance.getExtendedState().getVariables().put(INSTANCE_ID, instanceId);
         //执行初始转换
-        Long initTransfId = transfService.getInitTransf(stateMachineId);
+        Long initTransfId = transfService.getInitTransf(organizationId,stateMachineId);
         instance.sendEvent(initTransfId.toString());
 
         ExecuteResult result = instance.getExtendedState().getVariables().get(EXECUTE_RESULT) == null ? new ExecuteResult(false, null, null) : (ExecuteResult) instance.getExtendedState().getVariables().get(EXECUTE_RESULT);

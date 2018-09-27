@@ -21,4 +21,5 @@ public interface StateMachineNodeMapper extends BaseMapper<StateMachineNode> {
 
     int insertWithId(@Param("stateMachineNode") StateMachineNode stateMachineNode);
 
+    StateMachineNode queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 }

@@ -62,9 +62,10 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
         }
-        transf = transfMapper.selectByPrimaryKey(transf.getId());
-        stateMachineService.updateStateMachineStatus(transf.getStateMachineId());
+        transf = transfMapper.queryById(organizationId, transf.getId());
+        stateMachineService.updateStateMachineStatus(organizationId, transf.getStateMachineId());
         return stateMachineTransfAssembler.toTarget(transf, StateMachineTransfDTO.class);
+
     }
 
     @Override
@@ -75,26 +76,29 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachineTransf.update");
         }
-        transf = transfMapper.selectByPrimaryKey(transf.getId());
-        stateMachineService.updateStateMachineStatus(transf.getStateMachineId());
+
+        transf = transfMapper.queryById(organizationId, transf.getId());
+        stateMachineService.updateStateMachineStatus(organizationId, transf.getStateMachineId());
         return stateMachineTransfAssembler.toTarget(transf, StateMachineTransfDTO.class);
+
     }
 
     @Override
     public Boolean delete(Long organizationId, Long transfId) {
-        StateMachineTransf transf = transfMapper.selectByPrimaryKey(transfId);
+        StateMachineTransf transf = transfMapper.queryById(organizationId, transfId);
         int isDelete = transfMapper.deleteByPrimaryKey(transfId);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineTransf.delete");
         }
-        stateMachineService.updateStateMachineStatus(transf.getStateMachineId());
+        stateMachineService.updateStateMachineStatus(organizationId, transf.getStateMachineId());
         return true;
     }
 
     @Override
-    public Boolean checkName(Long stateMachineId, Long transfId, String name) {
+    public Boolean checkName(Long organizationId, Long stateMachineId, Long transfId, String name) {
         StateMachineTransf transf = new StateMachineTransf();
         transf.setStateMachineId(stateMachineId);
+        transf.setOrganizationId(organizationId);
         transf.setName(name);
         transf = transfMapper.selectOne(transf);
         if (transf != null) {
@@ -106,7 +110,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
 
     @Override
     public StateMachineTransfDTO queryById(Long organizationId, Long transfId) {
-        StateMachineTransf transf = transfMapper.selectByPrimaryKey(transfId);
+        StateMachineTransf transf = transfMapper.queryById(organizationId, transfId);
         StateMachineTransfDTO dto = stateMachineTransfAssembler.toTarget(transf, StateMachineTransfDTO.class);
         List<StateMachineConfigDTO> conditions = new ArrayList<>();
         List<StateMachineConfigDTO> validators = new ArrayList<>();
@@ -169,10 +173,11 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     }
 
     @Override
-    public Long getInitTransf(Long stateMachineId) {
+    public Long getInitTransf(Long organizationId, Long stateMachineId) {
         StateMachineTransf transf = new StateMachineTransf();
         transf.setStateMachineId(stateMachineId);
-        transf.setStartNodeId(nodeService.getInitNode(stateMachineId));
+        transf.setOrganizationId(organizationId);
+        transf.setStartNodeId(nodeService.getInitNode(organizationId, stateMachineId));
         List<StateMachineTransf> transfs = transfMapper.select(transf);
         if (transfs.isEmpty()) {
             throw new CommonException("error.initTransf.null");
@@ -200,11 +205,12 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
             throw new CommonException("error.stateMachineNode.null");
         }
         //创建【全部转换到当前】的transf
-        State state = stateMapper.selectByPrimaryKey(node.getStateId());
+        State state = stateMapper.queryById(organizationId, node.getStateId());
         transfDTO.setName(state.getName());
         transfDTO.setDescription("全部转换");
         transfDTO.setEndNodeId(endNodeId);
         transfDTO.setStartNodeId(null);
+        transfDTO.setOrganizationId(organizationId);
         transfDTO.setStatus(StateMachineNodeStatus.STATUS_CUSTOM);
         transfDTO.setConditionStrategy(StateMachineTransfStatus.CONDITION_STRATEGY_ONE);
         StateMachineTransf transf = stateMachineTransfAssembler.toTarget(transfDTO, StateMachineTransf.class);
@@ -215,9 +221,10 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
         //更新node的【全部转换到当前】转换id
         node.setAllStateTransfId(transf.getId());
         nodeService.updateOptional(node, "allStateTransfId");
-        transf = transfMapper.selectByPrimaryKey(transf.getId());
-        stateMachineService.updateStateMachineStatus(transf.getStateMachineId());
+        transf = transfMapper.queryById(organizationId, transf.getId());
+        stateMachineService.updateStateMachineStatus(organizationId, transf.getStateMachineId());
         return stateMachineTransfAssembler.toTarget(transf, StateMachineTransfDTO.class);
+
     }
 
     @Override

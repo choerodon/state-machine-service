@@ -45,7 +45,7 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
      * @param stateMachineId
      * @return
      */
-    Long getInitTransf(Long stateMachineId);
+    Long getInitTransf(Long organizationId, Long stateMachineId);
 
     /**
      * 校验转换名字是否未被使用
@@ -55,7 +55,7 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
      * @param name           名称
      * @return
      */
-    Boolean checkName(Long stateMachineId, Long transfId, String name);
+    Boolean checkName(Long organizationId,Long stateMachineId, Long transfId, String name);
 
     /**
      * 根据id获取转换

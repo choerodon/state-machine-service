@@ -88,7 +88,7 @@ public class StateMachineController extends BaseController {
     @GetMapping(value = "/{state_machine_id}")
     public ResponseEntity<StateMachineDTO> queryStateMachineWithConfigById(@PathVariable("organization_id") Long organizationId,
                                                                            @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.queryStateMachineWithConfigById(stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.queryStateMachineWithConfigById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -96,7 +96,8 @@ public class StateMachineController extends BaseController {
     @GetMapping(value = "/original/{state_machine_id}")
     public ResponseEntity<StateMachineDTO> queryOriginalById(@PathVariable("organization_id") Long organizationId,
                                                              @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.queryOriginalById(stateMachineId), HttpStatus.OK);
+
+        return new ResponseEntity<>(stateMachineService.queryOriginalById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -104,7 +105,7 @@ public class StateMachineController extends BaseController {
     @DeleteMapping(value = "/delete_draft/{state_machine_id}")
     public ResponseEntity<StateMachineDTO> deleteDraft(@PathVariable("organization_id") Long organizationId,
                                                        @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.deleteDraft(stateMachineId), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(stateMachineService.deleteDraft(organizationId, stateMachineId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -112,7 +113,7 @@ public class StateMachineController extends BaseController {
     @GetMapping(value = "/get_stateMachine/{state_machine_id}")
     public ResponseEntity<StateMachineDTO> getStateMachineById(@PathVariable("organization_id") Long organizationId,
                                                                @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.getStateMachineById(stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.queryStateMachineById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -126,7 +127,7 @@ public class StateMachineController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取组织下所有状态机")
-    @GetMapping(value = "/queryAll")
+    @GetMapping(value = "/query_all")
     public ResponseEntity<List<StateMachineDTO>> queryAll(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(stateMachineService.queryAll(organizationId), HttpStatus.OK);
     }

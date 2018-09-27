@@ -60,12 +60,12 @@ public class StateMachineTransfController extends BaseController {
                                              @RequestParam(value = "state_machine_id") Long stateMachineId,
                                              @RequestParam(value = "transf_id", required = false) Long transfId,
                                              @RequestParam("name") String name) {
-        return new ResponseEntity<>(transfService.checkName(stateMachineId, transfId, name), HttpStatus.OK);
+        return new ResponseEntity<>(transfService.checkName(organizationId, stateMachineId, transfId, name), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取转换")
-    @GetMapping(value = "/getById/{transf_id}")
+    @GetMapping(value = "/{transf_id}")
     public ResponseEntity<StateMachineTransfDTO> queryById(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("transf_id") Long transfId) {
         return new ResponseEntity<>(transfService.queryById(organizationId, transfId), HttpStatus.OK);
@@ -73,7 +73,7 @@ public class StateMachineTransfController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点")
-    @PostMapping(value = "/createAllStateTransf")
+    @PostMapping(value = "/create_all")
     public ResponseEntity<StateMachineTransfDTO> createAllStateTransf(@PathVariable("organization_id") Long organizationId,
                                                                       @RequestBody StateMachineTransfDTO transfDTO) {
         return new ResponseEntity<>(transfService.createAllStateTransf(organizationId, transfDTO), HttpStatus.CREATED);
@@ -81,7 +81,7 @@ public class StateMachineTransfController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除【全部】转换")
-    @DeleteMapping(value = "/deleteAllStateTransf/{node_id}")
+    @DeleteMapping(value = "/delete_all/{node_id}")
     public ResponseEntity<Boolean> deleteAllStateTransf(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("node_id") Long nodeId) {
         return new ResponseEntity<>(transfService.deleteAllStateTransf(organizationId, nodeId), HttpStatus.NO_CONTENT);

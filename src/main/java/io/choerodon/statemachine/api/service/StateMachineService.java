@@ -63,18 +63,20 @@ public interface StateMachineService extends BaseService<StateMachine> {
     /**
      * 获取状态机及配置
      *
+     * @param organizationId organizationId
      * @param stateMachineId 状态机id
-     * @return
+     * @return StateMachineDTO
      */
-    StateMachineDTO queryStateMachineWithConfigById(Long stateMachineId);
+    StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机原件DTO
      *
+     * @param organizationId organizationId
      * @param stateMachineId 状态机id
-     * @return
+     * @return StateMachineDTO
      */
-    StateMachineDTO queryOriginalById(Long stateMachineId);
+    StateMachineDTO queryOriginalById(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机原件
@@ -82,7 +84,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachine getOriginalById(Long stateMachineId);
+    StateMachine getOriginalById(Long organizationId, Long stateMachineId);
 
     /**
      * 删除草稿
@@ -90,7 +92,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId 状态机Id
      * @return 状态机对象
      */
-    StateMachineDTO deleteDraft(Long stateMachineId);
+    StateMachineDTO deleteDraft(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机
@@ -98,7 +100,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO getStateMachineById(Long stateMachineId);
+    StateMachineDTO queryStateMachineById(Long organizationId, Long stateMachineId);
 
     /**
      * 校验问题状态机名字是否未被使用
@@ -121,8 +123,9 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * 修改状态机状态
      * 发布 -> 修改
      *
+     * @param organizationId organizationId
      * @param stateMachineId stateMachineId
      */
-    void updateStateMachineStatus(Long stateMachineId);
+    void updateStateMachineStatus(Long organizationId, Long stateMachineId);
 
 }

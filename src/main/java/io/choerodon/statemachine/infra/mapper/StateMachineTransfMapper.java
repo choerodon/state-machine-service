@@ -25,5 +25,5 @@ public interface StateMachineTransfMapper extends BaseMapper<StateMachineTransf>
      */
     int insertWithId(@Param("stateMachineTransf") StateMachineTransf stateMachineTransf);
 
-
+    StateMachineTransf queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 }

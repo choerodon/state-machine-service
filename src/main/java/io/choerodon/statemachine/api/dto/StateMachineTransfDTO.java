@@ -18,6 +18,7 @@ public class StateMachineTransfDTO {
     private String status;
     private String style;
     private String conditionStrategy;
+    private Long organizationId;
 
     //是否所有状态都转换此状态
     private Boolean allStateTransf;
@@ -163,5 +164,21 @@ public class StateMachineTransfDTO {
 
     public void setConditionStrategy(String conditionStrategy) {
         this.conditionStrategy = conditionStrategy;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Boolean getAllStateTransf() {
+        return allStateTransf;
+    }
+
+    public void setAllStateTransf(Boolean allStateTransf) {
+        this.allStateTransf = allStateTransf;
     }
 }

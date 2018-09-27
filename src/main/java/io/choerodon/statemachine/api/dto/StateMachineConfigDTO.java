@@ -10,6 +10,7 @@ public class StateMachineConfigDTO {
     private Long stateMachineId;
     private String code;
     private String type;
+    private Long organizationId;
 
     private String description; //条件描述
 
@@ -59,5 +60,13 @@ public class StateMachineConfigDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
