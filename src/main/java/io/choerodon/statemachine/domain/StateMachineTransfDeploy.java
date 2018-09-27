@@ -19,8 +19,11 @@ public class StateMachineTransfDeploy extends AuditDomain {
     private Long stateMachineId;
     private Long startNodeId;
     private Long endNodeId;
-    private String url; //页面方案id
-    private String status;
+    /**
+     * 页面方案id
+     */
+    private String url;
+    private String type;
     private String style;
     private String conditionStrategy;
     private Long organizationId;
@@ -81,12 +84,12 @@ public class StateMachineTransfDeploy extends AuditDomain {
         this.stateMachineId = stateMachineId;
     }
 
-    public String getStatus() {
-        return status;
+    public String getType() {
+        return type;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getStyle() {

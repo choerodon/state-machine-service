@@ -48,7 +48,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         nodeDTO.setOrganizationId(organizationId);
         createState(organizationId, nodeDTO);
         StateMachineNode node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNode.class);
-        node.setStatus(NodeType.CUSTOM);
+        node.setType(NodeType.CUSTOM);
         int isInsert = nodeMapper.insert(node);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
@@ -130,7 +130,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     @Override
     public Long getInitNode(Long organizationId, Long stateMachineId) {
         StateMachineNode node = new StateMachineNode();
-        node.setStatus(NodeType.START);
+        node.setType(NodeType.START);
         node.setStateMachineId(stateMachineId);
         node.setOrganizationId(organizationId);
         List<StateMachineNode> nodes = nodeMapper.select(node);

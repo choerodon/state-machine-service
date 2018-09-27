@@ -13,22 +13,22 @@ public class StateMachineTransfDTO {
     private Long stateMachineId;
     private Long startNodeId;
     private Long endNodeId;
-    private String url; //页面方案id
+    /**
+     * 页面方案id
+     */
+    private String url;
     private Long objectVersionNumber;
-    private String status;
+    private String type;
     private String style;
     private String conditionStrategy;
     private Long organizationId;
 
-    //是否所有状态都转换此状态
-    private Boolean allStateTransf;
-
     private StateMachineNodeDTO startNodeDTO;
     private StateMachineNodeDTO endNodeDTO;
-    private List<StateMachineConfigDTO> conditions;       //配置的条件
-    private List<StateMachineConfigDTO> validators;       //配置的验证器
-    private List<StateMachineConfigDTO> triggers;         //配置的触发器
-    private List<StateMachineConfigDTO> postpositions;    //配置的后置处理
+    private List<StateMachineConfigDTO> conditions;
+    private List<StateMachineConfigDTO> validators;
+    private List<StateMachineConfigDTO> triggers;
+    private List<StateMachineConfigDTO> postpositions;
 
     public Long getId() {
         return id;
@@ -94,12 +94,12 @@ public class StateMachineTransfDTO {
         this.stateMachineId = stateMachineId;
     }
 
-    public String getStatus() {
-        return status;
+    public String getType() {
+        return type;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getStyle() {
@@ -172,13 +172,5 @@ public class StateMachineTransfDTO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
-    }
-
-    public Boolean getAllStateTransf() {
-        return allStateTransf;
-    }
-
-    public void setAllStateTransf(Boolean allStateTransf) {
-        this.allStateTransf = allStateTransf;
     }
 }

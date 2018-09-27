@@ -24,14 +24,14 @@ public class StateMachineTransf extends AuditDomain {
     private Long stateMachineId;
     private Long startNodeId;
     private Long endNodeId;
-    private String url; //页面方案id
-    private String status;
+    /**
+     * 页面方案id
+     */
+    private String url;
+    private String type;
     private String style;
     private String conditionStrategy;
     private Long organizationId;
-    //是否所有状态都转换此状态
-    @Column(name = "is_all_state_transf")
-    private Boolean allStateTransf;
 
     public Long getId() {
         return id;
@@ -89,14 +89,6 @@ public class StateMachineTransf extends AuditDomain {
         this.stateMachineId = stateMachineId;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getStyle() {
         return style;
     }
@@ -113,19 +105,19 @@ public class StateMachineTransf extends AuditDomain {
         this.conditionStrategy = conditionStrategy;
     }
 
-    public Boolean getAllStateTransf() {
-        return allStateTransf;
-    }
-
-    public void setAllStateTransf(Boolean allStateTransf) {
-        this.allStateTransf = allStateTransf;
-    }
-
     public Long getOrganizationId() {
         return organizationId;
     }
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

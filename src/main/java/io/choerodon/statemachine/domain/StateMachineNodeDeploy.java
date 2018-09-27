@@ -21,12 +21,15 @@ public class StateMachineNodeDeploy extends AuditDomain {
     private Long positionY;
     private Long width;
     private Long height;
-    private String status;
+    private String type;
     private Long organizationId;
+    /**
+     * 所有状态都转换此状态的转换id
+     */
+    private Long allStatusTransfId;
 
     @Transient
     private Status state;
-
 
 
     public Long getId() {
@@ -93,12 +96,12 @@ public class StateMachineNodeDeploy extends AuditDomain {
         this.statusId = statusId;
     }
 
-    public String getStatus() {
-        return status;
+    public String getType() {
+        return type;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Long getOrganizationId() {
@@ -107,5 +110,13 @@ public class StateMachineNodeDeploy extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getAllStatusTransfId() {
+        return allStatusTransfId;
+    }
+
+    public void setAllStatusTransfId(Long allStatusTransfId) {
+        this.allStatusTransfId = allStatusTransfId;
     }
 }

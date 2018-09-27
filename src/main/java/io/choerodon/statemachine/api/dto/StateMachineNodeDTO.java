@@ -14,8 +14,8 @@ public class StateMachineNodeDTO {
     private Long width;
     private Long height;
     private Long objectVersionNumber;
-    private String status;
-    private Boolean allStateTransf;
+    private String type;
+    private Long allStatusTransfId;
     private Long organizationId;
 
     private StatusDTO stateDTO;
@@ -95,12 +95,12 @@ public class StateMachineNodeDTO {
         this.stateDTO = stateDTO;
     }
 
-    public String getStatus() {
-        return status;
+    public String getType() {
+        return type;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public List<StateMachineTransfDTO> getIntoTransf() {
@@ -119,12 +119,12 @@ public class StateMachineNodeDTO {
         this.outTransf = outTransf;
     }
 
-    public Boolean getAllStateTransf() {
-        return allStateTransf;
+    public Long getAllStatusTransfId() {
+        return allStatusTransfId;
     }
 
-    public void setAllStateTransf(Boolean allStateTransf) {
-        this.allStateTransf = allStateTransf;
+    public void setAllStatusTransfId(Long allStatusTransfId) {
+        this.allStatusTransfId = allStatusTransfId;
     }
 
     public Long getOrganizationId() {

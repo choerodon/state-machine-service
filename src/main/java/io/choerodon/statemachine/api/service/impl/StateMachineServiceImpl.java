@@ -101,7 +101,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         startNode.setWidth(50L);
         startNode.setHeight(50L);
         startNode.setStatusId(0L);
-        startNode.setStatus(NodeType.START);
+        startNode.setType(NodeType.START);
         int isStartNodeInsert = nodeMapper.insert(startNode);
         if (isStartNodeInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
@@ -116,7 +116,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         node.setPositionY(120L);
         node.setWidth(100L);
         node.setHeight(50L);
-        node.setStatus(NodeType.INIT);
+        node.setType(NodeType.INIT);
         int isNodeInsert = nodeMapper.insert(node);
         if (isNodeInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
@@ -126,7 +126,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         transf.setStateMachineId(stateMachine.getId());
         transf.setStartNodeId(startNode.getId());
         transf.setEndNodeId(node.getId());
-        transf.setStatus(TransfType.INIT);
+        transf.setType(TransfType.INIT);
         int isTransfInsert = transfMapper.insert(transf);
         if (isTransfInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");

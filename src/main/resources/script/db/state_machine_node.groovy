@@ -1,7 +1,6 @@
 package script.db
 
 databaseChangeLog(logicalFilePath: 'script/db/state_machine_node.groovy') {
-
     changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state-machine-node') {
         createTable(tableName: 'state_machine_node') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
@@ -20,7 +19,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_node.groovy') {
             column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
                 constraints(nullable: false)
             }
-            column(name: "all_state_transf_id", type: "BIGINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态的转换id')
+            column(name: "all_status_transf_id", type: "BIGINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态的转换id')
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
@@ -34,7 +33,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_node.groovy') {
             column(name: "state_machine_id", type: "BIGINT UNSIGNED")
         }
         createIndex(tableName: "state_machine_node", indexName: "state_machine_node_n2") {
-            column(name: "state_id", type: "BIGINT UNSIGNED")
+            column(name: "status_id", type: "BIGINT UNSIGNED")
         }
     }
 

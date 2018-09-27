@@ -82,7 +82,7 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
      * @param transfDTO
      * @return
      */
-    StateMachineTransfDTO createAllStateTransf(Long organizationId, StateMachineTransfDTO transfDTO);
+    StateMachineTransfDTO createAllStatusTransf(Long organizationId, StateMachineTransfDTO transfDTO);
 
     /**
      * 删除【全部转换到此状态】转换
@@ -90,5 +90,5 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
      * @param nodeId
      * @return
      */
-    Boolean deleteAllStateTransf(Long organizationId, Long nodeId);
+    Boolean deleteAllStatusTransf(Long organizationId, Long nodeId);
 }

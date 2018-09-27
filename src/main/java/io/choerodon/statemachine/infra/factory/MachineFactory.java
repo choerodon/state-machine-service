@@ -9,6 +9,7 @@ import io.choerodon.statemachine.api.service.StateMachineTransfService;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineTransf;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
+import io.choerodon.statemachine.infra.enums.TransfType;
 import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
@@ -74,7 +75,7 @@ public class MachineFactory {
                     .initial(nodeService.getInitNode(organizationId, stateMachineId).toString(), initialAction(organizationId, serviceCode))
                     .states(nodes.stream().map(x -> x.getId().toString()).collect(Collectors.toSet()));
             for (StateMachineTransf transf : transfs) {
-                if (transf.getAllStateTransf() != null && transf.getAllStateTransf()) {
+                if (transf.getType().equals(TransfType.ALL)) {
                     //若配置了全部转换
                     for (StateMachineNode node : nodes) {
                         String event = transf.getId().toString();

@@ -57,7 +57,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     @Override
     public StateMachineTransfDTO create(Long organizationId, StateMachineTransfDTO transfDTO) {
         StateMachineTransf transf = stateMachineTransfAssembler.toTarget(transfDTO, StateMachineTransf.class);
-        transf.setStatus(TransfType.CUSTOM);
+        transf.setType(TransfType.CUSTOM);
         int isInsert = transfMapper.insert(transf);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
@@ -195,7 +195,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     }
 
     @Override
-    public StateMachineTransfDTO createAllStateTransf(Long organizationId, StateMachineTransfDTO transfDTO) {
+    public StateMachineTransfDTO createAllStatusTransf(Long organizationId, StateMachineTransfDTO transfDTO) {
         Long endNodeId = transfDTO.getEndNodeId();
         if (endNodeId == null) {
             throw new CommonException("error.endNodeId.null");
@@ -211,7 +211,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
         transfDTO.setEndNodeId(endNodeId);
         transfDTO.setStartNodeId(null);
         transfDTO.setOrganizationId(organizationId);
-        transfDTO.setStatus(TransfType.ALL);
+        transfDTO.setType(TransfType.ALL);
         transfDTO.setConditionStrategy(StateMachineTransfStatus.CONDITION_STRATEGY_ONE);
         StateMachineTransf transf = stateMachineTransfAssembler.toTarget(transfDTO, StateMachineTransf.class);
         int isInsert = transfMapper.insert(transf);
@@ -219,7 +219,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
             throw new CommonException("error.stateMachineTransf.create");
         }
         //更新node的【全部转换到当前】转换id
-        node.setAllStateTransfId(transf.getId());
+        node.setAllStatusTransfId(transf.getId());
         nodeService.updateOptional(node, "allStateTransfId");
         transf = transfMapper.queryById(organizationId, transf.getId());
         stateMachineService.updateStateMachineStatus(organizationId, transf.getStateMachineId());
@@ -228,15 +228,15 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     }
 
     @Override
-    public Boolean deleteAllStateTransf(Long organizationId, Long nodeId) {
+    public Boolean deleteAllStatusTransf(Long organizationId, Long nodeId) {
         StateMachineNode node = nodeMapper.getNodeById(nodeId);
         if (node == null) {
             throw new CommonException("error.stateMachineNode.null");
         }
         //删除【全部转换到当前】的转换
-        Boolean result = delete(organizationId, node.getAllStateTransfId());
+        Boolean result = delete(organizationId, node.getAllStatusTransfId());
         //更新node的【全部转换到当前】转换id
-        node.setAllStateTransfId(null);
+        node.setAllStatusTransfId(null);
         int updateResult = nodeService.updateOptional(node, "allStateTransfId");
         if (updateResult != 1) {
             throw new CommonException("error.StateMachineTransfServiceImpl.updateOptional");

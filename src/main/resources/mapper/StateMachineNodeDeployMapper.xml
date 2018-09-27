@@ -10,7 +10,7 @@
         <result property="positionY" column="position_y"/>
         <result property="width" column="width"/>
         <result property="height" column="height"/>
-        <result property="status" column="status"/>
+        <result property="type" column="type"/>
         <result property="creationDate" column="creation_date"/>
         <result property="createdBy" column="created_by"/>
         <result property="lastUpdateDate" column="last_update_date"/>

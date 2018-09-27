@@ -2,46 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.choerodon.statemachine.infra.mapper.StateMachineMapper">
 
-    <resultMap id="stateMachineWithConfig" type="io.choerodon.statemachine.domain.StateMachine">
-        <id property="id" column="id"/>
-        <result property="name" column="name"/>
-        <result property="description" column="description"/>
-        <result property="status" column="status"/>
-        <result property="organizationId" column="organization_id"/>
-        <result property="creationDate" column="creation_date"/>
-        <result property="createdBy" column="created_by"/>
-        <result property="lastUpdateDate" column="last_update_date"/>
-        <result property="lastUpdatedBy" column="last_updated_by"/>
-        <result property="objectVersionNumber" column="object_version_number"/>
-        <collection property="stateMachineNodes" ofType="io.choerodon.statemachine.domain.StateMachineNode">
-            <id property="id" column="n_id"/>
-            <result property="stateMachineId" column="n_state_machine_id"/>
-            <result property="statusId" column="n_state_id"/>
-            <result property="isDraft" column="n_is_draft"/>
-            <result property="creationDate" column="n_creation_date"/>
-            <result property="createdBy" column="n_created_by"/>
-            <result property="lastUpdateDate" column="n_last_update_date"/>
-            <result property="lastUpdatedBy" column="n_last_updated_by"/>
-            <result property="objectVersionNumber" column="n_object_version_number"/>
-        </collection>
-        <collection property="stateMachineTransfs" ofType="io.choerodon.statemachine.domain.StateMachineTransf">
-            <id property="id" column="t_id"/>
-            <result property="name" column="t_name"/>
-            <result property="description" column="t_description"/>
-            <result property="stateMachineId" column="t_state_machine_id"/>
-            <result property="startNodeId" column="t_start_node_id"/>
-            <result property="endNodeId" column="t_end_node_id"/>
-            <result property="isDraft" column="t_is_draft"/>
-            <result property="url" column="t_url"/>
-            <result property="style" column="t_style"/>
-            <result property="creationDate" column="t_creation_date"/>
-            <result property="createdBy" column="t_created_by"/>
-            <result property="lastUpdateDate" column="t_last_update_date"/>
-            <result property="lastUpdatedBy" column="t_last_updated_by"/>
-            <result property="objectVersionNumber" column="t_object_version_number"/>
-        </collection>
-    </resultMap>
-
     <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachine">
         SELECT *
         FROM state_machine
@@ -73,39 +33,5 @@
         SET status = #{statusDeploy}, object_version_number = object_version_number + 1
         WHERE id = #{stateMachineId}
     </update>
-
-    <select id="getStateMachineById" resultMap="stateMachineWithConfig">
-        SELECT
-          SM.*,
-          SMN.id as n_id,
-          SMN.state_machine_id as n_state_machine_id,
-          SMN.state_id as n_state_id,
-          SMN.is_draft as n_is_draft,
-          SMN.creation_date as n_creation_date,
-          SMN.created_by as n_created_by,
-          SMN.last_update_date as n_last_update_date,
-          SMN.last_updated_by as n_last_updated_by,
-          SMN.object_version_number as n_object_version_number,
-          SMT.id as t_id,
-          SMT.name as t_name,
-          SMT.description as t_description,
-          SMT.state_machine_id as t_state_machine_id,
-          SMT.start_node_id as t_start_node_id,
-          SMT.end_node_id as t_end_node_id,
-          SMT.is_draft as t_is_draft,
-          SMT.url as t_url,
-          SMT.style as t_style,
-          SMT.creation_date as t_creation_date,
-          SMT.created_by as t_created_by,
-          SMT.last_update_date as t_last_update_date,
-          SMT.last_updated_by as t_last_updated_by,
-          SMT.object_version_number as t_object_version_number
-          FROM state_machine SM
-          LEFT JOIN state_machine_node SMN ON SMN.state_machine_id = SM.id
-          LEFT JOIN state_machine_transf SMT ON SMT.state_machine_id = SM.id
-        WHERE SM.id = #{stateMachineId}
-          AND SMN.is_draft = #{isDraft}
-          AND SMT.is_draft = #{isDraft}
-    </select>
 
 </mapper>

@@ -87,4 +87,6 @@ public class StatusDTO {
     public void setCanDelete(Boolean canDelete) {
         this.canDelete = canDelete;
     }
+
+
 }

@@ -22,9 +22,11 @@ public class StateMachineNode extends AuditDomain {
     private Long positionY;
     private Long width;
     private Long height;
-    private String status;//节点标识
-    //所有状态都转换此状态的转换id
-    private Long allStateTransfId;
+    private String type;
+    /**
+     * 所有状态都转换此状态的转换id
+     */
+    private Long allStatusTransfId;
 
     private Long organizationId;
 
@@ -87,12 +89,12 @@ public class StateMachineNode extends AuditDomain {
         this.height = height;
     }
 
-    public String getStatus() {
-        return status;
+    public String getType() {
+        return type;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Status getState() {
@@ -103,12 +105,12 @@ public class StateMachineNode extends AuditDomain {
         this.state = state;
     }
 
-    public Long getAllStateTransfId() {
-        return allStateTransfId;
+    public Long getAllStatusTransfId() {
+        return allStatusTransfId;
     }
 
-    public void setAllStateTransfId(Long allStateTransfId) {
-        this.allStateTransfId = allStateTransfId;
+    public void setAllStatusTransfId(Long allStatusTransfId) {
+        this.allStatusTransfId = allStatusTransfId;
     }
 
     public Long getOrganizationId() {
