@@ -41,6 +41,7 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
 
     /**
      * 获取初始转换
+     *
      * @param stateMachineId
      * @return
      */
@@ -74,4 +75,20 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
      */
     List<StateMachineTransfDTO> queryListByStateId(Long organizationId, Long stateMachineId, Long stateId);
 
+    /**
+     * 创建【全部转换到此状态】转换，所有节点均可转换到当前节点
+     *
+     * @param organizationId 组织id
+     * @param transfDTO
+     * @return
+     */
+    StateMachineTransfDTO createAllStateTransf(Long organizationId, StateMachineTransfDTO transfDTO);
+
+    /**
+     * 删除【全部转换到此状态】转换
+     * @param organizationId
+     * @param nodeId
+     * @return
+     */
+    Boolean deleteAllStateTransf(Long organizationId, Long nodeId);
 }

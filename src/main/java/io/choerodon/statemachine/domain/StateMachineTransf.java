@@ -4,6 +4,7 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
+import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -27,6 +28,9 @@ public class StateMachineTransf extends AuditDomain {
     private String status;
     private String style;
     private String conditionStrategy;
+    //是否所有状态都转换此状态
+    @Column(name = "is_all_state_transf")
+    private Boolean allStateTransf;
 
     public Long getId() {
         return id;
@@ -106,5 +110,13 @@ public class StateMachineTransf extends AuditDomain {
 
     public void setConditionStrategy(String conditionStrategy) {
         this.conditionStrategy = conditionStrategy;
+    }
+
+    public Boolean getAllStateTransf() {
+        return allStateTransf;
+    }
+
+    public void setAllStateTransf(Boolean allStateTransf) {
+        this.allStateTransf = allStateTransf;
     }
 }

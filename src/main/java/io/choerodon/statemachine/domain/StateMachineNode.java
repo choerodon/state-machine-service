@@ -4,10 +4,7 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * @author peng.jiang@hand-china.com
@@ -26,6 +23,9 @@ public class StateMachineNode extends AuditDomain {
     private Long width;
     private Long height;
     private String status;//节点标识
+
+    //所有状态都转换此状态的转换id
+    private Long allStateTransfId;
 
     @Transient
     private State state;
@@ -100,5 +100,13 @@ public class StateMachineNode extends AuditDomain {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public Long getAllStateTransfId() {
+        return allStateTransfId;
+    }
+
+    public void setAllStateTransfId(Long allStateTransfId) {
+        this.allStateTransfId = allStateTransfId;
     }
 }

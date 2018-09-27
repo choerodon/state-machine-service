@@ -48,6 +48,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             column(name: 'width', type: 'BIGINT UNSIGNED', remarks: '宽')
             column(name: 'height', type: 'BIGINT UNSIGNED', remarks: '高')
             column(name: 'status', type: 'CHAR(1)', remarks: '节点状态类型', defaultValue: '0')
+            column(name: "all_state_transf_id", type: "BIGINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态的转换id')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
@@ -81,6 +82,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             }
             column(name: 'url', type: 'VARCHAR(255)', remarks: '页面')
             column(name: 'status', type: 'CHAR(1)', remarks: '转换状态类型', defaultValue: '0')
+            column(name: "is_all_state_transf", type: "TYNIINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
@@ -109,6 +111,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             column(name: 'width', type: 'BIGINT UNSIGNED', remarks: '宽')
             column(name: 'height', type: 'BIGINT UNSIGNED', remarks: '高')
             column(name: 'status', type: 'CHAR(1)', remarks: '节点状态类型', defaultValue: '0')
+            column(name: "all_state_transf_id", type: "BIGINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态的转换id')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
@@ -142,6 +145,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             }
             column(name: 'url', type: 'VARCHAR(255)', remarks: '页面')
             column(name: 'status', type: 'CHAR(1)', remarks: '转换状态类型', defaultValue: '0')
+            column(name: "is_all_state_transf", type: "TYNIINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
@@ -163,7 +167,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
                 constraints(nullable: false)
             }
             column(name: 'description', type: 'VARCHAR(255)', remarks: '描述')
-            column(name: 'type', type: 'CHAR(1)', remarks: '类型'){
+            column(name: 'type', type: 'CHAR(1)', remarks: '类型') {
                 constraints(nullable: false)
             }
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {

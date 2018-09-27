@@ -74,16 +74,32 @@ public class MachineFactory {
                     .initial(nodeService.getInitNode(stateMachineId).toString(), initialAction(organizationId, serviceCode))
                     .states(nodes.stream().map(x -> x.getId().toString()).collect(Collectors.toSet()));
             for (StateMachineTransf transf : transfs) {
-                //转换都是通过id配置
-                String event = transf.getId().toString();
-                String source = transf.getStartNodeId().toString();
-                String target = transf.getEndNodeId().toString();
-                builder.configureTransitions()
-                        .withExternal()
-                        .source(source).target(target)
-                        .event(event)
-                        .action(action(organizationId, serviceCode), errorAction(organizationId, serviceCode))
-                        .guard(guard(organizationId, serviceCode));
+                if(transf.getAllStateTransf()!=null&&transf.getAllStateTransf()){
+                    //若配置了全部转换
+                    for(StateMachineNode node:nodes){
+                        String event = transf.getId().toString();
+                        String source = node.getId().toString();
+                        String target = transf.getEndNodeId().toString();
+                        builder.configureTransitions()
+                                .withExternal()
+                                .source(source).target(target)
+                                .event(event)
+                                .action(action(organizationId, serviceCode), errorAction(organizationId, serviceCode))
+                                .guard(guard(organizationId, serviceCode));
+                    }
+                }else{
+                    //转换都是通过id配置
+                    String event = transf.getId().toString();
+                    String source = transf.getStartNodeId().toString();
+                    String target = transf.getEndNodeId().toString();
+                    builder.configureTransitions()
+                            .withExternal()
+                            .source(source).target(target)
+                            .event(event)
+                            .action(action(organizationId, serviceCode), errorAction(organizationId, serviceCode))
+                            .guard(guard(organizationId, serviceCode));
+                }
+
             }
         } catch (Exception e) {
             logger.error("build StateMachineBuilder error,exception:{},stateMachineId:{}", e, stateMachineId);

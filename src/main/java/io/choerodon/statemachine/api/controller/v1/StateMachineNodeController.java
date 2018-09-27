@@ -33,7 +33,7 @@ public class StateMachineNodeController extends BaseController {
     @PostMapping
     public ResponseEntity<List<StateMachineNodeDTO>> create(@PathVariable("organization_id") Long organizationId, @RequestBody StateMachineNodeDTO nodeDTO) {
         nodeValidator.createValidate(nodeDTO);
-        return new ResponseEntity<>(nodeService.create(organizationId,nodeDTO),HttpStatus.OK);
+        return new ResponseEntity<>(nodeService.create(organizationId,nodeDTO),HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -49,7 +49,7 @@ public class StateMachineNodeController extends BaseController {
     @ApiOperation(value = "删除节点")
     @DeleteMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeDTO>> deleteNode(@PathVariable("organization_id") Long organizationId, @PathVariable("node_id") Long nodeId) {
-        return new ResponseEntity<>(nodeService.delete(organizationId, nodeId), HttpStatus.OK);
+        return new ResponseEntity<>(nodeService.delete(organizationId, nodeId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
