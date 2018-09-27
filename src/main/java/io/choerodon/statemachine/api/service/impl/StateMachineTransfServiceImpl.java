@@ -14,9 +14,9 @@ import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransfAssembler;
 import io.choerodon.statemachine.domain.*;
-import io.choerodon.statemachine.infra.enums.StateMachineConfigType;
-import io.choerodon.statemachine.infra.enums.StateMachineNodeStatus;
+import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.StateMachineTransfStatus;
+import io.choerodon.statemachine.infra.enums.TransfType;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     @Autowired
     private StateMachineConfigService configService;
     @Autowired
-    private StateMapper stateMapper;
+    private StatusMapper stateMapper;
     @Autowired
     private StateMachineTransfAssembler stateMachineTransfAssembler;
     @Autowired
@@ -57,7 +57,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     @Override
     public StateMachineTransfDTO create(Long organizationId, StateMachineTransfDTO transfDTO) {
         StateMachineTransf transf = stateMachineTransfAssembler.toTarget(transfDTO, StateMachineTransf.class);
-        transf.setStatus(StateMachineNodeStatus.STATUS_CUSTOM);
+        transf.setStatus(TransfType.CUSTOM);
         int isInsert = transfMapper.insert(transf);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
@@ -122,8 +122,8 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
         if (stateMachineConfigList != null && !stateMachineConfigList.isEmpty()) {
             List<StateMachineConfigDTO> dtoList = stateMachineConfigAssembler.toTargetList(stateMachineConfigList, StateMachineConfigDTO.class);
             for (StateMachineConfigDTO configDto : dtoList) {
-                if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())) {
-                    List<ConfigEnumDTO> conditionConfigEnums = configService.buildConfigEnum(StateMachineConfigType.STATUS_CONDITION.value());
+                if (ConfigType.CONDITION.equals(configDto.getType())) {
+                    List<ConfigEnumDTO> conditionConfigEnums = configService.buildConfigEnum(ConfigType.CONDITION);
                     for (ConfigEnumDTO configEnum : conditionConfigEnums) {
                         if (configEnum.getCode().equals(configDto.getCode())) {
                             configDto.setDescription(configEnum.getDescription());
@@ -131,8 +131,8 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
                         }
                     }
                     conditions.add(configDto);
-                } else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())) {
-                    List<ConfigEnumDTO> validatorConfigEnums = configService.buildConfigEnum(StateMachineConfigType.STATUS_VALIDATOR.value());
+                } else if (ConfigType.VALIDATOR.equals(configDto.getType())) {
+                    List<ConfigEnumDTO> validatorConfigEnums = configService.buildConfigEnum(ConfigType.VALIDATOR);
                     for (ConfigEnumDTO configEnum : validatorConfigEnums) {
                         if (configEnum.getCode().equals(configDto.getCode())) {
                             configDto.setDescription(configEnum.getDescription());
@@ -140,8 +140,8 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
                         }
                     }
                     validators.add(configDto);
-                } else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())) {
-                    List<ConfigEnumDTO> triggerConfigEnums = configService.buildConfigEnum(StateMachineConfigType.STATUS_TRIGGER.value());
+                } else if (ConfigType.TRIGGER.equals(configDto.getType())) {
+                    List<ConfigEnumDTO> triggerConfigEnums = configService.buildConfigEnum(ConfigType.TRIGGER);
                     for (ConfigEnumDTO configEnum : triggerConfigEnums) {
                         if (configEnum.getCode().equals(configDto.getCode())) {
                             configDto.setDescription(configEnum.getDescription());
@@ -150,7 +150,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
                     }
                     triggers.add(configDto);
                 } else {
-                    List<ConfigEnumDTO> postpositionConfigEnums = configService.buildConfigEnum(StateMachineConfigType.STATUS_POSTPOSITION.value());
+                    List<ConfigEnumDTO> postpositionConfigEnums = configService.buildConfigEnum(ConfigType.POSTPOSITION);
                     for (ConfigEnumDTO configEnum : postpositionConfigEnums) {
                         if (configEnum.getCode().equals(configDto.getCode())) {
                             configDto.setDescription(configEnum.getDescription());
@@ -186,8 +186,8 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     }
 
     @Override
-    public List<StateMachineTransfDTO> queryListByStateId(Long organizationId, Long stateMachineId, Long stateId) {
-        Long startNodeId = nodeMapper.getNodeByStateId(stateMachineId, stateId).getId();
+    public List<StateMachineTransfDTO> queryListByStatusId(Long organizationId, Long stateMachineId, Long statusId) {
+        Long startNodeId = nodeMapper.getNodeByStatusId(stateMachineId, statusId).getId();
         StateMachineTransfDeploy transf = new StateMachineTransfDeploy();
         transf.setStateMachineId(stateMachineId);
         transf.setStartNodeId(startNodeId);
@@ -205,13 +205,13 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
             throw new CommonException("error.stateMachineNode.null");
         }
         //创建【全部转换到当前】的transf
-        State state = stateMapper.queryById(organizationId, node.getStateId());
+        Status state = stateMapper.queryById(organizationId, node.getStatusId());
         transfDTO.setName(state.getName());
         transfDTO.setDescription("全部转换");
         transfDTO.setEndNodeId(endNodeId);
         transfDTO.setStartNodeId(null);
         transfDTO.setOrganizationId(organizationId);
-        transfDTO.setStatus(StateMachineNodeStatus.STATUS_CUSTOM);
+        transfDTO.setStatus(TransfType.ALL);
         transfDTO.setConditionStrategy(StateMachineTransfStatus.CONDITION_STRATEGY_ONE);
         StateMachineTransf transf = stateMachineTransfAssembler.toTarget(transfDTO, StateMachineTransf.class);
         int isInsert = transfMapper.insert(transf);

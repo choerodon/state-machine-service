@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.infra.mapper;
 
 import io.choerodon.mybatis.common.BaseMapper;
-import io.choerodon.statemachine.domain.State;
+import io.choerodon.statemachine.domain.Status;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -9,16 +9,16 @@ import java.util.List;
 /**
  * @author peng.jiang@hand-china.com
  */
-public interface StateMapper extends BaseMapper<State> {
+public interface StatusMapper extends BaseMapper<Status> {
 
     /**
      * 分页查询状态
      *
-     * @param state 状态对象
+     * @param status 状态对象
      * @param param 模糊查询参数
      * @return 状态列表
      */
-    List<State> fulltextSearch(@Param("state") State state, @Param("param") String param);
+    List<Status> fulltextSearch(@Param("status") Status status, @Param("param") String param);
 
-    State queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
+    Status queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 }

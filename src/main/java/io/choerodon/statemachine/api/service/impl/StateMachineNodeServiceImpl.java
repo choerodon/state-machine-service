@@ -8,13 +8,13 @@ import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransfAssembler;
-import io.choerodon.statemachine.domain.State;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineTransf;
-import io.choerodon.statemachine.infra.enums.StateMachineNodeStatus;
+import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransfMapper;
-import io.choerodon.statemachine.infra.mapper.StateMapper;
+import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,14 +41,14 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     private StateMachineTransfAssembler stateMachineTransfAssembler;
 
     @Autowired
-    private StateMapper stateMapper;
+    private StatusMapper stateMapper;
 
     @Override
     public List<StateMachineNodeDTO> create(Long organizationId, StateMachineNodeDTO nodeDTO) {
         nodeDTO.setOrganizationId(organizationId);
         createState(organizationId, nodeDTO);
         StateMachineNode node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNode.class);
-        node.setStatus(StateMachineNodeStatus.STATUS_CUSTOM);
+        node.setStatus(NodeType.CUSTOM);
         int isInsert = nodeMapper.insert(node);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
@@ -110,14 +110,14 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
      * @param nodeDTO        节点
      */
     private void createState(Long organizationId, StateMachineNodeDTO nodeDTO) {
-        if (nodeDTO.getStateId() == null && nodeDTO.getStateDTO() != null && nodeDTO.getStateDTO().getName() != null) {
-            State state = stateMachineNodeAssembler.toTarget(nodeDTO.getStateDTO(), State.class);
-            state.setOrganizationId(organizationId);
-            int isStateInsert = stateMapper.insert(state);
+        if (nodeDTO.getStatusId() == null && nodeDTO.getStateDTO() != null && nodeDTO.getStateDTO().getName() != null) {
+            Status status = stateMachineNodeAssembler.toTarget(nodeDTO.getStateDTO(), Status.class);
+            status.setOrganizationId(organizationId);
+            int isStateInsert = stateMapper.insert(status);
             if (isStateInsert != 1) {
                 throw new CommonException("error.state.create");
             }
-            nodeDTO.setStateId(state.getId());
+            nodeDTO.setStatusId(status.getId());
         }
     }
 
@@ -130,7 +130,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     @Override
     public Long getInitNode(Long organizationId, Long stateMachineId) {
         StateMachineNode node = new StateMachineNode();
-        node.setStatus(StateMachineNodeStatus.STATUS_START);
+        node.setStatus(NodeType.START);
         node.setStateMachineId(stateMachineId);
         node.setOrganizationId(organizationId);
         List<StateMachineNode> nodes = nodeMapper.select(node);

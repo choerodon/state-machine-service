@@ -28,21 +28,21 @@ public interface InstanceService {
      *
      * @param stateMachineId 状态机Id
      * @param transfId       转换Id
-     * @param currentStateId 当前状态Id
+     * @param currentStatusId 当前状态Id
      * @param instanceId     操作对象Id(cloopm-service: issueId)
      * @param serviceCode    请求服务code
      * @return
      */
-    ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStateId, Long transfId);
+    ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transfId);
 
     /**
      * 获取当前状态拥有的转换列表，feign调用对应服务的条件验证
      *
      * @param organizationId
-     * @param stateId
+     * @param statusId
      * @return
      */
-    List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long stateId);
+    List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId);
 
     /**
      * 调用相应服务，验证转换

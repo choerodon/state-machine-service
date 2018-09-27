@@ -8,7 +8,7 @@ import java.util.List;
 public class StateMachineNodeDTO {
     private Long id;
     private Long stateMachineId;
-    private Long stateId;
+    private Long statusId;
     private Long positionX;
     private Long positionY;
     private Long width;
@@ -18,7 +18,7 @@ public class StateMachineNodeDTO {
     private Boolean allStateTransf;
     private Long organizationId;
 
-    private StateDTO stateDTO;
+    private StatusDTO stateDTO;
 
     private List<StateMachineTransfDTO> intoTransf;
     private List<StateMachineTransfDTO> outTransf;
@@ -39,12 +39,12 @@ public class StateMachineNodeDTO {
         this.stateMachineId = stateMachineId;
     }
 
-    public Long getStateId() {
-        return stateId;
+    public Long getStatusId() {
+        return statusId;
     }
 
-    public void setStateId(Long stateId) {
-        this.stateId = stateId;
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
     public Long getPositionX() {
@@ -87,11 +87,11 @@ public class StateMachineNodeDTO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public StateDTO getStateDTO() {
+    public StatusDTO getStateDTO() {
         return stateDTO;
     }
 
-    public void setStateDTO(StateDTO stateDTO) {
+    public void setStateDTO(StatusDTO stateDTO) {
         this.stateDTO = stateDTO;
     }
 

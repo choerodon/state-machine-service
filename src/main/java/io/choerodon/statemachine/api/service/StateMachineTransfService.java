@@ -70,10 +70,10 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
      * 获取当前状态拥有的转换列表
      *
      * @param organizationId
-     * @param stateId
+     * @param statusId
      * @return
      */
-    List<StateMachineTransfDTO> queryListByStateId(Long organizationId, Long stateMachineId, Long stateId);
+    List<StateMachineTransfDTO> queryListByStatusId(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 创建【全部转换到此状态】转换，所有节点均可转换到当前节点

@@ -13,11 +13,11 @@ public interface StateMachineNodeMapper extends BaseMapper<StateMachineNode> {
 
     StateMachineNode getNodeById(@Param("nodeId") Long nodeId);
 
-    StateMachineNode getNodeByStateId(@Param("stateMachineId") Long stateMachineId, @Param("stateId") Long stateId);
+    StateMachineNode getNodeByStatusId(@Param("stateMachineId") Long stateMachineId, @Param("statusId") Long statusId);
 
     List<StateMachineNode> selectByStateMachineId(@Param("stateMachineId") Long stateMachineId);
 
-    Long checkStateDelete(@Param("organizationId") Long organizationId, @Param("stateId") Long stateId);
+    Long checkStateDelete(@Param("organizationId") Long organizationId, @Param("statusId") Long statusId);
 
     int insertWithId(@Param("stateMachineNode") StateMachineNode stateMachineNode);
 

@@ -2,7 +2,7 @@ package script.db
 
 databaseChangeLog(logicalFilePath: 'script/db/state_machine_config.groovy') {
 
-    changeSet(author: 'peng.jiang@hand-china.com', id: '2018-09-12-state-machine-config') {
+    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-09-12-state-machine-config') {
         createTable(tableName: 'state_machine_config') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
@@ -16,8 +16,8 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_config.groovy') {
             column(name: 'code', type: 'VARCHAR(255)', remarks: '编码') {
                 constraints(nullable: 'false')
             }
-            column(name: 'type', type: 'VARCHAR(255)', remarks: '类型') {
-                constraints(nullable: 'false')
+            column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
+                constraints(nullable: false)
             }
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)

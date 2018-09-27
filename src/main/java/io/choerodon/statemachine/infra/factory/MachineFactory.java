@@ -60,7 +60,7 @@ public class MachineFactory {
     private static Map<String, StateMachine<String, String>> stateMachineMap = new ConcurrentHashMap<>();
 
     private StateMachineBuilder.Builder<String, String> getBuilder(Long organizationId, String serviceCode, Long stateMachineId) {
-        io.choerodon.statemachine.domain.StateMachine stateMachine = stateMachineService.getOriginalById(organizationId,stateMachineId);
+        io.choerodon.statemachine.domain.StateMachine stateMachine = stateMachineService.getOriginalById(organizationId, stateMachineId);
         List<StateMachineNode> nodes = stateMachine.getStateMachineNodes();
         List<StateMachineTransf> transfs = stateMachine.getStateMachineTransfs();
 
@@ -71,12 +71,12 @@ public class MachineFactory {
                     .machineId(stateMachineId.toString());
             builder.configureStates()
                     .withStates()
-                    .initial(nodeService.getInitNode(organizationId,stateMachineId).toString(), initialAction(organizationId, serviceCode))
+                    .initial(nodeService.getInitNode(organizationId, stateMachineId).toString(), initialAction(organizationId, serviceCode))
                     .states(nodes.stream().map(x -> x.getId().toString()).collect(Collectors.toSet()));
             for (StateMachineTransf transf : transfs) {
-                if(transf.getAllStateTransf()!=null&&transf.getAllStateTransf()){
+                if (transf.getAllStateTransf() != null && transf.getAllStateTransf()) {
                     //若配置了全部转换
-                    for(StateMachineNode node:nodes){
+                    for (StateMachineNode node : nodes) {
                         String event = transf.getId().toString();
                         String source = node.getId().toString();
                         String target = transf.getEndNodeId().toString();
@@ -87,7 +87,7 @@ public class MachineFactory {
                                 .action(action(organizationId, serviceCode), errorAction(organizationId, serviceCode))
                                 .guard(guard(organizationId, serviceCode));
                     }
-                }else{
+                } else {
                     //转换都是通过id配置
                     String event = transf.getId().toString();
                     String source = transf.getStartNodeId().toString();
@@ -110,8 +110,8 @@ public class MachineFactory {
     private StateMachine<String, String> buildInstance(Long organizationId, String serviceCode, Long stateMachineId) {
         StateMachineBuilder.Builder<String, String> builder = builderMaps.get(stateMachineId);
         if (builder == null) {
-            io.choerodon.statemachine.domain.StateMachine sm = stateMachineMapper.queryById(organizationId,stateMachineId);
-            if (sm.getStatus().equals(StateMachineStatus.STATUS_INACTIVE)) {
+            io.choerodon.statemachine.domain.StateMachine sm = stateMachineMapper.queryById(organizationId, stateMachineId);
+            if (sm.getStatus().equals(StateMachineStatus.CREATE)) {
                 throw new CommonException("error.buildInstance.stateMachine.inActive");
             }
             builder = getBuilder(organizationId, serviceCode, stateMachineId);
@@ -136,7 +136,7 @@ public class MachineFactory {
         //存入instanceId，以便执行guard和action
         instance.getExtendedState().getVariables().put(INSTANCE_ID, instanceId);
         //执行初始转换
-        Long initTransfId = transfService.getInitTransf(organizationId,stateMachineId);
+        Long initTransfId = transfService.getInitTransf(organizationId, stateMachineId);
         instance.sendEvent(initTransfId.toString());
 
         ExecuteResult result = instance.getExtendedState().getVariables().get(EXECUTE_RESULT) == null ? new ExecuteResult(false, null, null) : (ExecuteResult) instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
@@ -149,13 +149,13 @@ public class MachineFactory {
      * @param serviceCode
      * @param stateMachineId
      * @param instanceId
-     * @param currentStateId
+     * @param currentStatusId
      * @param transfId
      * @return
      */
-    public ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStateId, Long transfId) {
+    public ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transfId) {
         //状态转节点
-        Long currentNodeId = nodeMapper.getNodeByStateId(stateMachineId, currentStateId).getId();
+        Long currentNodeId = nodeMapper.getNodeByStatusId(stateMachineId, currentStatusId).getId();
 
         String instanceCode = serviceCode + ":" + stateMachineId + ":" + instanceId;
         StateMachine<String, String> instance = stateMachineMap.get(instanceCode);
@@ -175,10 +175,10 @@ public class MachineFactory {
         instance.sendEvent(transfId.toString());
 
         //节点转状态
-        Long stateId = nodeMapper.getNodeById(Long.parseLong(instance.getState().getId())).getStateId();
+        Long statusId = nodeMapper.getNodeById(Long.parseLong(instance.getState().getId())).getStatusId();
         Object executeResult = instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
         if (executeResult == null) {
-            executeResult = new ExecuteResult(true, stateId, null);
+            executeResult = new ExecuteResult(true, statusId, null);
         }
 
         return (ExecuteResult) executeResult;

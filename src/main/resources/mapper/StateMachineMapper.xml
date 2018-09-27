@@ -16,7 +16,7 @@
         <collection property="stateMachineNodes" ofType="io.choerodon.statemachine.domain.StateMachineNode">
             <id property="id" column="n_id"/>
             <result property="stateMachineId" column="n_state_machine_id"/>
-            <result property="stateId" column="n_state_id"/>
+            <result property="statusId" column="n_state_id"/>
             <result property="isDraft" column="n_is_draft"/>
             <result property="creationDate" column="n_creation_date"/>
             <result property="createdBy" column="n_created_by"/>

@@ -6,7 +6,7 @@ import io.choerodon.statemachine.api.dto.ConfigEnumDTO;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.domain.StateMachineConfig;
-import io.choerodon.statemachine.infra.enums.StateMachineConfigType;
+import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.mapper.StateMachineConfigMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -115,7 +115,7 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     public List<ConfigEnumDTO> buildConfigEnum(String type) {
         //todo 条件验证动作code，用数据库实现
         List<ConfigEnumDTO> configEnumDTOS = new ArrayList<>();
-        if (type.equals(StateMachineConfigType.STATUS_CONDITION.value())) {
+        if (type.equals(ConfigType.CONDITION)) {
             ConfigEnumDTO reporter = new ConfigEnumDTO();
             reporter.setCode("reporter");
             reporter.setName("仅允许报告人");
@@ -151,14 +151,14 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
             configEnumDTOS.add(inGroup);
             configEnumDTOS.add(inProjectRole);
             configEnumDTOS.add(authority);
-        } else if (type.equals(StateMachineConfigType.STATUS_VALIDATOR.value())) {
+        } else if (type.equals(ConfigType.VALIDATOR)) {
             ConfigEnumDTO validator = new ConfigEnumDTO();
             validator.setCode("validator");
             validator.setName("权限校验");
             validator.setDescription("校验用户的权限。");
             validator.setType(type);
             configEnumDTOS.add(validator);
-        } else if (type.equals(StateMachineConfigType.STATUS_POSTPOSITION.value())) {
+        } else if (type.equals(ConfigType.POSTPOSITION)) {
             ConfigEnumDTO assignCurrentUser = new ConfigEnumDTO();
             assignCurrentUser.setCode("assignCurrentUser");
             assignCurrentUser.setName("分配给当前用户");

@@ -17,7 +17,7 @@ public class StateMachineNode extends AuditDomain {
     @GeneratedValue
     private Long id;
     private Long stateMachineId;
-    private Long stateId;
+    private Long statusId;
     private Long positionX;
     private Long positionY;
     private Long width;
@@ -29,7 +29,7 @@ public class StateMachineNode extends AuditDomain {
     private Long organizationId;
 
     @Transient
-    private State state;
+    private Status state;
 
     public Long getId() {
         return id;
@@ -47,12 +47,12 @@ public class StateMachineNode extends AuditDomain {
         this.stateMachineId = stateMachineId;
     }
 
-    public Long getStateId() {
-        return stateId;
+    public Long getStatusId() {
+        return statusId;
     }
 
-    public void setStateId(Long stateId) {
-        this.stateId = stateId;
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
     public Long getPositionX() {
@@ -95,11 +95,11 @@ public class StateMachineNode extends AuditDomain {
         this.status = status;
     }
 
-    public State getState() {
+    public Status getState() {
         return state;
     }
 
-    public void setState(State state) {
+    public void setState(Status state) {
         this.state = state;
     }
 

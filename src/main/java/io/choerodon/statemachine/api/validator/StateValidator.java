@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.api.validator;
 
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.statemachine.api.dto.StateDTO;
+import io.choerodon.statemachine.api.dto.StatusDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -11,15 +11,15 @@ import org.springframework.util.StringUtils;
 @Component
 public class StateValidator {
 
-    public void validate(StateDTO stateDTO) {
-        if (StringUtils.isEmpty(stateDTO.getName())) {
-            throw new CommonException("error.state.name.empty");
+    public void validate(StatusDTO statusDTO) {
+        if (StringUtils.isEmpty(statusDTO.getName())) {
+            throw new CommonException("error.status.name.empty");
         }
-        if (StringUtils.isEmpty(stateDTO.getType())) {
-            throw new CommonException("error.state.name.empty");
+        if (StringUtils.isEmpty(statusDTO.getType())) {
+            throw new CommonException("error.status.name.empty");
         }
-        if (stateDTO.getType().length() != 1) {
-            throw new CommonException("error.state.type.length");
+        if (statusDTO.getType().length() != 1) {
+            throw new CommonException("error.status.type.length");
         }
     }
 }
