@@ -42,6 +42,13 @@
         </collection>
     </resultMap>
 
+    <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachine">
+        SELECT *
+        FROM state_machine
+        WHERE organization_id = #{organizationId}
+        and id = #{id}
+    </select>
+
     <select id="fulltextSearch" resultType="io.choerodon.statemachine.domain.StateMachine">
         SELECT * FROM state_machine
         WHERE 1=1

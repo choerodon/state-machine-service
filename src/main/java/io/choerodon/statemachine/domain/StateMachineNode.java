@@ -23,9 +23,10 @@ public class StateMachineNode extends AuditDomain {
     private Long width;
     private Long height;
     private String status;//节点标识
-
     //所有状态都转换此状态的转换id
     private Long allStateTransfId;
+
+    private Long organizationId;
 
     @Transient
     private State state;
@@ -108,5 +109,13 @@ public class StateMachineNode extends AuditDomain {
 
     public void setAllStateTransfId(Long allStateTransfId) {
         this.allStateTransfId = allStateTransfId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

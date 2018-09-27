@@ -32,20 +32,24 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public StateMachineConfigDTO create(Long stateMachineId, StateMachineConfigDTO configDTO) {
+    public StateMachineConfigDTO create(Long organizationId, Long stateMachineId, StateMachineConfigDTO configDTO) {
+        configDTO.setOrganizationId(organizationId);
         StateMachineConfig config = modelMapper.map(configDTO, StateMachineConfig.class);
         config.setStateMachineId(stateMachineId);
         int isInsert = configMapper.insert(config);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineConfig.create");
         }
-        config = configMapper.selectByPrimaryKey(config.getId());
+        config = configMapper.queryById(organizationId,config.getId());
         return modelMapper.map(config, StateMachineConfigDTO.class);
     }
 
     @Override
-    public Boolean delete(Long configId) {
-        int isDelete = configMapper.deleteByPrimaryKey(configId);
+    public Boolean delete(Long organizationId, Long configId) {
+        StateMachineConfig config = new StateMachineConfig();
+        config.setId(configId);
+        config.setOrganizationId(organizationId);
+        int isDelete = configMapper.delete(config);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineConfig.delete");
         }
@@ -53,8 +57,9 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<StateMachineConfigDTO> queryByTransfId(Long transfId, String type) {
+    public List<StateMachineConfigDTO> queryByTransfId(Long organizationId,Long transfId, String type) {
         StateMachineConfig config = new StateMachineConfig();
+        config.setOrganizationId(organizationId);
         config.setTransfId(transfId);
         config.setType(type);
         List<StateMachineConfig> list = configMapper.select(config);
@@ -65,9 +70,9 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
         }.getType());
         //todo 这里是代码中构建的数据，后面可以考虑放在数据库中维护
         List<ConfigEnumDTO> enumDTOS = configService.buildConfigEnum(type);
-        for (StateMachineConfigDTO configDTO:configDTOS) {
-            for (ConfigEnumDTO enumDTO:enumDTOS) {
-                if (configDTO.getCode().equals(enumDTO.getCode())){
+        for (StateMachineConfigDTO configDTO : configDTOS) {
+            for (ConfigEnumDTO enumDTO : enumDTOS) {
+                if (configDTO.getCode().equals(enumDTO.getCode())) {
                     configDTO.setDescription(enumDTO.getDescription());
                 }
             }
@@ -76,9 +81,10 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<ConfigEnumDTO> queryConfig(Long transfId, String type) {
+    public List<ConfigEnumDTO> queryConfig(Long organizationId,Long transfId, String type) {
         List<ConfigEnumDTO> configEnumDTOS = buildConfigEnum(type);
         StateMachineConfig config = new StateMachineConfig();
+        config.setOrganizationId(organizationId);
         config.setTransfId(transfId);
         config.setType(type);
         List<StateMachineConfig> configs = configMapper.select(config);

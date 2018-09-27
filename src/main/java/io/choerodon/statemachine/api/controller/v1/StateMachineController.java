@@ -39,7 +39,7 @@ public class StateMachineController extends BaseController {
     @CustomPageRequest
     @GetMapping
     public ResponseEntity<Page<StateMachineDTO>> pagingQuery(@ApiIgnore
-                                                             @SortDefault(value = "id", direction = Sort.Direction.DESC)PageRequest pageRequest,
+                                                             @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                              @PathVariable("organization_id") Long organizationId,
                                                              @RequestParam(required = false) String name,
                                                              @RequestParam(required = false) String description,
@@ -48,7 +48,7 @@ public class StateMachineController extends BaseController {
         stateMachineDTO.setOrganizationId(organizationId);
         stateMachineDTO.setName(name);
         stateMachineDTO.setDescription(description);
-        return new ResponseEntity<>(stateMachineService.pageQuery(pageRequest,stateMachineDTO, ParamUtils.arrToStr(param)), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.pageQuery(pageRequest, stateMachineDTO, ParamUtils.arrToStr(param)), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -56,7 +56,7 @@ public class StateMachineController extends BaseController {
     @PostMapping
     public ResponseEntity<StateMachineDTO> create(@PathVariable("organization_id") Long organizationId, @RequestBody StateMachineDTO stateMachineDTO) {
         stateMachineValidator.createValidate(stateMachineDTO);
-        return new ResponseEntity<>(stateMachineService.create(organizationId,stateMachineDTO),HttpStatus.CREATED);
+        return new ResponseEntity<>(stateMachineService.create(organizationId, stateMachineDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -65,7 +65,7 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<StateMachineDTO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("state_machine_id") Long stateMachineId,
                                                   @RequestBody StateMachineDTO stateMachineDTO) {
         stateMachineValidator.updateValidate(stateMachineDTO);
-        return new ResponseEntity<>(stateMachineService.update(organizationId,stateMachineId,stateMachineDTO), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.update(organizationId, stateMachineId, stateMachineDTO), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -88,7 +88,7 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<StateMachineDTO> getStateMachineWithConfigById(
             @PathVariable("organization_id") Long organizationId,
             @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.getStateMachineWithConfigById(stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.getStateMachineWithConfigById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -97,7 +97,7 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<StateMachineDTO> getOriginalById(
             @PathVariable("organization_id") Long organizationId,
             @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.getOriginalDTOById(stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.getOriginalDTOById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -106,7 +106,7 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<StateMachineDTO> deleteDraft(
             @PathVariable("organization_id") Long organizationId,
             @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.deleteDraft(stateMachineId), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(stateMachineService.deleteDraft(organizationId, stateMachineId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -115,13 +115,13 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<StateMachineDTO> getStateMachineById(
             @PathVariable("organization_id") Long organizationId,
             @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.getStateMachineById(stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.getStateMachineById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验状态机名字是否未被使用")
     @GetMapping(value = "/check_name")
-    public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId, @RequestParam(value = "state_machine_id",required = false)Long stateMachineId, @RequestParam("name") String name) {
+    public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId, @RequestParam(value = "state_machine_id", required = false) Long stateMachineId, @RequestParam("name") String name) {
         return new ResponseEntity<>(stateMachineService.checkName(organizationId, stateMachineId, name), HttpStatus.OK);
     }
 

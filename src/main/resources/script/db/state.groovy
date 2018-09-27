@@ -1,6 +1,6 @@
 package script.db
 
-databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
+databaseChangeLog(logicalFilePath: 'script/db/state.groovy') {
 
     changeSet(author: 'peng.jiang@hand-china.com', id: '2018-08-06-state') {
         createTable(tableName: 'state') {

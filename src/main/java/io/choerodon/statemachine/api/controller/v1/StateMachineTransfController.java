@@ -59,15 +59,15 @@ public class StateMachineTransfController extends BaseController {
                                              @RequestParam(value = "state_machine_id") Long stateMachineId,
                                              @RequestParam(value = "transf_id", required = false) Long transfId,
                                              @RequestParam("name") String name) {
-        return new ResponseEntity<>(transfService.checkName(stateMachineId, transfId, name), HttpStatus.OK);
+        return new ResponseEntity<>(transfService.checkName(organizationId, stateMachineId, transfId, name), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取转换")
-    @GetMapping(value = "/getById/{transf_id}")
-    public ResponseEntity<StateMachineTransfDTO> getById(@PathVariable("organization_id") Long organizationId,
+    @GetMapping(value = "/queryById/{transf_id}")
+    public ResponseEntity<StateMachineTransfDTO> queryById(@PathVariable("organization_id") Long organizationId,
                                                          @PathVariable("transf_id") Long transfId) {
-        return new ResponseEntity<>(transfService.getById(organizationId, transfId), HttpStatus.OK);
+        return new ResponseEntity<>(transfService.queryById(organizationId, transfId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

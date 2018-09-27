@@ -23,6 +23,8 @@ public class StateMachineConfig extends AuditDomain {
     private String code;
     private String type;
 
+    private Long organizationId;
+
     public Long getId() {
         return id;
     }
@@ -61,5 +63,13 @@ public class StateMachineConfig extends AuditDomain {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

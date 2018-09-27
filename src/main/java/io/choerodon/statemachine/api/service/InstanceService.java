@@ -47,22 +47,24 @@ public interface InstanceService {
 
     /**
      * 调用相应服务，验证转换
+     *
      * @param organizationId
      * @param serviceCode
      * @param transfId
      * @param instanceId
-     * @param context 状态机上下文，传递参数
+     * @param context        状态机上下文，传递参数
      * @return
      */
     Boolean validatorGuard(Long organizationId, String serviceCode, Long transfId, Long instanceId, StateContext<String, String> context);
 
     /**
      * 调用相应服务，执行后置动作
+     *
      * @param organizationId
      * @param serviceCode
      * @param transfId
      * @param instanceId
-     * @param context 状态机上下文，传递参数
+     * @param context        状态机上下文，传递参数
      * @return
      */
     Boolean postpositionAction(Long organizationId, String serviceCode, Long transfId, Long instanceId, StateContext<String, String> context);
@@ -70,34 +72,34 @@ public interface InstanceService {
     /**
      * 条件
      *
-     * @param transfId       转换id
+     * @param transfId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> condition(Long transfId);
+    List<StateMachineConfigDTO> condition(Long organizationId, Long transfId);
 
     /**
      * 验证器
      *
-     * @param transfId       转换id
+     * @param transfId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> validator(Long transfId);
+    List<StateMachineConfigDTO> validator(Long organizationId, Long transfId);
 
     /**
      * 触发器
      *
-     * @param transfId       转换id
+     * @param transfId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> trigger(Long transfId);
+    List<StateMachineConfigDTO> trigger(Long organizationId, Long transfId);
 
     /**
      * 后置功能
      *
-     * @param transfId       转换id
+     * @param transfId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> postposition(Long transfId);
+    List<StateMachineConfigDTO> postposition(Long organizationId, Long transfId);
 
-    void test()throws URISyntaxException;
+    void test() throws URISyntaxException;
 }

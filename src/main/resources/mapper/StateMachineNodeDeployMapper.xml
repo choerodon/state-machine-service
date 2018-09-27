@@ -30,6 +30,13 @@
         </association>
     </resultMap>
 
+    <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachineNodeDeploy">
+        SELECT *
+        FROM state_machine_node_deploy
+        WHERE organization_id = #{organizationId}
+        and id = #{id}
+    </select>
+
     <select id="getNodeDeployById" resultMap="nodeDeployWithState">
         SELECT
         SMN.*,

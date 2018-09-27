@@ -125,7 +125,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (isTransfInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
         }
-        return getStateMachineWithConfigById(stateMachine.getId());
+        return getStateMachineWithConfigById(organizationId, stateMachine.getId());
     }
 
     @Override
@@ -136,14 +136,14 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachine.update");
         }
-        stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachine.getId());
+        stateMachine = stateMachineMapper.queryById(organizationId,stateMachine.getId());
         return modelMapper.map(stateMachine, StateMachineDTO.class);
     }
 
     @Override
     @Transactional(rollbackFor = CommonException.class)
     public Boolean delete(Long organizationId, Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId,stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.delete.noFound");
         }
@@ -181,7 +181,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     @Override
     @Transactional(rollbackFor = CommonException.class)
     public StateMachineDTO deploy(Long organizationId, Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId,stateMachineId);
         if (null == stateMachine) {
             throw new CommonException("stateMachine.deploy.no.found");
         }
@@ -243,12 +243,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         //清理内存中的旧状态机构建器与实例
         machineFactory.deployStateMachine(stateMachineId);
 
-        return getStateMachineWithConfigById(stateMachine.getId());
+        return getStateMachineWithConfigById(organizationId, stateMachine.getId());
     }
 
     @Override
-    public StateMachineDTO getStateMachineWithConfigById(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public StateMachineDTO getStateMachineWithConfigById(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId,stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.nofound");
         }
@@ -262,7 +262,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         stateMachine.setStateMachineTransfs(transfs);
         StateMachineDTO dto = ConvertUtils.covertStateMachine(stateMachine);
         List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
-        for (StateMachineTransfDTO transfDTO:transfDTOS) {
+        for (StateMachineTransfDTO transfDTO : transfDTOS) {
             List<StateMachineConfigDTO> conditions = new ArrayList<>();
             List<StateMachineConfigDTO> validators = new ArrayList<>();
             List<StateMachineConfigDTO> triggers = new ArrayList<>();
@@ -271,16 +271,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             StateMachineConfig config = new StateMachineConfig();
             config.setTransfId(transfDTO.getId());
             List<StateMachineConfig> list = configMapper.select(config);
-            if (list != null && !list.isEmpty()){
-                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>(){}.getType());
-                for (StateMachineConfigDTO configDto:dtoList) {
-                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())){
+            if (list != null && !list.isEmpty()) {
+                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
+                }.getType());
+                for (StateMachineConfigDTO configDto : dtoList) {
+                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())) {
                         conditions.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())) {
                         validators.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())) {
                         triggers.add(configDto);
-                    }else {
+                    } else {
                         postpositions.add(configDto);
                     }
                 }
@@ -295,9 +296,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public StateMachine getOriginalById(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
-        if(stateMachine==null){
+    public StateMachine getOriginalById(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId,stateMachineId);
+        if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notExist");
         }
         //获取原件节点
@@ -319,10 +320,10 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public StateMachineDTO getOriginalDTOById(Long stateMachineId) {
-        StateMachineDTO dto = ConvertUtils.covertStateMachine(getOriginalById(stateMachineId));
+    public StateMachineDTO getOriginalDTOById(Long organizationId, Long stateMachineId) {
+        StateMachineDTO dto = ConvertUtils.covertStateMachine(getOriginalById(organizationId, stateMachineId));
         List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
-        for (StateMachineTransfDTO transfDTO:transfDTOS) {
+        for (StateMachineTransfDTO transfDTO : transfDTOS) {
             List<StateMachineConfigDTO> conditions = new ArrayList<>();
             List<StateMachineConfigDTO> validators = new ArrayList<>();
             List<StateMachineConfigDTO> triggers = new ArrayList<>();
@@ -331,16 +332,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
             configDeploy.setTransfId(transfDTO.getId());
             List<StateMachineConfigDeploy> list = configDeployMapper.select(configDeploy);
-            if (list != null && !list.isEmpty()){
-                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>(){}.getType());
-                for (StateMachineConfigDTO configDto:dtoList) {
-                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())){
+            if (list != null && !list.isEmpty()) {
+                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
+                }.getType());
+                for (StateMachineConfigDTO configDto : dtoList) {
+                    if (StateMachineConfigType.STATUS_CONDITION.value().equals(configDto.getType())) {
                         conditions.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_VALIDATOR.value().equals(configDto.getType())) {
                         validators.add(configDto);
-                    }else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())){
+                    } else if (StateMachineConfigType.STATUS_TRIGGER.value().equals(configDto.getType())) {
                         triggers.add(configDto);
-                    }else {
+                    } else {
                         postpositions.add(configDto);
                     }
                 }
@@ -356,8 +358,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     @Transactional(rollbackFor = CommonException.class)
-    public StateMachineDTO deleteDraft(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public StateMachineDTO deleteDraft(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId,stateMachineId);
         if (null == stateMachine) {
             throw new CommonException("stateMachine.deleteDraft.no.found");
         }
@@ -422,12 +424,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 }
             }
         }
-        return getStateMachineWithConfigById(stateMachine.getId());
+        return getStateMachineWithConfigById(organizationId, stateMachine.getId());
     }
 
     @Override
-    public StateMachineDTO getStateMachineById(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    public StateMachineDTO getStateMachineById(Long organizationId, Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId,stateMachineId);
         if (stateMachine != null) {
             return modelMapper.map(stateMachine, StateMachineDTO.class);
         }

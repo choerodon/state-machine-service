@@ -1,6 +1,6 @@
 package script.db
 
-databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
+databaseChangeLog(logicalFilePath: 'script/db/state_machine_transf_deploy.groovy') {
 
     changeSet(author: 'peng.jiang@hand-china.com', id: '2018-07-30-state-machine-transf-deploy') {
         createTable(tableName: 'state_machine_transf_deploy') {
@@ -20,7 +20,10 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             }
             column(name: 'url', type: 'VARCHAR(255)', remarks: '页面')
             column(name: 'status', type: 'CHAR(1)', remarks: '转换状态类型', defaultValue: '0')
-            column(name: "is_all_state_transf", type: "TYNIINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态')
+            column(name: "is_all_state_transf", type: "TINYINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态')
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
+                constraints(nullable: false)
+            }
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")

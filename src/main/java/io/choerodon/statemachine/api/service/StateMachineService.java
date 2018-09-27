@@ -15,16 +15,18 @@ public interface StateMachineService extends BaseService<StateMachine> {
 
     /**
      * 分页查询状态机
-     * @param pageRequest 分页信息
+     *
+     * @param pageRequest     分页信息
      * @param stateMachineDTO 参数对象
-     * @param params 模糊查询参数
+     * @param params          模糊查询参数
      * @return 状态机列表
      */
     Page<StateMachineDTO> pageQuery(PageRequest pageRequest, StateMachineDTO stateMachineDTO, String params);
 
     /**
      * 创建状态机及配置
-     * @param organizationId 组织id
+     *
+     * @param organizationId  组织id
      * @param stateMachineDTO 状态机及配置对象
      * @return 状态机
      */
@@ -32,8 +34,9 @@ public interface StateMachineService extends BaseService<StateMachine> {
 
     /**
      * 更新状态机
-     * @param organizationId 组织id
-     * @param stateMachineId 状态机id
+     *
+     * @param organizationId  组织id
+     * @param stateMachineId  状态机id
      * @param stateMachineDTO 状态机对象
      * @return 更新状态机
      */
@@ -41,6 +44,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
 
     /**
      * 删除状态机
+     *
      * @param organizationId 组织id
      * @param stateMachineId 状态机id
      * @return
@@ -49,6 +53,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
 
     /**
      * 发布状态机
+     *
      * @param organizationId 组织id
      * @param stateMachineId 状态机id
      * @return 发布状态机对象
@@ -57,49 +62,56 @@ public interface StateMachineService extends BaseService<StateMachine> {
 
     /**
      * 获取状态机及配置
+     *
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO getStateMachineWithConfigById(Long stateMachineId);
+    StateMachineDTO getStateMachineWithConfigById(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机原件DTO
+     *
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO getOriginalDTOById(Long stateMachineId);
+    StateMachineDTO getOriginalDTOById(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机原件
+     *
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachine getOriginalById(Long stateMachineId);
+    StateMachine getOriginalById(Long organizationId, Long stateMachineId);
 
     /**
      * 删除草稿
+     *
      * @param stateMachineId 状态机Id
      * @return 状态机对象
      */
-    StateMachineDTO deleteDraft(Long stateMachineId);
+    StateMachineDTO deleteDraft(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机
+     *
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO getStateMachineById(Long stateMachineId);
+    StateMachineDTO getStateMachineById(Long organizationId, Long stateMachineId);
 
     /**
      * 校验问题状态机名字是否未被使用
+     *
      * @param organizationId 组织id
-     * @param name 名称
+     * @param name           名称
      * @return
      */
     Boolean checkName(Long organizationId, Long stateMachineId, String name);
 
     /**
      * 获取所有状态机
+     *
      * @param organizationId 组织id
      * @return 状态机列表
      */

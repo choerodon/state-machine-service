@@ -33,7 +33,7 @@ public class StateMachineNodeController extends BaseController {
     @PostMapping
     public ResponseEntity<List<StateMachineNodeDTO>> create(@PathVariable("organization_id") Long organizationId, @RequestBody StateMachineNodeDTO nodeDTO) {
         nodeValidator.createValidate(nodeDTO);
-        return new ResponseEntity<>(nodeService.create(organizationId,nodeDTO),HttpStatus.CREATED);
+        return new ResponseEntity<>(nodeService.create(organizationId, nodeDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -42,7 +42,7 @@ public class StateMachineNodeController extends BaseController {
     public ResponseEntity<List<StateMachineNodeDTO>> update(@PathVariable("organization_id") Long organizationId, @PathVariable("node_id") Long nodeId,
                                                             @RequestBody StateMachineNodeDTO nodeDTO) {
         nodeValidator.updateValidate(nodeDTO);
-        return new ResponseEntity<>(nodeService.update(organizationId,nodeId,nodeDTO), HttpStatus.OK);
+        return new ResponseEntity<>(nodeService.update(organizationId, nodeId, nodeDTO), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -54,10 +54,10 @@ public class StateMachineNodeController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取节点")
-    @GetMapping(value = "/getById/{node_id}")
-    public ResponseEntity<StateMachineNodeDTO> getById(@PathVariable("organization_id") Long organizationId,
+    @GetMapping(value = "/queryById/{node_id}")
+    public ResponseEntity<StateMachineNodeDTO> queryById(@PathVariable("organization_id") Long organizationId,
                                                        @PathVariable("node_id") Long nodeId) {
-        return new ResponseEntity<>(nodeService.getById(organizationId, nodeId), HttpStatus.OK);
+        return new ResponseEntity<>(nodeService.queryById(organizationId, nodeId), HttpStatus.OK);
     }
 
 }
