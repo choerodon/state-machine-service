@@ -63,18 +63,20 @@ public interface StateMachineService extends BaseService<StateMachine> {
     /**
      * 获取状态机及配置
      *
+     * @param organizationId organizationId
      * @param stateMachineId 状态机id
-     * @return
+     * @return StateMachineDTO
      */
-    StateMachineDTO getStateMachineWithConfigById(Long organizationId, Long stateMachineId);
+    StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机原件DTO
      *
+     * @param organizationId organizationId
      * @param stateMachineId 状态机id
-     * @return
+     * @return StateMachineDTO
      */
-    StateMachineDTO getOriginalDTOById(Long organizationId, Long stateMachineId);
+    StateMachineDTO queryOriginalById(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机原件
@@ -98,7 +100,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO getStateMachineById(Long organizationId, Long stateMachineId);
+    StateMachineDTO queryStateMachineById(Long organizationId, Long stateMachineId);
 
     /**
      * 校验问题状态机名字是否未被使用
@@ -116,5 +118,14 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @return 状态机列表
      */
     List<StateMachineDTO> queryAll(Long organizationId);
+
+    /**
+     * 修改状态机状态
+     * 发布 -> 修改
+     *
+     * @param organizationId organizationId
+     * @param stateMachineId stateMachineId
+     */
+    void updateStateMachineStatus(Long organizationId, Long stateMachineId);
 
 }

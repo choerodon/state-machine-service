@@ -18,7 +18,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @RestController
-@RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_node")
+@RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_nodes")
 public class StateMachineNodeController extends BaseController {
 
     @Autowired
@@ -31,7 +31,8 @@ public class StateMachineNodeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建节点")
     @PostMapping
-    public ResponseEntity<List<StateMachineNodeDTO>> create(@PathVariable("organization_id") Long organizationId, @RequestBody StateMachineNodeDTO nodeDTO) {
+    public ResponseEntity<List<StateMachineNodeDTO>> create(@PathVariable("organization_id") Long organizationId,
+                                                            @RequestBody StateMachineNodeDTO nodeDTO) {
         nodeValidator.createValidate(nodeDTO);
         return new ResponseEntity<>(nodeService.create(organizationId, nodeDTO), HttpStatus.CREATED);
     }
@@ -39,24 +40,26 @@ public class StateMachineNodeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新节点")
     @PutMapping(value = "/{node_id}")
-    public ResponseEntity<List<StateMachineNodeDTO>> update(@PathVariable("organization_id") Long organizationId, @PathVariable("node_id") Long nodeId,
+    public ResponseEntity<List<StateMachineNodeDTO>> update(@PathVariable("organization_id") Long organizationId,
+                                                            @PathVariable("node_id") Long nodeId,
                                                             @RequestBody StateMachineNodeDTO nodeDTO) {
         nodeValidator.updateValidate(nodeDTO);
-        return new ResponseEntity<>(nodeService.update(organizationId, nodeId, nodeDTO), HttpStatus.OK);
+        return new ResponseEntity<>(nodeService.update(organizationId, nodeId, nodeDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除节点")
     @DeleteMapping(value = "/{node_id}")
-    public ResponseEntity<List<StateMachineNodeDTO>> deleteNode(@PathVariable("organization_id") Long organizationId, @PathVariable("node_id") Long nodeId) {
+    public ResponseEntity<List<StateMachineNodeDTO>> deleteNode(@PathVariable("organization_id") Long organizationId,
+                                                                @PathVariable("node_id") Long nodeId) {
         return new ResponseEntity<>(nodeService.delete(organizationId, nodeId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取节点")
-    @GetMapping(value = "/queryById/{node_id}")
+    @GetMapping(value = "/{node_id}")
     public ResponseEntity<StateMachineNodeDTO> queryById(@PathVariable("organization_id") Long organizationId,
-                                                       @PathVariable("node_id") Long nodeId) {
+                                                         @PathVariable("node_id") Long nodeId) {
         return new ResponseEntity<>(nodeService.queryById(organizationId, nodeId), HttpStatus.OK);
     }
 

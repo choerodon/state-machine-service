@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @Component
+@Transactional(rollbackFor = Exception.class)
 public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineConfig> implements StateMachineConfigService {
 
     @Autowired
@@ -111,6 +113,7 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
      */
     @Override
     public List<ConfigEnumDTO> buildConfigEnum(String type) {
+        //todo 条件验证动作code，用数据库实现
         List<ConfigEnumDTO> configEnumDTOS = new ArrayList<>();
         if (type.equals(StateMachineConfigType.STATUS_CONDITION.value())) {
             ConfigEnumDTO reporter = new ConfigEnumDTO();

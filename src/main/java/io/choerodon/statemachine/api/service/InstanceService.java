@@ -5,7 +5,6 @@ import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
 import org.springframework.statemachine.StateContext;
 
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -43,7 +42,7 @@ public interface InstanceService {
      * @param stateId
      * @return
      */
-    List<StateMachineTransfDTO> transfList(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long stateId);
+    List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long stateId);
 
     /**
      * 调用相应服务，验证转换
@@ -100,6 +99,4 @@ public interface InstanceService {
      * @return
      */
     List<StateMachineConfigDTO> postposition(Long organizationId, Long transfId);
-
-    void test() throws URISyntaxException;
 }

@@ -2,7 +2,6 @@ package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.statemachine.api.dto.StateMachineDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
 import io.choerodon.statemachine.api.service.StateMachineTransfService;
 import io.choerodon.statemachine.api.validator.StateMachineTransfValidator;
@@ -13,13 +12,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * @author peng.jiang@hand-china.com
  */
 @RestController
-@RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_transf")
+@RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_transfs")
 public class StateMachineTransfController extends BaseController {
 
     @Autowired
@@ -31,7 +29,8 @@ public class StateMachineTransfController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建转换")
     @PostMapping
-    public ResponseEntity<StateMachineTransfDTO> create(@PathVariable("organization_id") Long organizationId, @RequestBody StateMachineTransfDTO transfDTO) {
+    public ResponseEntity<StateMachineTransfDTO> create(@PathVariable("organization_id") Long organizationId,
+                                                        @RequestBody StateMachineTransfDTO transfDTO) {
         transfValidator.createValidate(transfDTO);
         return new ResponseEntity<>(transfService.create(organizationId, transfDTO), HttpStatus.CREATED);
     }
@@ -39,16 +38,18 @@ public class StateMachineTransfController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新转换")
     @PutMapping(value = "/{transf_id}")
-    public ResponseEntity<StateMachineTransfDTO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("transf_id") Long transfId,
+    public ResponseEntity<StateMachineTransfDTO> update(@PathVariable("organization_id") Long organizationId,
+                                                        @PathVariable("transf_id") Long transfId,
                                                         @RequestBody StateMachineTransfDTO transfDTO) {
         transfValidator.updateValidate(transfDTO);
-        return new ResponseEntity<>(transfService.update(organizationId, transfId, transfDTO), HttpStatus.OK);
+        return new ResponseEntity<>(transfService.update(organizationId, transfId, transfDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除转换")
     @DeleteMapping(value = "/{transf_id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("transf_id") Long transfId) {
+    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
+                                          @PathVariable("transf_id") Long transfId) {
         return new ResponseEntity<>(transfService.delete(organizationId, transfId), HttpStatus.NO_CONTENT);
     }
 
@@ -64,23 +65,25 @@ public class StateMachineTransfController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取转换")
-    @GetMapping(value = "/queryById/{transf_id}")
+    @GetMapping(value = "/{transf_id}")
     public ResponseEntity<StateMachineTransfDTO> queryById(@PathVariable("organization_id") Long organizationId,
-                                                         @PathVariable("transf_id") Long transfId) {
+                                                           @PathVariable("transf_id") Long transfId) {
         return new ResponseEntity<>(transfService.queryById(organizationId, transfId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点")
-    @PostMapping(value = "/createAllStateTransf")
-    public ResponseEntity<StateMachineTransfDTO> createAllStateTransf(@PathVariable("organization_id") Long organizationId, @RequestBody StateMachineTransfDTO transfDTO) {
+    @PostMapping(value = "/create_all")
+    public ResponseEntity<StateMachineTransfDTO> createAllStateTransf(@PathVariable("organization_id") Long organizationId,
+                                                                      @RequestBody StateMachineTransfDTO transfDTO) {
         return new ResponseEntity<>(transfService.createAllStateTransf(organizationId, transfDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除【全部】转换")
-    @DeleteMapping(value = "/deleteAllStateTransf/{node_id}")
-    public ResponseEntity<Boolean> deleteAllStateTransf(@PathVariable("organization_id") Long organizationId, @PathVariable("node_id") Long nodeId) {
+    @DeleteMapping(value = "/delete_all/{node_id}")
+    public ResponseEntity<Boolean> deleteAllStateTransf(@PathVariable("organization_id") Long organizationId,
+                                                        @PathVariable("node_id") Long nodeId) {
         return new ResponseEntity<>(transfService.deleteAllStateTransf(organizationId, nodeId), HttpStatus.NO_CONTENT);
     }
 }

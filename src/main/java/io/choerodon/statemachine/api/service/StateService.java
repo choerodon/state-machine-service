@@ -51,14 +51,14 @@ public interface StateService extends BaseService<State> {
      * @param stateId 状态id
      * @return
      */
-    StateDTO getByStateId(Long organizationId, Long stateId);
+    StateDTO queryStateById(Long organizationId, Long stateId);
 
     /**
      * 获取所有
      * @param organizationId 组织id
      * @return
      */
-    List<StateDTO> selectAll(Long organizationId);
+    List<StateDTO> queryAllState(Long organizationId);
 
     /**
      * 校验状态名字是否未被使用

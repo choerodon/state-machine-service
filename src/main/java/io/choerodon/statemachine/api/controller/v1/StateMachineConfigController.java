@@ -18,7 +18,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @RestController
-@RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_config")
+@RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_configs")
 public class StateMachineConfigController extends BaseController {
 
     @Autowired
@@ -44,9 +44,9 @@ public class StateMachineConfigController extends BaseController {
     @ApiOperation(value = "获取转换下的配置")
     @GetMapping(value = "/query")
     public ResponseEntity<List<StateMachineConfigDTO>> queryByTransfId(@PathVariable("organization_id") Long organizationId,
-                                                                       @RequestParam(required = true) Long transfId,
-                                                                       @RequestParam(required = true) String type) {
-        return new ResponseEntity<>(configService.queryByTransfId(organizationId, transfId, type), HttpStatus.OK);
+                                                                       @RequestParam Long transfId,
+                                                                       @RequestParam String type) {
+        return new ResponseEntity<>(configService.queryByTransfId(organizationId,transfId, type), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -54,7 +54,7 @@ public class StateMachineConfigController extends BaseController {
     @GetMapping(value = "/queryConfig/{transf_id}")
     public ResponseEntity<List<ConfigEnumDTO>> queryConfig(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("transf_id") Long transfId,
-                                                           @RequestParam(required = true) String type) {
+                                                           @RequestParam String type) {
         return new ResponseEntity<>(configService.queryConfig(organizationId, transfId, type), HttpStatus.OK);
     }
 

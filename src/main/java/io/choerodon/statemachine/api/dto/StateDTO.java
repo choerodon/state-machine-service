@@ -13,6 +13,15 @@ public class StateDTO {
     private Long objectVersionNumber;
     private Long associationMachine;
 
+    public StateDTO(){}
+
+    public StateDTO(String name, String description, String type, Long organizationId) {
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.organizationId = organizationId;
+    }
+
     private Boolean canDelete;
 
     public Long getId() {
