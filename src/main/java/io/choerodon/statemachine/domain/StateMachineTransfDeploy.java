@@ -23,6 +23,7 @@ public class StateMachineTransfDeploy extends AuditDomain {
     private String status;
     private String style;
     private String conditionStrategy;
+    private Long organizationId;
 
     public Long getId() {
         return id;
@@ -102,5 +103,13 @@ public class StateMachineTransfDeploy extends AuditDomain {
 
     public void setConditionStrategy(String conditionStrategy) {
         this.conditionStrategy = conditionStrategy;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

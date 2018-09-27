@@ -85,9 +85,7 @@ class StateControllerSpec extends Specification {
 
     def "update"() {
         given: '初始化一个状态'
-        State state = new State();
-        state.setId(list.get(0).getId());
-        state = service.selectByPrimaryKey(state);
+        State state = service.queryById(organizationId,list.get(0).getId());
 
         StateDTO stateDTO = new StateDTO();
         stateDTO.setType(state.getType());

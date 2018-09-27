@@ -10,4 +10,6 @@ import org.apache.ibatis.annotations.Param;
 public interface StateMachineConfigMapper extends BaseMapper<StateMachineConfig> {
 
     int insertWithId(@Param("stateMachineConfig") StateMachineConfig stateMachineConfig);
+
+    StateMachineConfig queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 }

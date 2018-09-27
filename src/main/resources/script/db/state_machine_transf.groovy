@@ -1,6 +1,6 @@
 package script.db
 
-databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
+databaseChangeLog(logicalFilePath: 'script/db/state_machine_transf.groovy') {
 
     changeSet(author: 'peng.jiang@hand-china.com', id: '2018-07-30-state-machine-transf') {
         createTable(tableName: 'state_machine_transf') {
@@ -20,7 +20,12 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             }
             column(name: 'url', type: 'VARCHAR(255)', remarks: '页面')
             column(name: 'status', type: 'CHAR(1)', remarks: '转换状态类型', defaultValue: '0')
-            column(name: "is_all_state_transf", type: "TYNIINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态')
+            column(name: "is_all_state_transf", type: "TINYINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态')
+            column(name: 'style', type: 'clob', remarks: '样式')
+            column(name: 'condition_strategy', type: 'varchar(20)', remarks: '条件策略', defaultValue: "all")
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
+                constraints(nullable: false)
+            }
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
@@ -30,19 +35,6 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
         }
         createIndex(tableName: "state_machine_transf", indexName: "state_machine_transf_n1") {
             column(name: "state_machine_id", type: "BIGINT UNSIGNED")
-        }
-    }
-
-
-    changeSet(author: 'peng.jiang@hand-china.com', id: '2018-09-12-add-column-state-machine-transf') {
-        addColumn(tableName: 'state_machine_transf') {
-            column(name: 'style', type: 'clob', remarks: '样式')
-        }
-    }
-
-    changeSet(author: 'peng.jiang@hand-china.com', id: '2018-09-18-add-column-state-machine-transf') {
-        addColumn(tableName: 'state_machine_transf') {
-            column(name: 'condition_strategy', type: 'varchar(20)', remarks: '条件策略', defaultValue: "all")
         }
     }
 

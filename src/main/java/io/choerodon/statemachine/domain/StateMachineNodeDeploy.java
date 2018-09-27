@@ -22,9 +22,12 @@ public class StateMachineNodeDeploy extends AuditDomain {
     private Long width;
     private Long height;
     private String status;
+    private Long organizationId;
 
     @Transient
     private State state;
+
+
 
     public Long getId() {
         return id;
@@ -96,5 +99,13 @@ public class StateMachineNodeDeploy extends AuditDomain {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

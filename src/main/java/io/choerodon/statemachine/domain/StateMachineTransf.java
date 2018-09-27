@@ -28,6 +28,7 @@ public class StateMachineTransf extends AuditDomain {
     private String status;
     private String style;
     private String conditionStrategy;
+    private Long organizationId;
     //是否所有状态都转换此状态
     @Column(name = "is_all_state_transf")
     private Boolean allStateTransf;
@@ -118,5 +119,13 @@ public class StateMachineTransf extends AuditDomain {
 
     public void setAllStateTransf(Boolean allStateTransf) {
         this.allStateTransf = allStateTransf;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

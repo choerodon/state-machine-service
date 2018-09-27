@@ -1,6 +1,6 @@
 package script.db
 
-databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
+databaseChangeLog(logicalFilePath: 'script/db/state_machine_deploy.groovy') {
 
 
     changeSet(author: 'peng.jiang@hand-china.com', id: '2018-09-12-state-machine-config-deploy') {
@@ -19,6 +19,9 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             }
             column(name: 'type', type: 'VARCHAR(255)', remarks: '类型') {
                 constraints(nullable: 'false')
+            }
+            column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
+                constraints(nullable: false)
             }
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")

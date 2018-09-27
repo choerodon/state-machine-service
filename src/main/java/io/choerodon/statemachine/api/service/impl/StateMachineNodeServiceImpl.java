@@ -46,6 +46,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
 
     @Override
     public List<StateMachineNodeDTO> create(Long organizationId, StateMachineNodeDTO nodeDTO) {
+        nodeDTO.setOrganizationId(organizationId);
         createState(organizationId, nodeDTO);
         StateMachineNode node = modelMapper.map(nodeDTO, StateMachineNode.class);
         node.setStatus(StateMachineNodeStatus.STATUS_CUSTOM);
@@ -54,13 +55,14 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             throw new CommonException("error.stateMachineNode.create");
         }
         node = nodeMapper.getNodeById(node.getId());
-        updateStateMachineStatus(node.getStateMachineId());
+        updateStateMachineStatus(organizationId,node.getStateMachineId());
         List<StateMachineNode> nodes = nodeMapper.selectByStateMachineId(node.getStateMachineId());
         return ConvertUtils.convertNodesToNodeDTOs(nodes);
     }
 
     @Override
     public List<StateMachineNodeDTO> update(Long organizationId, Long nodeId, StateMachineNodeDTO nodeDTO) {
+        nodeDTO.setOrganizationId(organizationId);
         createState(organizationId, nodeDTO);
         StateMachineNode node = modelMapper.map(nodeDTO, StateMachineNode.class);
         node.setId(nodeId);
@@ -69,7 +71,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             throw new CommonException("error.stateMachineNode.update");
         }
         node = nodeMapper.getNodeById(node.getId());
-        updateStateMachineStatus(node.getStateMachineId());
+        updateStateMachineStatus(organizationId,node.getStateMachineId());
         List<StateMachineNode> nodes = nodeMapper.selectByStateMachineId(node.getStateMachineId());
         return ConvertUtils.convertNodesToNodeDTOs(nodes);
     }
@@ -77,19 +79,19 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     @Override
     @Transactional(rollbackFor = CommonException.class)
     public List<StateMachineNodeDTO> delete(Long organizationId, Long nodeId) {
-        StateMachineNode node = nodeMapper.selectByPrimaryKey(nodeId);
+        StateMachineNode node = nodeMapper.queryById(organizationId,nodeId);
         int isDelete = nodeMapper.deleteByPrimaryKey(nodeId);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineNode.delete");
         }
         transfMapper.deleteByNodeId(nodeId);
-        updateStateMachineStatus(node.getStateMachineId());
+        updateStateMachineStatus(organizationId,node.getStateMachineId());
         List<StateMachineNode> nodes = nodeMapper.selectByStateMachineId(node.getStateMachineId());
         return ConvertUtils.convertNodesToNodeDTOs(nodes);
     }
 
     @Override
-    public StateMachineNodeDTO getById(Long organizationId, Long nodeId) {
+    public StateMachineNodeDTO queryById(Long organizationId, Long nodeId) {
         StateMachineNode node = nodeMapper.getNodeById(nodeId);
         if (node == null) {
             throw new CommonException("error.stateMachineNode.noFound");
@@ -118,8 +120,8 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
      *
      * @param stateMachineId
      */
-    private void updateStateMachineStatus(Long stateMachineId) {
-        StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+    private void updateStateMachineStatus(Long organizationId,Long stateMachineId) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId,stateMachineId);
         if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.STATUS_ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.STATUS_DRAFT);
             int stateMachineUpdate = stateMachineMapper.updateByPrimaryKey(stateMachine);
@@ -153,10 +155,11 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
      * @return
      */
     @Override
-    public Long getInitNode(Long stateMachineId) {
+    public Long getInitNode(Long organizationId,Long stateMachineId) {
         StateMachineNode node = new StateMachineNode();
         node.setStatus(StateMachineNodeStatus.STATUS_START);
         node.setStateMachineId(stateMachineId);
+        node.setOrganizationId(organizationId);
         List<StateMachineNode> nodes = nodeMapper.select(node);
         if (nodes.isEmpty()) {
             throw new CommonException("error.initNode.null");

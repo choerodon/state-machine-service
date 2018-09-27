@@ -16,6 +16,7 @@ public class StateMachineNodeDTO {
     private Long objectVersionNumber;
     private String status;
     private Boolean allStateTransf;
+    private Long organizationId;
 
     private StateDTO stateDTO;
 
@@ -124,5 +125,13 @@ public class StateMachineNodeDTO {
 
     public void setAllStateTransf(Boolean allStateTransf) {
         this.allStateTransf = allStateTransf;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

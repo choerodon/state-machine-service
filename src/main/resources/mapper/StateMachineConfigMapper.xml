@@ -29,5 +29,10 @@
         #{stateMachineConfig.objectVersionNumber}
         );
     </insert>
-
+    <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachineConfig">
+        SELECT *
+        FROM state_machine_config
+        WHERE organization_id = #{organizationId}
+        and id = #{id}
+    </select>
 </mapper>

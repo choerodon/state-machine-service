@@ -6,6 +6,6 @@ fi
 java -Dspring.datasource.url="jdbc:mysql://localhost:3306/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
  -Dspring.datasource.username=hapcloud \
  -Dspring.datasource.password=handhand \
- -Ddata.drop=false -Ddata.init=true \
+ -Ddata.drop=true -Ddata.init=true \
  -Ddata.dir=src/main/resources \
  -jar target/choerodon-tool-liquibase.jar

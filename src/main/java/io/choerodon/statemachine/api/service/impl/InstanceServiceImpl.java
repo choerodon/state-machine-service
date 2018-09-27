@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.feign.FeignClientsConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.statemachine.StateContext;
@@ -101,7 +100,7 @@ public class InstanceServiceImpl implements InstanceService {
         List<StateMachineTransfDTO> list = transfService.queryListByStateId(organizationId, stateMachineId, stateId);
         //获取转换的条件配置
         for (StateMachineTransfDTO transfDTO : list) {
-            transfDTO.setConditions(condition(transfDTO.getId()));
+            transfDTO.setConditions(condition(organizationId,transfDTO.getId()));
         }
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
         list = list == null ? Collections.emptyList() : list;
@@ -117,7 +116,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public Boolean validatorGuard(Long organizationId, String serviceCode, Long transfId, Long instanceId, StateContext<String, String> context) {
-        List<StateMachineConfigDTO> configs = validator(transfId);
+        List<StateMachineConfigDTO> configs = validator(organizationId,transfId);
         ExecuteResult executeResult = new ExecuteResult(false, null, "error.customFeignClientAdaptor.executeConfig.validatorGuard");
         //调用对应服务，执行验证，返回是否成功
         try {
@@ -137,7 +136,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public Boolean postpositionAction(Long organizationId, String serviceCode, Long transfId, Long instanceId, StateContext<String, String> context) {
-        List<StateMachineConfigDTO> configs = postposition(transfId);
+        List<StateMachineConfigDTO> configs = postposition(organizationId,transfId);
         //节点转状态
         Long targetStateId = nodeMapper.getNodeById(Long.parseLong(context.getTarget().getId())).getStateId();
 
@@ -159,8 +158,8 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public List<StateMachineConfigDTO> condition(Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(transfId, StateMachineConfigType.STATUS_CONDITION.value());
+    public List<StateMachineConfigDTO> condition(Long organizationId, Long transfId) {
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_CONDITION.value());
         if (configs == null) {
             return Collections.emptyList();
         }
@@ -168,8 +167,8 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public List<StateMachineConfigDTO> validator(Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(transfId, StateMachineConfigType.STATUS_VALIDATOR.value());
+    public List<StateMachineConfigDTO> validator(Long organizationId, Long transfId) {
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_VALIDATOR.value());
         if (configs == null) {
             return Collections.emptyList();
         }
@@ -177,8 +176,8 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public List<StateMachineConfigDTO> trigger(Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(transfId, StateMachineConfigType.STATUS_TRIGGER.value());
+    public List<StateMachineConfigDTO> trigger(Long organizationId, Long transfId) {
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_TRIGGER.value());
         if (configs == null) {
             return Collections.emptyList();
         }
@@ -186,8 +185,8 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public List<StateMachineConfigDTO> postposition(Long transfId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransfId(transfId, StateMachineConfigType.STATUS_POSTPOSITION.value());
+    public List<StateMachineConfigDTO> postposition(Long organizationId, Long transfId) {
+        List<StateMachineConfigDTO> configs = configService.queryByTransfId(organizationId, transfId, StateMachineConfigType.STATUS_POSTPOSITION.value());
         if (configs == null) {
             return Collections.emptyList();
         }

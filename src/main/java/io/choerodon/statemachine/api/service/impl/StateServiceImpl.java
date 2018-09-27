@@ -69,7 +69,7 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
         if (isInsert != 1) {
             throw new CommonException("error.state.create");
         }
-        state = stateMapper.selectByPrimaryKey(state);
+        state = stateMapper.queryById(organizationId,state.getId());
         return modelMapper.map(state, StateDTO.class);
     }
 
@@ -80,13 +80,13 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
         if (isUpdate != 1) {
             throw new CommonException("error.state.update");
         }
-        state = stateMapper.selectByPrimaryKey(state);
+        state = stateMapper.queryById(state.getOrganizationId(),state.getId());
         return modelMapper.map(state, StateDTO.class);
     }
 
     @Override
     public Boolean delete(Long organizationId, Long stateId) {
-        State state = stateMapper.selectByPrimaryKey(stateId);
+        State state = stateMapper.queryById(organizationId,stateId);
         if (state == null){
             throw new CommonException("error.state.delete.nofound");
         }
@@ -106,7 +106,7 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
     public StateDTO getByStateId(Long organizationId, Long stateId) {
         State state = new State();
         state.setId(stateId);
-        state = stateMapper.selectByPrimaryKey(state);
+        state = stateMapper.queryById(organizationId,stateId);
         if (state != null){
             return modelMapper.map(state, StateDTO.class);
         }
