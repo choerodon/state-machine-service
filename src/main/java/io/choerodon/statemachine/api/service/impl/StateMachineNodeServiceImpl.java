@@ -28,6 +28,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @Component
+@Transactional(rollbackFor = Exception.class)
 public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNode> implements StateMachineNodeService {
 
     @Autowired
@@ -75,7 +76,6 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     }
 
     @Override
-    @Transactional(rollbackFor = CommonException.class)
     public List<StateMachineNodeDTO> delete(Long organizationId, Long nodeId) {
         StateMachineNode node = nodeMapper.selectByPrimaryKey(nodeId);
         int isDelete = nodeMapper.deleteByPrimaryKey(nodeId);
@@ -89,7 +89,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     }
 
     @Override
-    public StateMachineNodeDTO getById(Long organizationId, Long nodeId) {
+    public StateMachineNodeDTO queryById(Long organizationId, Long nodeId) {
         StateMachineNode node = nodeMapper.getNodeById(nodeId);
         if (node == null) {
             throw new CommonException("error.stateMachineNode.noFound");

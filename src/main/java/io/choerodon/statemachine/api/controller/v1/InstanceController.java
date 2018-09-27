@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -20,7 +19,7 @@ import java.util.List;
  * @date 2018/9/17
  */
 @RestController
-@RequestMapping(value = "/v1/organizations/{organization_id}/instance")
+@RequestMapping(value = "/v1/organizations/{organization_id}/instances")
 public class InstanceController extends BaseController {
 
     @Autowired
@@ -53,17 +52,12 @@ public class InstanceController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取当前状态拥有的转换列表，feign调用对应服务的条件验证")
     @GetMapping(value = "/transf_list")
-    public ResponseEntity<List<StateMachineTransfDTO>> transfList(@PathVariable("organization_id") Long organizationId,
-                                                                  @RequestParam("service_code") String serviceCode,
-                                                                  @RequestParam("state_machine_id") Long stateMachineId,
-                                                                  @RequestParam("instance_id") Long instanceId,
-                                                                  @RequestParam("current_state_id") Long currentStateId) {
-        return new ResponseEntity<>(instanceService.transfList(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/test")
-    public void getAllCustomers(@PathVariable("organization_id") Long organizationId) throws URISyntaxException {
-        instanceService.test();
+    public ResponseEntity<List<StateMachineTransfDTO>> queryListTransf(@PathVariable("organization_id") Long organizationId,
+                                                                       @RequestParam("service_code") String serviceCode,
+                                                                       @RequestParam("state_machine_id") Long stateMachineId,
+                                                                       @RequestParam("instance_id") Long instanceId,
+                                                                       @RequestParam("current_state_id") Long currentStateId) {
+        return new ResponseEntity<>(instanceService.queryListTransf(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
     }
 
 }

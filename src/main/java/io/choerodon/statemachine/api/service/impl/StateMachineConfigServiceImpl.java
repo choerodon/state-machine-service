@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @Component
+@Transactional(rollbackFor = Exception.class)
 public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineConfig> implements StateMachineConfigService {
 
     @Autowired

@@ -28,6 +28,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @Component
+@Transactional(rollbackFor = Exception.class)
 public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineTransf> implements StateMachineTransfService {
     @Autowired
     private StateMachineTransfMapper transfMapper;
@@ -41,8 +42,6 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     private StateMachineNodeMapper nodeMapper;
     @Autowired
     private StateMachineConfigMapper configMapper;
-    @Autowired
-    private StateMachineConfigDeployMapper configDeployMapper;
     @Autowired
     private StateMachineConfigService configService;
     @Autowired
@@ -64,7 +63,6 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     }
 
     @Override
-    @Transactional(rollbackFor = CommonException.class)
     public StateMachineTransfDTO update(Long organizationId, Long transfId, StateMachineTransfDTO transfDTO) {
         StateMachineTransf transf = modelMapper.map(transfDTO, StateMachineTransf.class);
         transf.setId(transfId);
@@ -78,7 +76,6 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     }
 
     @Override
-    @Transactional(rollbackFor = CommonException.class)
     public Boolean delete(Long organizationId, Long transfId) {
         StateMachineTransf transf = transfMapper.selectByPrimaryKey(transfId);
         int isDelete = transfMapper.deleteByPrimaryKey(transfId);
@@ -103,7 +100,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     }
 
     @Override
-    public StateMachineTransfDTO getById(Long organizationId, Long transfId) {
+    public StateMachineTransfDTO queryById(Long organizationId, Long transfId) {
         StateMachineTransf transf = transfMapper.selectByPrimaryKey(transfId);
         StateMachineTransfDTO dto = modelMapper.map(transf, StateMachineTransfDTO.class);
         List<StateMachineConfigDTO> conditions = new ArrayList<>();
@@ -237,7 +234,7 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
 
         //更新node的【全部转换到当前】转换id
         node.setAllStateTransfId(transf.getId());
-        nodeService.updateOptional(node,"allStateTransfId");
+        nodeService.updateOptional(node, "allStateTransfId");
 
         transf = transfMapper.selectByPrimaryKey(transf.getId());
         updateStateMachineStatus(transf.getStateMachineId());
@@ -247,17 +244,17 @@ public class StateMachineTransfServiceImpl extends BaseServiceImpl<StateMachineT
     @Override
     public Boolean deleteAllStateTransf(Long organizationId, Long nodeId) {
         StateMachineNode node = nodeMapper.getNodeById(nodeId);
-        if (node != null) {
+        if (node == null) {
             throw new CommonException("error.stateMachineNode.null");
         }
-
         //删除【全部转换到当前】的转换
-        delete(organizationId,node.getAllStateTransfId());
-
+        Boolean result = delete(organizationId, node.getAllStateTransfId());
         //更新node的【全部转换到当前】转换id
         node.setAllStateTransfId(null);
-        nodeService.updateOptional(node,"allStateTransfId");
-
-        return null;
+        int updateResult = nodeService.updateOptional(node, "allStateTransfId");
+        if (updateResult != 1) {
+            throw new CommonException("error.StateMachineTransfServiceImpl.updateOptional");
+        }
+        return result;
     }
 }

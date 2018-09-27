@@ -64,7 +64,7 @@ public interface StateMachineTransfService extends BaseService<StateMachineTrans
      * @param transfId
      * @return
      */
-    StateMachineTransfDTO getById(Long organizationId, Long transfId);
+    StateMachineTransfDTO queryById(Long organizationId, Long transfId);
 
     /**
      * 获取当前状态拥有的转换列表

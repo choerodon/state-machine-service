@@ -29,6 +29,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @Component
+@Transactional(rollbackFor = Exception.class)
 public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> implements StateMachineService {
 
     @Autowired
@@ -76,7 +77,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    @Transactional(rollbackFor = CommonException.class)
     public StateMachineDTO create(Long organizationId, StateMachineDTO stateMachineDTO) {
         stateMachineDTO.setId(null);
         stateMachineDTO.setStatus(StateMachineStatus.STATUS_INACTIVE);
@@ -125,7 +125,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (isTransfInsert != 1) {
             throw new CommonException("error.stateMachineTransf.create");
         }
-        return getStateMachineWithConfigById(stateMachine.getId());
+        return queryStateMachineWithConfigById(stateMachine.getId());
     }
 
     @Override
@@ -141,7 +141,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    @Transactional(rollbackFor = CommonException.class)
     public Boolean delete(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
         if (stateMachine == null) {
@@ -179,7 +178,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    @Transactional(rollbackFor = CommonException.class)
     public StateMachineDTO deploy(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
         if (null == stateMachine) {
@@ -243,11 +241,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         //清理内存中的旧状态机构建器与实例
         machineFactory.deployStateMachine(stateMachineId);
 
-        return getStateMachineWithConfigById(stateMachine.getId());
+        return queryStateMachineWithConfigById(stateMachine.getId());
     }
 
     @Override
-    public StateMachineDTO getStateMachineWithConfigById(Long stateMachineId) {
+    public StateMachineDTO queryStateMachineWithConfigById(Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.nofound");
@@ -319,7 +317,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public StateMachineDTO getOriginalDTOById(Long stateMachineId) {
+    public StateMachineDTO queryOriginalById(Long stateMachineId) {
         StateMachineDTO dto = ConvertUtils.covertStateMachine(getOriginalById(stateMachineId));
         List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
         for (StateMachineTransfDTO transfDTO:transfDTOS) {
@@ -355,7 +353,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    @Transactional(rollbackFor = CommonException.class)
     public StateMachineDTO deleteDraft(Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
         if (null == stateMachine) {
@@ -422,7 +419,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 }
             }
         }
-        return getStateMachineWithConfigById(stateMachine.getId());
+        return queryStateMachineWithConfigById(stateMachine.getId());
     }
 
     @Override

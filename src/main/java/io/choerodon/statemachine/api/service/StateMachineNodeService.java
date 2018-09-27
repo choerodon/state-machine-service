@@ -49,6 +49,6 @@ public interface StateMachineNodeService extends BaseService<StateMachineNode> {
      * @param nodeId
      * @return
      */
-    StateMachineNodeDTO getById(Long organizationId, Long nodeId);
+    StateMachineNodeDTO queryById(Long organizationId, Long nodeId);
 
 }

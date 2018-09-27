@@ -60,14 +60,14 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO getStateMachineWithConfigById(Long stateMachineId);
+    StateMachineDTO queryStateMachineWithConfigById(Long stateMachineId);
 
     /**
      * 获取状态机原件DTO
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO getOriginalDTOById(Long stateMachineId);
+    StateMachineDTO queryOriginalById(Long stateMachineId);
 
     /**
      * 获取状态机原件

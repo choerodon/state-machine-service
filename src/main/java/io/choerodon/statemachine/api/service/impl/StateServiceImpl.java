@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @Component
+@Transactional(rollbackFor = Exception.class)
 public class StateServiceImpl extends BaseServiceImpl<State> implements StateService {
 
     @Autowired
@@ -38,16 +40,17 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
     @Override
     public Page<StateDTO> pageQuery(PageRequest pageRequest, StateDTO stateDTO, String param) {
         State state = modelMapper.map(stateDTO, State.class);
-        Page<State> page = PageHelper.doPageAndSort(pageRequest,
-                () -> stateMapper.fulltextSearch(state, param));
+        Page<State> page = PageHelper.doPageAndSort(pageRequest,() -> stateMapper.fulltextSearch(state, param));
         List<State> states = page.getContent();
-        List<StateDTO> stateDTOS = modelMapper.map(states, new TypeToken<List<StateDTO>>(){}.getType());
-        for (StateDTO dto:stateDTOS) {
-            Long draftUsed = nodeMapper.checkStateDelete(dto.getOrganizationId(), dto.getId()); //该状态已被草稿状态机使用个数
-            Long deployUsed = nodeDeployMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());//该状态已被发布状态机使用个数
-            if (draftUsed == 0 && deployUsed == 0){
+        List<StateDTO> stateDTOS = modelMapper.map(states, new TypeToken<List<StateDTO>>() {}.getType());
+        for (StateDTO dto : stateDTOS) {
+            //该状态已被草稿状态机使用个数
+            Long draftUsed = nodeMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
+            //该状态已被发布状态机使用个数
+            Long deployUsed = nodeDeployMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
+            if (draftUsed == 0 && deployUsed == 0) {
                 dto.setCanDelete(true);
-            }else {
+            } else {
                 dto.setCanDelete(false);
             }
         }
@@ -87,12 +90,12 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
     @Override
     public Boolean delete(Long organizationId, Long stateId) {
         State state = stateMapper.selectByPrimaryKey(stateId);
-        if (state == null){
+        if (state == null) {
             throw new CommonException("error.state.delete.nofound");
         }
         Long draftUsed = nodeMapper.checkStateDelete(organizationId, stateId);
         Long deployUsed = nodeDeployMapper.checkStateDelete(organizationId, stateId);
-        if (draftUsed != 0 || deployUsed != 0){
+        if (draftUsed != 0 || deployUsed != 0) {
             throw new CommonException("error.state.delete");
         }
         int isDelete = stateMapper.deleteByPrimaryKey(stateId);
@@ -103,22 +106,23 @@ public class StateServiceImpl extends BaseServiceImpl<State> implements StateSer
     }
 
     @Override
-    public StateDTO getByStateId(Long organizationId, Long stateId) {
+    public StateDTO queryStateById(Long organizationId, Long stateId) {
         State state = new State();
         state.setId(stateId);
         state = stateMapper.selectByPrimaryKey(state);
-        if (state != null){
+        if (state != null) {
             return modelMapper.map(state, StateDTO.class);
         }
         return null;
     }
 
     @Override
-    public List<StateDTO> selectAll(Long organizationId) {
+    public List<StateDTO> queryAllState(Long organizationId) {
         State state = new State();
         state.setOrganizationId(organizationId);
         List<State> states = stateMapper.select(state);
-        return modelMapper.map(states, new TypeToken<List<StateDTO>>() {}.getType());
+        return modelMapper.map(states, new TypeToken<List<StateDTO>>() {
+        }.getType());
     }
 
     @Override

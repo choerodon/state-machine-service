@@ -43,7 +43,7 @@ public interface InstanceService {
      * @param stateId
      * @return
      */
-    List<StateMachineTransfDTO> transfList(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long stateId);
+    List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long stateId);
 
     /**
      * 调用相应服务，验证转换
@@ -99,5 +99,4 @@ public interface InstanceService {
      */
     List<StateMachineConfigDTO> postposition(Long transfId);
 
-    void test()throws URISyntaxException;
 }

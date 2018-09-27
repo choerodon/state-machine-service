@@ -17,6 +17,15 @@ public class StateMachineDTO {
     private List<StateMachineNodeDTO> nodeDTOs;
     private List<StateMachineTransfDTO> transfDTOs;
 
+    public StateMachineDTO() {
+    }
+
+    public StateMachineDTO(String name, String description, Long organizationId) {
+        this.name = name;
+        this.description = description;
+        this.organizationId = organizationId;
+    }
+
     public Long getId() {
         return id;
     }
