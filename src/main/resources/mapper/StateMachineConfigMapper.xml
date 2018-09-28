@@ -5,7 +5,7 @@
     <insert id="insertWithId">
         INSERT INTO state_machine_config (
         id,
-        transf_id,
+        transform_id,
         state_machine_id,
         code,
         type,
@@ -18,7 +18,7 @@
         VALUES
         (
         #{stateMachineConfig.id},
-        #{stateMachineConfig.transfId},
+        #{stateMachineConfig.transformId},
         #{stateMachineConfig.stateMachineId},
         #{stateMachineConfig.code},
         #{stateMachineConfig.type},

@@ -5,11 +5,11 @@ import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
-import io.choerodon.statemachine.api.service.StateMachineTransfService;
+import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.domain.StateMachineNode;
-import io.choerodon.statemachine.domain.StateMachineTransf;
+import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
-import io.choerodon.statemachine.infra.enums.TransfType;
+import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class MachineFactory {
     @Autowired
     private StateMachineService stateMachineService;
     @Autowired
-    private StateMachineTransfService transfService;
+    private StateMachineTransformService transformService;
     @Autowired
     private StateMachineNodeService nodeService;
     @Autowired
@@ -63,7 +63,7 @@ public class MachineFactory {
     private StateMachineBuilder.Builder<String, String> getBuilder(Long organizationId, String serviceCode, Long stateMachineId) {
         io.choerodon.statemachine.domain.StateMachine stateMachine = stateMachineService.getOriginalById(organizationId, stateMachineId);
         List<StateMachineNode> nodes = stateMachine.getStateMachineNodes();
-        List<StateMachineTransf> transfs = stateMachine.getStateMachineTransfs();
+        List<StateMachineTransform> transforms = stateMachine.getStateMachineTransforms();
 
         StateMachineBuilder.Builder<String, String> builder = StateMachineBuilder.builder();
         try {
@@ -74,13 +74,13 @@ public class MachineFactory {
                     .withStates()
                     .initial(nodeService.getInitNode(organizationId, stateMachineId).toString(), initialAction(organizationId, serviceCode))
                     .states(nodes.stream().map(x -> x.getId().toString()).collect(Collectors.toSet()));
-            for (StateMachineTransf transf : transfs) {
-                if (transf.getType().equals(TransfType.ALL)) {
+            for (StateMachineTransform transform : transforms) {
+                if (transform.getType().equals(TransformType.ALL)) {
                     //若配置了全部转换
                     for (StateMachineNode node : nodes) {
-                        String event = transf.getId().toString();
+                        String event = transform.getId().toString();
                         String source = node.getId().toString();
-                        String target = transf.getEndNodeId().toString();
+                        String target = transform.getEndNodeId().toString();
                         builder.configureTransitions()
                                 .withExternal()
                                 .source(source).target(target)
@@ -90,9 +90,9 @@ public class MachineFactory {
                     }
                 } else {
                     //转换都是通过id配置
-                    String event = transf.getId().toString();
-                    String source = transf.getStartNodeId().toString();
-                    String target = transf.getEndNodeId().toString();
+                    String event = transform.getId().toString();
+                    String source = transform.getStartNodeId().toString();
+                    String target = transform.getEndNodeId().toString();
                     builder.configureTransitions()
                             .withExternal()
                             .source(source).target(target)
@@ -137,8 +137,8 @@ public class MachineFactory {
         //存入instanceId，以便执行guard和action
         instance.getExtendedState().getVariables().put(INSTANCE_ID, instanceId);
         //执行初始转换
-        Long initTransfId = transfService.getInitTransf(organizationId, stateMachineId);
-        instance.sendEvent(initTransfId.toString());
+        Long initTransformId = transformService.getInitTransform(organizationId, stateMachineId);
+        instance.sendEvent(initTransformId.toString());
 
         ExecuteResult result = instance.getExtendedState().getVariables().get(EXECUTE_RESULT) == null ? new ExecuteResult(false, null, null) : (ExecuteResult) instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
         return result;
@@ -151,10 +151,10 @@ public class MachineFactory {
      * @param stateMachineId
      * @param instanceId
      * @param currentStatusId
-     * @param transfId
+     * @param transformId
      * @return
      */
-    public ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transfId) {
+    public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transformId) {
         //状态转节点
         Long currentNodeId = nodeMapper.getNodeByStatusId(stateMachineId, currentStatusId).getId();
 
@@ -173,7 +173,7 @@ public class MachineFactory {
             stateMachineMap.put(instanceCode, instance);
         }
         //触发事件
-        instance.sendEvent(transfId.toString());
+        instance.sendEvent(transformId.toString());
 
         //节点转状态
         Long statusId = nodeMapper.getNodeById(Long.parseLong(instance.getState().getId())).getStatusId();
@@ -211,10 +211,10 @@ public class MachineFactory {
         return new Action<String, String>() {
             @Override
             public void execute(StateContext<String, String> context) {
-                Long transfId = Long.parseLong(context.getEvent());
+                Long transformId = Long.parseLong(context.getEvent());
                 Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
-                logger.info("stateMachine instance execute transform action,instanceId:{},transfId:{}", instanceId, transfId);
-                Boolean result = instanceService.postpositionAction(organizationId, serviceCode, transfId, instanceId, context);
+                logger.info("stateMachine instance execute transformorm action,instanceId:{},transformId:{}", instanceId, transformId);
+                Boolean result = instanceService.postpositionAction(organizationId, serviceCode, transformId, instanceId, context);
                 if (!result) {
                     throw new CommonException("error.stateMachine.action");
                 }
@@ -232,9 +232,9 @@ public class MachineFactory {
         return new Action<String, String>() {
             @Override
             public void execute(StateContext<String, String> context) {
-                Long transfId = Long.parseLong(context.getEvent());
+                Long transformId = Long.parseLong(context.getEvent());
                 Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
-                logger.error("stateMachine instance execute transform error,instanceId:{},transfId:{}", instanceId, transfId);
+                logger.error("stateMachine instance execute transformorm error,instanceId:{},transformId:{}", instanceId, transformId);
                 // do something
             }
         };
@@ -250,10 +250,10 @@ public class MachineFactory {
         return new Guard<String, String>() {
             @Override
             public boolean evaluate(StateContext<String, String> context) {
-                Long transfId = Long.parseLong(context.getEvent());
+                Long transformId = Long.parseLong(context.getEvent());
                 Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
-                logger.info("stateMachine instance execute transform guard,instanceId:{},transfId:{}", instanceId, transfId);
-                return instanceService.validatorGuard(organizationId, serviceCode, transfId, instanceId, context);
+                logger.info("stateMachine instance execute transformorm guard,instanceId:{},transformId:{}", instanceId, transformId);
+                return instanceService.validatorGuard(organizationId, serviceCode, transformId, instanceId, context);
             }
         };
     }

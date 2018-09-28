@@ -29,7 +29,7 @@ public class StateMachine extends AuditDomain {
     private List<StateMachineNode> stateMachineNodes;
 
     @Transient
-    private List<StateMachineTransf> stateMachineTransfs;
+    private List<StateMachineTransform> stateMachineTransforms;
 
     public Long getId() {
         return id;
@@ -79,12 +79,12 @@ public class StateMachine extends AuditDomain {
         this.stateMachineNodes = stateMachineNodes;
     }
 
-    public List<StateMachineTransf> getStateMachineTransfs() {
-        return stateMachineTransfs;
+    public List<StateMachineTransform> getStateMachineTransforms() {
+        return stateMachineTransforms;
     }
 
-    public void setStateMachineTransfs(List<StateMachineTransf> stateMachineTransfs) {
-        this.stateMachineTransfs = stateMachineTransfs;
+    public void setStateMachineTransforms(List<StateMachineTransform> stateMachineTransforms) {
+        this.stateMachineTransforms = stateMachineTransforms;
     }
 
 }

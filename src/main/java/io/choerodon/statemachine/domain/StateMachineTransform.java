@@ -4,6 +4,9 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
@@ -11,8 +14,10 @@ import javax.persistence.Table;
  */
 @ModifyAudit
 @VersionAudit
-@Table(name = "state_machine_transf_deploy")
-public class StateMachineTransfDeploy extends AuditDomain {
+@Table(name = "state_machine_transform")
+public class StateMachineTransform extends AuditDomain {
+    @Id
+    @GeneratedValue
     private Long id;
     private String name;
     private String description;
@@ -84,14 +89,6 @@ public class StateMachineTransfDeploy extends AuditDomain {
         this.stateMachineId = stateMachineId;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getStyle() {
         return style;
     }
@@ -114,5 +111,13 @@ public class StateMachineTransfDeploy extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

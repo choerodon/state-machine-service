@@ -2,7 +2,7 @@ package io.choerodon.statemachine.api.service;
 
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import org.springframework.statemachine.StateContext;
 
 import java.util.List;
@@ -27,13 +27,13 @@ public interface InstanceService {
      * 执行状态转换，并返回转换后的状态
      *
      * @param stateMachineId 状态机Id
-     * @param transfId       转换Id
+     * @param transformId       转换Id
      * @param currentStatusId 当前状态Id
      * @param instanceId     操作对象Id(cloopm-service: issueId)
      * @param serviceCode    请求服务code
      * @return
      */
-    ExecuteResult executeTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transfId);
+    ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transformId);
 
     /**
      * 获取当前状态拥有的转换列表，feign调用对应服务的条件验证
@@ -42,61 +42,61 @@ public interface InstanceService {
      * @param statusId
      * @return
      */
-    List<StateMachineTransfDTO> queryListTransf(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId);
+    List<StateMachineTransformDTO> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId);
 
     /**
      * 调用相应服务，验证转换
      *
      * @param organizationId
      * @param serviceCode
-     * @param transfId
+     * @param transformId
      * @param instanceId
      * @param context        状态机上下文，传递参数
      * @return
      */
-    Boolean validatorGuard(Long organizationId, String serviceCode, Long transfId, Long instanceId, StateContext<String, String> context);
+    Boolean validatorGuard(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context);
 
     /**
      * 调用相应服务，执行后置动作
      *
      * @param organizationId
      * @param serviceCode
-     * @param transfId
+     * @param transformId
      * @param instanceId
      * @param context        状态机上下文，传递参数
      * @return
      */
-    Boolean postpositionAction(Long organizationId, String serviceCode, Long transfId, Long instanceId, StateContext<String, String> context);
+    Boolean postpositionAction(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context);
 
     /**
      * 条件
      *
-     * @param transfId 转换id
+     * @param transformId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> condition(Long organizationId, Long transfId);
+    List<StateMachineConfigDTO> condition(Long organizationId, Long transformId);
 
     /**
      * 验证器
      *
-     * @param transfId 转换id
+     * @param transformId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> validator(Long organizationId, Long transfId);
+    List<StateMachineConfigDTO> validator(Long organizationId, Long transformId);
 
     /**
      * 触发器
      *
-     * @param transfId 转换id
+     * @param transformId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> trigger(Long organizationId, Long transfId);
+    List<StateMachineConfigDTO> trigger(Long organizationId, Long transformId);
 
     /**
      * 后置功能
      *
-     * @param transfId 转换id
+     * @param transformId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> postposition(Long organizationId, Long transfId);
+    List<StateMachineConfigDTO> postposition(Long organizationId, Long transformId);
 }

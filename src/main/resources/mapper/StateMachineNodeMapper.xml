@@ -5,7 +5,7 @@
     <resultMap id="nodeWithState" type="io.choerodon.statemachine.domain.StateMachineNode">
         <id property="id" column="id"/>
         <result property="stateMachineId" column="state_machine_id"/>
-        <result property="statusId" column="state_id"/>
+        <result property="statusId" column="status_id"/>
         <result property="positionX" column="position_x"/>
         <result property="positionY" column="position_y"/>
         <result property="width" column="width"/>
@@ -51,7 +51,7 @@
         STATE.last_updated_by as s_last_updated_by,
         STATE.object_version_number as s_object_version_number
         FROM state_machine_node SMN
-        LEFT JOIN state STATE ON STATE.id = SMN.state_id
+        LEFT JOIN status STATE ON STATE.id = SMN.status_id
         WHERE SMN.id = #{nodeId}
     </select>
 
@@ -69,7 +69,7 @@
         STATE.last_updated_by as s_last_updated_by,
         STATE.object_version_number as s_object_version_number
         FROM state_machine_node SMN
-        LEFT JOIN state STATE ON STATE.id = SMN.state_id
+        LEFT JOIN status STATE ON STATE.id = SMN.status_id
         WHERE STATE.id = #{statusId}
         AND SMN.state_machine_id = #{stateMachineId}
     </select>
@@ -88,7 +88,7 @@
         STATE.last_updated_by as s_last_updated_by,
         STATE.object_version_number as s_object_version_number
         FROM state_machine_node SMN
-        LEFT JOIN state STATE ON STATE.id = SMN.state_id
+        LEFT JOIN status STATE ON STATE.id = SMN.status_id
         WHERE SMN.state_machine_id = #{stateMachineId}
     </select>
 
@@ -99,7 +99,7 @@
             state_machine_node SMN
             LEFT JOIN state_machine SM ON SMN.state_machine_id = SM.id
         WHERE
-            SMN.state_id = #{statusId}
+            SMN.status_id = #{statusId}
             AND SM.organization_id = #{organizationId}
     </select>
 
@@ -107,7 +107,7 @@
         INSERT INTO state_machine_node (
             id,
             state_machine_id,
-            state_id,
+            status_id,
             position_x,
             position_y,
             width,

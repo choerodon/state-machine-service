@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * @author peng.jiang@hand-china.com
  */
-public class StateMachineTransfDTO {
+public class StateMachineTransformDTO {
     private Long id;
     private String name;
     private String description;

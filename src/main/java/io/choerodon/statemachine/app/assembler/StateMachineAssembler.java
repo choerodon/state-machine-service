@@ -2,7 +2,7 @@ package io.choerodon.statemachine.app.assembler;
 
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class StateMachineAssembler extends AbstractAssembler {
             nodes.forEach(node -> nodeDTOs.add(stateMachineNodeAssembler.toTarget(node, StateMachineNodeDTO.class)));
             stateMachineDTO.setNodeDTOs(nodeDTOs);
         }
-        stateMachineDTO.setTransfDTOs(toTargetList(stateMachine.getStateMachineTransfs(), StateMachineTransfDTO.class));
+        stateMachineDTO.setTransformDTOs(toTargetList(stateMachine.getStateMachineTransforms(), StateMachineTransformDTO.class));
         return stateMachineDTO;
     }
 }

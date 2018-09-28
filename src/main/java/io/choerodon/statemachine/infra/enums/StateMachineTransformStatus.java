@@ -3,7 +3,7 @@ package io.choerodon.statemachine.infra.enums;
 /**
  * @author peng.jiang@hand-china.com
  */
-public interface StateMachineTransfStatus {
+public interface StateMachineTransformStatus {
     /**
      * 满足下列所有条件
      */

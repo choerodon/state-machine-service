@@ -15,7 +15,7 @@ public class StateMachineDTO {
     private Long objectVersionNumber;
 
     private List<StateMachineNodeDTO> nodeDTOs;
-    private List<StateMachineTransfDTO> transfDTOs;
+    private List<StateMachineTransformDTO> transformDTOs;
 
     public StateMachineDTO() {
     }
@@ -74,12 +74,12 @@ public class StateMachineDTO {
         this.nodeDTOs = nodeDTOs;
     }
 
-    public List<StateMachineTransfDTO> getTransfDTOs() {
-        return transfDTOs;
+    public List<StateMachineTransformDTO> getTransformDTOs() {
+        return transformDTOs;
     }
 
-    public void setTransfDTOs(List<StateMachineTransfDTO> transfDTOs) {
-        this.transfDTOs = transfDTOs;
+    public void setTransformDTOs(List<StateMachineTransformDTO> transformDTOs) {
+        this.transformDTOs = transformDTOs;
     }
 
     public Long getObjectVersionNumber() {

@@ -6,7 +6,7 @@ package io.choerodon.statemachine.api.dto;
 public class StateMachineConfigDTO {
 
     private Long id;
-    private Long transfId;
+    private Long transformId;
     private Long stateMachineId;
     private String code;
     private String type;
@@ -25,12 +25,12 @@ public class StateMachineConfigDTO {
         this.id = id;
     }
 
-    public Long getTransfId() {
-        return transfId;
+    public Long getTransformId() {
+        return transformId;
     }
 
-    public void setTransfId(Long transfId) {
-        this.transfId = transfId;
+    public void setTransformId(Long transformId) {
+        this.transformId = transformId;
     }
 
     public Long getStateMachineId() {

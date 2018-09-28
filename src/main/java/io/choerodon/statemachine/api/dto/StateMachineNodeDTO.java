@@ -15,13 +15,13 @@ public class StateMachineNodeDTO {
     private Long height;
     private Long objectVersionNumber;
     private String type;
-    private Long allStatusTransfId;
+    private Long allStatusTransformId;
     private Long organizationId;
 
     private StatusDTO stateDTO;
 
-    private List<StateMachineTransfDTO> intoTransf;
-    private List<StateMachineTransfDTO> outTransf;
+    private List<StateMachineTransformDTO> intoTransform;
+    private List<StateMachineTransformDTO> outTransform;
 
     public Long getId() {
         return id;
@@ -103,28 +103,28 @@ public class StateMachineNodeDTO {
         this.type = type;
     }
 
-    public List<StateMachineTransfDTO> getIntoTransf() {
-        return intoTransf;
+    public List<StateMachineTransformDTO> getIntoTransform() {
+        return intoTransform;
     }
 
-    public void setIntoTransf(List<StateMachineTransfDTO> intoTransf) {
-        this.intoTransf = intoTransf;
+    public void setIntoTransform(List<StateMachineTransformDTO> intoTransform) {
+        this.intoTransform = intoTransform;
     }
 
-    public List<StateMachineTransfDTO> getOutTransf() {
-        return outTransf;
+    public List<StateMachineTransformDTO> getOutTransform() {
+        return outTransform;
     }
 
-    public void setOutTransf(List<StateMachineTransfDTO> outTransf) {
-        this.outTransf = outTransf;
+    public void setOutTransform(List<StateMachineTransformDTO> outTransform) {
+        this.outTransform = outTransform;
     }
 
-    public Long getAllStatusTransfId() {
-        return allStatusTransfId;
+    public Long getAllStatusTransformId() {
+        return allStatusTransformId;
     }
 
-    public void setAllStatusTransfId(Long allStatusTransfId) {
-        this.allStatusTransfId = allStatusTransfId;
+    public void setAllStatusTransformId(Long allStatusTransformId) {
+        this.allStatusTransformId = allStatusTransformId;
     }
 
     public Long getOrganizationId() {

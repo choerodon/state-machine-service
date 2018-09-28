@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper">
+
+    <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachineTransform">
+        SELECT *
+        FROM state_machine_transform
+        WHERE organization_id = #{organizationId}
+        and id = #{id}
+    </select>
+
+    <update id="deleteByNodeId">
+        DELETE FROM state_machine_transform
+        WHERE start_node_id = #{nodeId} OR end_node_id = #{nodeId}
+    </update>
+
+    <insert id="insertWithId">
+        INSERT INTO state_machine_transform (
+        id,
+        name,
+        description,
+        state_machine_id,
+        start_node_id,
+        end_node_id,
+        url,
+        type,
+        style,
+        condition_strategy,
+        creation_date,
+        created_by,
+        last_update_date,
+        last_updated_by,
+        object_version_number
+        )
+        VALUES
+        (
+        #{stateMachineTransform.id},
+        #{stateMachineTransform.name},
+        #{stateMachineTransform.description},
+        #{stateMachineTransform.stateMachineId},
+        #{stateMachineTransform.startNodeId},
+        #{stateMachineTransform.endNodeId},
+        #{stateMachineTransform.url},
+        #{stateMachineTransform.type},
+        #{stateMachineTransform.style},
+        #{stateMachineTransform.conditionStrategy},
+        #{stateMachineTransform.creationDate},
+        #{stateMachineTransform.createdBy},
+        #{stateMachineTransform.lastUpdateDate},
+        #{stateMachineTransform.lastUpdatedBy},
+        #{stateMachineTransform.objectVersionNumber}
+        );
+    </insert>
+
+</mapper>

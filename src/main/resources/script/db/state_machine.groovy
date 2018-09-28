@@ -27,7 +27,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             column(name: "name", type: "VARCHAR(64)")
         }
         createIndex(tableName: "state_machine", indexName: "state_machine_n2") {
-            column(name: "status", type: "CHAR(1)")
+            column(name: "status", type: "VARCHAR(30)")
         }
         createIndex(tableName: "state_machine", indexName: "state_machine_n3") {
             column(name: "organization_id", type: "BIGINT UNSIGNED")

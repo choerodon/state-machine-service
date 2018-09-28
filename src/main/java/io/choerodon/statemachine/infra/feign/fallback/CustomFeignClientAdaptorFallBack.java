@@ -3,7 +3,7 @@ package io.choerodon.statemachine.infra.feign.fallback;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +25,12 @@ public class CustomFeignClientAdaptorFallBack implements CustomFeignClientAdapto
     }
 
     @Override
-    public ResponseEntity<List<StateMachineTransfDTO>> filterTransfsByConfig(URI baseUri, List<StateMachineTransfDTO> transfs) {
-        throw new CommonException("error.customFeignClientAdaptor.filterTransfsByConfig");
+    public ResponseEntity<List<StateMachineTransformDTO>> filterTransformsByConfig(URI baseUri, List<StateMachineTransformDTO> transforms) {
+        throw new CommonException("error.customFeignClientAdaptor.filterTransformsByConfig");
     }
 
     @Override
     public ResponseEntity<ExecuteResult> executeConfig(URI baseUri, List<StateMachineConfigDTO> configs) {
-        throw new CommonException("error.customFeignClientAdaptor.filterTransfsByConfig");
+        throw new CommonException("error.customFeignClientAdaptor.filterTransformsByConfig");
     }
 }

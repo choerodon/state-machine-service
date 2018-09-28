@@ -3,11 +3,11 @@ package io.choerodon.statemachine.infra.utils;
 import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineNodeDeploy;
-import io.choerodon.statemachine.domain.StateMachineTransf;
+import io.choerodon.statemachine.domain.StateMachineTransform;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeToken;
@@ -61,10 +61,10 @@ public class ConvertUtils {
             }
             stateMachineDTO.setNodeDTOs(nodeDTOs);
         }
-        List<StateMachineTransf> transfs = stateMachine.getStateMachineTransfs();
-        if (null != transfs && !transfs.isEmpty()) {
-            List<StateMachineTransfDTO> transfDTOs = modelMapper.map(transfs, new TypeToken<List<StateMachineTransfDTO>>() {}.getType());
-            stateMachineDTO.setTransfDTOs(transfDTOs);
+        List<StateMachineTransform> transforms = stateMachine.getStateMachineTransforms();
+        if (null != transforms && !transforms.isEmpty()) {
+            List<StateMachineTransformDTO> transformDTOs = modelMapper.map(transforms, new TypeToken<List<StateMachineTransformDTO>>() {}.getType());
+            stateMachineDTO.setTransformDTOs(transformDTOs);
         }
         return stateMachineDTO;
     }

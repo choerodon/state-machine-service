@@ -59,10 +59,10 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<StateMachineConfigDTO> queryByTransfId(Long organizationId,Long transfId, String type) {
+    public List<StateMachineConfigDTO> queryByTransformId(Long organizationId,Long transformId, String type) {
         StateMachineConfig config = new StateMachineConfig();
         config.setOrganizationId(organizationId);
-        config.setTransfId(transfId);
+        config.setTransformId(transformId);
         config.setType(type);
         List<StateMachineConfig> list = configMapper.select(config);
         if (list == null || list.isEmpty()) {
@@ -83,11 +83,11 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<ConfigEnumDTO> queryConfig(Long organizationId,Long transfId, String type) {
+    public List<ConfigEnumDTO> queryConfig(Long organizationId,Long transformId, String type) {
         List<ConfigEnumDTO> configEnumDTOS = buildConfigEnum(type);
         StateMachineConfig config = new StateMachineConfig();
         config.setOrganizationId(organizationId);
-        config.setTransfId(transfId);
+        config.setTransformId(transformId);
         config.setType(type);
         List<StateMachineConfig> configs = configMapper.select(config);
         if (configs != null && !configs.isEmpty()) {

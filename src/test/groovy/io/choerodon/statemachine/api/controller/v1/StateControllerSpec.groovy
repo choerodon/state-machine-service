@@ -94,7 +94,7 @@ class StateControllerSpec extends Specification {
 
         when: '更新状态'
         HttpEntity<StatusDTO> httpEntity = new HttpEntity<>(stateDTO)
-        def entity = restTemplate.exchange(baseUrl + '/{state_id}', HttpMethod.PUT, httpEntity, StatusDTO, testOrginzationId, state.getId())
+        def entity = restTemplate.exchange(baseUrl + '/{status_id}', HttpMethod.PUT, httpEntity, StatusDTO, testOrginzationId, state.getId())
 
         then: '状态码为200，更新成功'
         entity.getStatusCode().is2xxSuccessful() == isSuccess
@@ -144,7 +144,7 @@ class StateControllerSpec extends Specification {
     def "delete"() {
         when: '发布状态机'
         def statusId = list.get(0).getId()
-        def entity = restTemplate.exchange(baseUrl + '/{state_id}', HttpMethod.DELETE, null, Boolean, testOrginzationId, statusId)
+        def entity = restTemplate.exchange(baseUrl + '/{status_id}', HttpMethod.DELETE, null, Boolean, testOrginzationId, statusId)
 
         then: '状态码为200，更新成功'
         entity.getStatusCode().is2xxSuccessful() == true

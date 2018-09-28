@@ -3,17 +3,17 @@ package io.choerodon.statemachine.api.service.impl;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
-import io.choerodon.statemachine.app.assembler.StateMachineTransfAssembler;
+import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.StateMachineNode;
-import io.choerodon.statemachine.domain.StateMachineTransf;
+import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineTransfMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,13 +32,13 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     private StateMachineNodeMapper nodeMapper;
 
     @Autowired
-    private StateMachineTransfMapper transfMapper;
+    private StateMachineTransformMapper transformMapper;
     @Autowired
     private StateMachineService stateMachineService;
     @Autowired
     private StateMachineNodeAssembler stateMachineNodeAssembler;
     @Autowired
-    private StateMachineTransfAssembler stateMachineTransfAssembler;
+    private StateMachineTransformAssembler stateMachineTransformAssembler;
 
     @Autowired
     private StatusMapper stateMapper;
@@ -80,7 +80,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineNode.delete");
         }
-        transfMapper.deleteByNodeId(nodeId);
+        transformMapper.deleteByNodeId(nodeId);
         stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
         return stateMachineNodeAssembler.toTargetList(nodeMapper.selectByStateMachineId(node.getStateMachineId()), StateMachineNodeDTO.class);
     }
@@ -92,14 +92,14 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             throw new CommonException("error.stateMachineNode.noFound");
         }
         StateMachineNodeDTO nodeDTO = stateMachineNodeAssembler.toTarget(node, StateMachineNodeDTO.class);
-        StateMachineTransf intoTransfSerach = new StateMachineTransf();
-        intoTransfSerach.setEndNodeId(nodeId);
-        List<StateMachineTransf> intoTransfs = transfMapper.select(intoTransfSerach);
-        nodeDTO.setIntoTransf(stateMachineTransfAssembler.toTargetList(intoTransfs, StateMachineTransfDTO.class));
-        StateMachineTransf outTransfSerach = new StateMachineTransf();
-        outTransfSerach.setStartNodeId(nodeId);
-        List<StateMachineTransf> outTransfs = transfMapper.select(outTransfSerach);
-        nodeDTO.setOutTransf(stateMachineTransfAssembler.toTargetList(outTransfs, StateMachineTransfDTO.class));
+        StateMachineTransform intoTransformSerach = new StateMachineTransform();
+        intoTransformSerach.setEndNodeId(nodeId);
+        List<StateMachineTransform> intoTransforms = transformMapper.select(intoTransformSerach);
+        nodeDTO.setIntoTransform(stateMachineTransformAssembler.toTargetList(intoTransforms, StateMachineTransformDTO.class));
+        StateMachineTransform outTransformSerach = new StateMachineTransform();
+        outTransformSerach.setStartNodeId(nodeId);
+        List<StateMachineTransform> outTransforms = transformMapper.select(outTransformSerach);
+        nodeDTO.setOutTransform(stateMachineTransformAssembler.toTargetList(outTransforms, StateMachineTransformDTO.class));
         return nodeDTO;
     }
 

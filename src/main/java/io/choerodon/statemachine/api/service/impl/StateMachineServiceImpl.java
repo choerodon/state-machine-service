@@ -7,7 +7,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.app.assembler.StateMachineAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
@@ -15,7 +15,7 @@ import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
-import io.choerodon.statemachine.infra.enums.TransfType;
+import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.modelmapper.ModelMapper;
@@ -41,13 +41,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     private StateMachineNodeMapper nodeMapper;
 
     @Autowired
-    private StateMachineTransfMapper transfMapper;
+    private StateMachineTransformMapper transformMapper;
 
     @Autowired
     private StateMachineNodeDeployMapper nodeDeployMapper;
 
     @Autowired
-    private StateMachineTransfDeployMapper transfDeployMapper;
+    private StateMachineTransformDeployMapper transformDeployMapper;
 
     @Autowired
     private StateMachineConfigMapper configMapper;
@@ -122,14 +122,14 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             throw new CommonException("error.stateMachineNode.create");
         }
 
-        StateMachineTransf transf = new StateMachineTransf();
-        transf.setStateMachineId(stateMachine.getId());
-        transf.setStartNodeId(startNode.getId());
-        transf.setEndNodeId(node.getId());
-        transf.setType(TransfType.INIT);
-        int isTransfInsert = transfMapper.insert(transf);
-        if (isTransfInsert != 1) {
-            throw new CommonException("error.stateMachineTransf.create");
+        StateMachineTransform transform = new StateMachineTransform();
+        transform.setStateMachineId(stateMachine.getId());
+        transform.setStartNodeId(startNode.getId());
+        transform.setEndNodeId(node.getId());
+        transform.setType(TransformType.INIT);
+        int isTransformInsert = transformMapper.insert(transform);
+        if (isTransformInsert != 1) {
+            throw new CommonException("error.stateMachineTransform.create");
         }
         return queryStateMachineWithConfigById(organizationId, stateMachine.getId());
     }
@@ -161,17 +161,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         node.setStateMachineId(stateMachineId);
         nodeMapper.delete(node);
         //删除转换
-        StateMachineTransf transf = new StateMachineTransf();
-        transf.setStateMachineId(stateMachineId);
-        transfMapper.delete(transf);
+        StateMachineTransform transform = new StateMachineTransform();
+        transform.setStateMachineId(stateMachineId);
+        transformMapper.delete(transform);
         //删除发布节点
         StateMachineNodeDeploy nodeDeploy = new StateMachineNodeDeploy();
         nodeDeploy.setStateMachineId(stateMachineId);
         nodeDeployMapper.delete(nodeDeploy);
         //删除发布转换
-        StateMachineTransfDeploy transfDeploy = new StateMachineTransfDeploy();
-        transfDeploy.setStateMachineId(stateMachineId);
-        transfDeployMapper.delete(transfDeploy);
+        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        transformDeploy.setStateMachineId(stateMachineId);
+        transformDeployMapper.delete(transformDeploy);
         //删除配置
         StateMachineConfig config = new StateMachineConfig();
         config.setStateMachineId(stateMachineId);
@@ -202,9 +202,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         nodeDeploy.setStateMachineId(stateMachineId);
         nodeDeployMapper.delete(nodeDeploy);
         //删除上一版本的转换
-        StateMachineTransfDeploy transfDeploy = new StateMachineTransfDeploy();
-        transfDeploy.setStateMachineId(stateMachineId);
-        transfDeployMapper.delete(transfDeploy);
+        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        transformDeploy.setStateMachineId(stateMachineId);
+        transformDeployMapper.delete(transformDeploy);
         //删除上一版本的配置
         StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
         configDeploy.setStateMachineId(stateMachineId);
@@ -221,15 +221,15 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             }
         }
         //写入发布的转换
-        StateMachineTransf transf = new StateMachineTransf();
-        transf.setStateMachineId(stateMachineId);
-        List<StateMachineTransf> transfs = transfMapper.select(transf);
-        if (transfs != null && !transfs.isEmpty()) {
-            List<StateMachineTransfDeploy> transfDeploys = modelMapper.map(transfs, new TypeToken<List<StateMachineTransfDeploy>>() {
+        StateMachineTransform transform = new StateMachineTransform();
+        transform.setStateMachineId(stateMachineId);
+        List<StateMachineTransform> transforms = transformMapper.select(transform);
+        if (transforms != null && !transforms.isEmpty()) {
+            List<StateMachineTransformDeploy> transformDeploys = modelMapper.map(transforms, new TypeToken<List<StateMachineTransformDeploy>>() {
             }.getType());
-            int transfDeployInsert = transfDeployMapper.insertList(transfDeploys);
-            if (transfDeployInsert < 1) {
-                throw new CommonException("error.stateMachineTransfDeploy.create");
+            int transformDeployInsert = transformDeployMapper.insertList(transformDeploys);
+            if (transformDeployInsert < 1) {
+                throw new CommonException("error.stateMachineTransformDeploy.create");
             }
         }
         //写入发布的配置
@@ -259,20 +259,20 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<StateMachineNode> nodes = nodeMapper.selectByStateMachineId(stateMachineId);
         stateMachine.setStateMachineNodes(nodes);
         //获取转换
-        StateMachineTransf stateMachineTransf = new StateMachineTransf();
-        stateMachineTransf.setStateMachineId(stateMachineId);
-        List<StateMachineTransf> transfs = transfMapper.select(stateMachineTransf);
-        stateMachine.setStateMachineTransfs(transfs);
+        StateMachineTransform stateMachineTransform = new StateMachineTransform();
+        stateMachineTransform.setStateMachineId(stateMachineId);
+        List<StateMachineTransform> transforms = transformMapper.select(stateMachineTransform);
+        stateMachine.setStateMachineTransforms(transforms);
         StateMachineDTO dto = stateMachineAssembler.covertStateMachine(stateMachine);
-        List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
-        for (StateMachineTransfDTO transfDTO : transfDTOS) {
+        List<StateMachineTransformDTO> transformDTOS = dto.getTransformDTOs();
+        for (StateMachineTransformDTO transformDTO : transformDTOS) {
             List<StateMachineConfigDTO> conditions = new ArrayList<>();
             List<StateMachineConfigDTO> validators = new ArrayList<>();
             List<StateMachineConfigDTO> triggers = new ArrayList<>();
             List<StateMachineConfigDTO> postpositions = new ArrayList<>();
             List<StateMachineConfigDTO> dtoList = new ArrayList<>();
             StateMachineConfig config = new StateMachineConfig();
-            config.setTransfId(transfDTO.getId());
+            config.setTransformId(transformDTO.getId());
             List<StateMachineConfig> list = configMapper.select(config);
             if (list != null && !list.isEmpty()) {
                 dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
@@ -288,13 +288,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                         postpositions.add(configDto);
                     }
                 }
-                transfDTO.setConditions(conditions);
-                transfDTO.setValidators(validators);
-                transfDTO.setTriggers(triggers);
-                transfDTO.setPostpositions(postpositions);
+                transformDTO.setConditions(conditions);
+                transformDTO.setValidators(validators);
+                transformDTO.setTriggers(triggers);
+                transformDTO.setPostpositions(postpositions);
             }
         }
-        dto.setTransfDTOs(transfDTOS);
+        dto.setTransformDTOs(transformDTOS);
         return dto;
     }
 
@@ -311,13 +311,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             stateMachine.setStateMachineNodes(nodes);
         }
         //获取原件转换
-        StateMachineTransfDeploy transfDeploy = new StateMachineTransfDeploy();
-        transfDeploy.setStateMachineId(stateMachineId);
-        List<StateMachineTransfDeploy> transfDeploys = transfDeployMapper.select(transfDeploy);
-        if (transfDeploys != null && !transfDeploys.isEmpty()) {
-            List<StateMachineTransf> transfs = modelMapper.map(transfDeploys, new TypeToken<List<StateMachineTransf>>() {
+        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        transformDeploy.setStateMachineId(stateMachineId);
+        List<StateMachineTransformDeploy> transformDeploys = transformDeployMapper.select(transformDeploy);
+        if (transformDeploys != null && !transformDeploys.isEmpty()) {
+            List<StateMachineTransform> transforms = modelMapper.map(transformDeploys, new TypeToken<List<StateMachineTransform>>() {
             }.getType());
-            stateMachine.setStateMachineTransfs(transfs);
+            stateMachine.setStateMachineTransforms(transforms);
         }
         return stateMachine;
     }
@@ -325,15 +325,15 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     @Override
     public StateMachineDTO queryOriginalById(Long organizationId, Long stateMachineId) {
         StateMachineDTO dto = stateMachineAssembler.covertStateMachine(getOriginalById(organizationId, stateMachineId));
-        List<StateMachineTransfDTO> transfDTOS = dto.getTransfDTOs();
-        for (StateMachineTransfDTO transfDTO : transfDTOS) {
+        List<StateMachineTransformDTO> transformDTOS = dto.getTransformDTOs();
+        for (StateMachineTransformDTO transformDTO : transformDTOS) {
             List<StateMachineConfigDTO> conditions = new ArrayList<>();
             List<StateMachineConfigDTO> validators = new ArrayList<>();
             List<StateMachineConfigDTO> triggers = new ArrayList<>();
             List<StateMachineConfigDTO> postpositions = new ArrayList<>();
             List<StateMachineConfigDTO> dtoList = new ArrayList<>();
             StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
-            configDeploy.setTransfId(transfDTO.getId());
+            configDeploy.setTransformId(transformDTO.getId());
             List<StateMachineConfigDeploy> list = configDeployMapper.select(configDeploy);
             if (list != null && !list.isEmpty()) {
                 dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
@@ -349,13 +349,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                         postpositions.add(configDto);
                     }
                 }
-                transfDTO.setConditions(conditions);
-                transfDTO.setValidators(validators);
-                transfDTO.setTriggers(triggers);
-                transfDTO.setPostpositions(postpositions);
+                transformDTO.setConditions(conditions);
+                transformDTO.setValidators(validators);
+                transformDTO.setTriggers(triggers);
+                transformDTO.setPostpositions(postpositions);
             }
         }
-        dto.setTransfDTOs(transfDTOS);
+        dto.setTransformDTOs(transformDTOS);
         return dto;
     }
 
@@ -378,9 +378,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         node.setStateMachineId(stateMachineId);
         nodeMapper.delete(node);
         //删除草稿转换
-        StateMachineTransf transf = new StateMachineTransf();
-        transf.setStateMachineId(stateMachineId);
-        transfMapper.delete(transf);
+        StateMachineTransform transform = new StateMachineTransform();
+        transform.setStateMachineId(stateMachineId);
+        transformMapper.delete(transform);
         //删除草稿配置
         StateMachineConfig config = new StateMachineConfig();
         config.setStateMachineId(stateMachineId);
@@ -399,16 +399,16 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             }
         }
         //写入活跃的转换
-        StateMachineTransfDeploy transfDeploy = new StateMachineTransfDeploy();
-        transfDeploy.setStateMachineId(stateMachineId);
-        List<StateMachineTransfDeploy> transfDeploys = transfDeployMapper.select(transfDeploy);
-        if (transfDeploys != null && !transfDeploys.isEmpty()) {
-            List<StateMachineTransf> transfInserts = modelMapper.map(transfDeploys, new TypeToken<List<StateMachineTransf>>() {
+        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        transformDeploy.setStateMachineId(stateMachineId);
+        List<StateMachineTransformDeploy> transformDeploys = transformDeployMapper.select(transformDeploy);
+        if (transformDeploys != null && !transformDeploys.isEmpty()) {
+            List<StateMachineTransform> transformInserts = modelMapper.map(transformDeploys, new TypeToken<List<StateMachineTransform>>() {
             }.getType());
-            for (StateMachineTransf insertTransf : transfInserts) {
-                int transfInsert = transfMapper.insertWithId(insertTransf);
-                if (transfInsert < 1) {
-                    throw new CommonException("error.stateMachineTransf.create");
+            for (StateMachineTransform insertTransform : transformInserts) {
+                int transformInsert = transformMapper.insertWithId(insertTransform);
+                if (transformInsert < 1) {
+                    throw new CommonException("error.stateMachineTransform.create");
                 }
             }
         }

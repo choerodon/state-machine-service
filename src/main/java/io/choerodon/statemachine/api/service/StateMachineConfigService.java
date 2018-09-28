@@ -32,20 +32,20 @@ public interface StateMachineConfigService extends BaseService<StateMachineConfi
     /**
      * 查询配置列表
      *
-     * @param transfId 转换id
+     * @param transformId 转换id
      * @param type     配置类型
      * @return
      */
-    List<StateMachineConfigDTO> queryByTransfId(Long organizationId, Long transfId, String type);
+    List<StateMachineConfigDTO> queryByTransformId(Long organizationId, Long transformId, String type);
 
     /**
      * 查询可配置对象的列表
      *
-     * @param transfId
+     * @param transformId
      * @param type
      * @return
      */
-    List<ConfigEnumDTO> queryConfig(Long organizationId, Long transfId, String type);
+    List<ConfigEnumDTO> queryConfig(Long organizationId, Long transformId, String type);
 
     /**
      * 构建条件，验证等数据
