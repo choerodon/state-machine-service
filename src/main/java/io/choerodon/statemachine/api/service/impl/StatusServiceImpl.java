@@ -108,7 +108,10 @@ public class StatusServiceImpl extends BaseServiceImpl<Status> implements Status
     @Override
     public StatusDTO queryStateById(Long organizationId, Long stateId) {
         Status status = stateMapper.queryById(organizationId, stateId);
-        return status != null ? modelMapper.map(status, StatusDTO.class) : null;
+        if(status==null){
+            throw new CommonException("error.queryStateById.notExist");
+        }
+        return modelMapper.map(status, StatusDTO.class);
     }
 
     @Override

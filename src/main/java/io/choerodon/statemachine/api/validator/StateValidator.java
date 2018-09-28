@@ -2,6 +2,8 @@ package io.choerodon.statemachine.api.validator;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.dto.StatusDTO;
+import io.choerodon.statemachine.infra.enums.StatusType;
+import io.choerodon.statemachine.infra.utils.EnumUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -18,8 +20,9 @@ public class StateValidator {
         if (StringUtils.isEmpty(statusDTO.getType())) {
             throw new CommonException("error.status.name.empty");
         }
-        if (statusDTO.getType().length() != 1) {
-            throw new CommonException("error.status.type.length");
+
+        if (!EnumUtil.contain(StatusType.class, statusDTO.getType())) {
+            throw new CommonException("error.status.type.illegal");
         }
     }
 }

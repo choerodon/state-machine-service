@@ -19,7 +19,7 @@ public interface StateMachineConfigService extends BaseService<StateMachineConfi
      * @param configDTO      配置对象
      * @return
      */
-    StateMachineConfigDTO create(Long organizationId, Long stateMachineId, StateMachineConfigDTO configDTO);
+    StateMachineConfigDTO create(Long organizationId, Long stateMachineId,Long transformId, StateMachineConfigDTO configDTO);
 
     /**
      * 删除配置

@@ -11,14 +11,13 @@ import io.choerodon.statemachine.domain.StateMachineConfigDraft;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.mapper.StateMachineConfigDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineConfigMapper;
+import io.choerodon.statemachine.infra.utils.EnumUtil;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,7 +40,11 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public StateMachineConfigDTO create(Long organizationId, Long stateMachineId, StateMachineConfigDTO configDTO) {
+    public StateMachineConfigDTO create(Long organizationId, Long stateMachineId, Long transformId, StateMachineConfigDTO configDTO) {
+        if (!EnumUtil.contain(ConfigType.class, configDTO.getType())) {
+            throw new CommonException("error.status.type.illegal");
+        }
+        configDTO.setTransformId(transformId);
         configDTO.setOrganizationId(organizationId);
         StateMachineConfigDraft config = modelMapper.map(configDTO, StateMachineConfigDraft.class);
         config.setStateMachineId(stateMachineId);
@@ -49,7 +52,7 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineConfig.create");
         }
-        config = configDraftMapper.queryById(organizationId,config.getId());
+        config = configDraftMapper.queryById(organizationId, config.getId());
         return modelMapper.map(config, StateMachineConfigDTO.class);
     }
 
@@ -66,7 +69,11 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<StateMachineConfigDTO> queryByTransformId(Long organizationId,Long transformId, String type,Boolean isDraft) {
+    public List<StateMachineConfigDTO> queryByTransformId(Long organizationId, Long transformId, String type, Boolean isDraft) {
+        if (!EnumUtil.contain(ConfigType.class, type)) {
+            throw new CommonException("error.status.type.illegal");
+        }
+
         List<StateMachineConfigDTO> configDTOS = null;
         if (isDraft) {
             StateMachineConfigDraft config = new StateMachineConfigDraft();
@@ -96,7 +103,10 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<ConfigEnumDTO> queryConfig(Long organizationId,Long transformId, String type) {
+    public List<ConfigEnumDTO> queryConfig(Long organizationId, Long transformId, String type) {
+        if (!EnumUtil.contain(ConfigType.class, type)) {
+            throw new CommonException("error.status.type.illegal");
+        }
         List<ConfigEnumDTO> configEnumDTOS = buildConfigEnum(type);
         StateMachineConfigDraft config = new StateMachineConfigDraft();
         config.setOrganizationId(organizationId);
