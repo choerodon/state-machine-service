@@ -3,7 +3,7 @@ package io.choerodon.statemachine.infra.feign;
 import feign.RequestLine;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.infra.feign.fallback.CustomFeignClientAdaptorFallBack;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +24,11 @@ public interface CustomFeignClientAdaptor {
     /**
      * 调用对应服务，通过条件验证过滤掉转换
      * @param baseUri
-     * @param transfs
+     * @param transforms
      * @return
      */
     @RequestLine("POST")
-    ResponseEntity<List<StateMachineTransfDTO>> filterTransfsByConfig(URI baseUri, List<StateMachineTransfDTO> transfs);
+    ResponseEntity<List<StateMachineTransformDTO>> filterTransformsByConfig(URI baseUri, List<StateMachineTransformDTO> transforms);
 
     /**
      * 调用对应服务，执行条件，验证，后置处理

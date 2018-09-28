@@ -1,9 +1,9 @@
 package script.db
 
-databaseChangeLog(logicalFilePath: 'script/db/state_machine_transf_deploy.groovy') {
+databaseChangeLog(logicalFilePath: 'script/db/state_machine_transform.groovy') {
 
-    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state-machine-transf-deploy') {
-        createTable(tableName: 'state_machine_transf_deploy') {
+    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state_machine_transform') {
+        createTable(tableName: 'state_machine_transform') {
             column(name: 'id', type: 'BIGINT UNSIGNED', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
             }
@@ -22,6 +22,8 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_transf_deploy.groovy
             column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
                 constraints(nullable: false)
             }
+            column(name: 'style', type: 'clob', remarks: '样式')
+            column(name: 'condition_strategy', type: 'varchar(20)', remarks: '条件策略', defaultValue: "all")
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
@@ -32,21 +34,11 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_transf_deploy.groovy
             column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
-        createIndex(tableName: "state_machine_transf_deploy", indexName: "state_machine_transf_deploy_n1") {
+        createIndex(tableName: "state_machine_transform", indexName: "state_machine_transform_n1") {
             column(name: "state_machine_id", type: "BIGINT UNSIGNED")
         }
-    }
-
-    changeSet(author: 'peng.jiang@hand-china.com', id: '2018-09-12-add-column-state-machine-transf-deploy') {
-        addColumn(tableName: 'state_machine_transf_deploy') {
-            column(name: 'style', type: 'clob', remarks: '样式')
+        createIndex(tableName: "state_machine_transform", indexName: "state_machine_transform_n2") {
+            column(name: "type", type: "VARCHAR(30)")
         }
     }
-
-    changeSet(author: 'peng.jiang@hand-china.com', id: '2018-09-18-add-column-state-machine-transf-deploy') {
-        addColumn(tableName: 'state_machine_transf_deploy') {
-            column(name: 'condition_strategy', type: 'varchar(20)', remarks: '条件策略', defaultValue: "all")
-        }
-    }
-
 }

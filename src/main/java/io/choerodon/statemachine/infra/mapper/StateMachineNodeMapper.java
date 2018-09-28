@@ -2,7 +2,9 @@ package io.choerodon.statemachine.infra.mapper;
 
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.statemachine.domain.StateMachineNode;
+import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -11,15 +13,14 @@ import java.util.List;
  */
 public interface StateMachineNodeMapper extends BaseMapper<StateMachineNode> {
 
-    StateMachineNode getNodeById(@Param("nodeId") Long nodeId);
+    StateMachineNode getNodeDeployById(@Param("nodeId") Long nodeId);
 
-    StateMachineNode getNodeByStatusId(@Param("stateMachineId") Long stateMachineId, @Param("statusId") Long statusId);
+    StateMachineNodeDraft getNodeDeployByStatusId(@Param("stateMachineId") Long stateMachineId, @Param("statusId") Long statusId);
+
 
     List<StateMachineNode> selectByStateMachineId(@Param("stateMachineId") Long stateMachineId);
 
     Long checkStateDelete(@Param("organizationId") Long organizationId, @Param("statusId") Long statusId);
-
-    int insertWithId(@Param("stateMachineNode") StateMachineNode stateMachineNode);
 
     StateMachineNode queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 }

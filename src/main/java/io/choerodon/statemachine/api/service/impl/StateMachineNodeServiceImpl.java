@@ -3,17 +3,17 @@ package io.choerodon.statemachine.api.service.impl;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
-import io.choerodon.statemachine.app.assembler.StateMachineTransfAssembler;
-import io.choerodon.statemachine.domain.StateMachineNode;
-import io.choerodon.statemachine.domain.StateMachineTransf;
+import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
+import io.choerodon.statemachine.domain.StateMachineNodeDraft;
+import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.infra.enums.NodeType;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineTransfMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,19 +26,19 @@ import java.util.List;
  */
 @Component
 @Transactional(rollbackFor = Exception.class)
-public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNode> implements StateMachineNodeService {
+public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNodeDraft> implements StateMachineNodeService {
 
     @Autowired
-    private StateMachineNodeMapper nodeMapper;
+    private StateMachineNodeDraftMapper nodeMapper;
 
     @Autowired
-    private StateMachineTransfMapper transfMapper;
+    private StateMachineTransformDraftMapper transformMapper;
     @Autowired
     private StateMachineService stateMachineService;
     @Autowired
     private StateMachineNodeAssembler stateMachineNodeAssembler;
     @Autowired
-    private StateMachineTransfAssembler stateMachineTransfAssembler;
+    private StateMachineTransformAssembler stateMachineTransformAssembler;
 
     @Autowired
     private StatusMapper stateMapper;
@@ -47,7 +47,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     public List<StateMachineNodeDTO> create(Long organizationId, StateMachineNodeDTO nodeDTO) {
         nodeDTO.setOrganizationId(organizationId);
         createState(organizationId, nodeDTO);
-        StateMachineNode node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNode.class);
+        StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
         node.setType(NodeType.CUSTOM);
         int isInsert = nodeMapper.insert(node);
         if (isInsert != 1) {
@@ -62,7 +62,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     public List<StateMachineNodeDTO> update(Long organizationId, Long nodeId, StateMachineNodeDTO nodeDTO) {
         nodeDTO.setOrganizationId(organizationId);
         createState(organizationId, nodeDTO);
-        StateMachineNode node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNode.class);
+        StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
         node.setId(nodeId);
         int isUpdate = nodeMapper.updateByPrimaryKeySelective(node);
         if (isUpdate != 1) {
@@ -75,31 +75,31 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
 
     @Override
     public List<StateMachineNodeDTO> delete(Long organizationId, Long nodeId) {
-        StateMachineNode node = nodeMapper.queryById(organizationId, nodeId);
+        StateMachineNodeDraft node = nodeMapper.queryById(organizationId, nodeId);
         int isDelete = nodeMapper.deleteByPrimaryKey(nodeId);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineNode.delete");
         }
-        transfMapper.deleteByNodeId(nodeId);
+        transformMapper.deleteByNodeId(nodeId);
         stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
         return stateMachineNodeAssembler.toTargetList(nodeMapper.selectByStateMachineId(node.getStateMachineId()), StateMachineNodeDTO.class);
     }
 
     @Override
     public StateMachineNodeDTO queryById(Long organizationId, Long nodeId) {
-        StateMachineNode node = nodeMapper.getNodeById(nodeId);
+        StateMachineNodeDraft node = nodeMapper.getNodeById(nodeId);
         if (node == null) {
             throw new CommonException("error.stateMachineNode.noFound");
         }
         StateMachineNodeDTO nodeDTO = stateMachineNodeAssembler.toTarget(node, StateMachineNodeDTO.class);
-        StateMachineTransf intoTransfSerach = new StateMachineTransf();
-        intoTransfSerach.setEndNodeId(nodeId);
-        List<StateMachineTransf> intoTransfs = transfMapper.select(intoTransfSerach);
-        nodeDTO.setIntoTransf(stateMachineTransfAssembler.toTargetList(intoTransfs, StateMachineTransfDTO.class));
-        StateMachineTransf outTransfSerach = new StateMachineTransf();
-        outTransfSerach.setStartNodeId(nodeId);
-        List<StateMachineTransf> outTransfs = transfMapper.select(outTransfSerach);
-        nodeDTO.setOutTransf(stateMachineTransfAssembler.toTargetList(outTransfs, StateMachineTransfDTO.class));
+        StateMachineTransformDraft intoTransformSerach = new StateMachineTransformDraft();
+        intoTransformSerach.setEndNodeId(nodeId);
+        List<StateMachineTransformDraft> intoTransforms = transformMapper.select(intoTransformSerach);
+        nodeDTO.setIntoTransform(stateMachineTransformAssembler.toTargetList(intoTransforms, StateMachineTransformDTO.class));
+        StateMachineTransformDraft outTransformSerach = new StateMachineTransformDraft();
+        outTransformSerach.setStartNodeId(nodeId);
+        List<StateMachineTransformDraft> outTransforms = transformMapper.select(outTransformSerach);
+        nodeDTO.setOutTransform(stateMachineTransformAssembler.toTargetList(outTransforms, StateMachineTransformDTO.class));
         return nodeDTO;
     }
 
@@ -129,11 +129,11 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
      */
     @Override
     public Long getInitNode(Long organizationId, Long stateMachineId) {
-        StateMachineNode node = new StateMachineNode();
+        StateMachineNodeDraft node = new StateMachineNodeDraft();
         node.setType(NodeType.START);
         node.setStateMachineId(stateMachineId);
         node.setOrganizationId(organizationId);
-        List<StateMachineNode> nodes = nodeMapper.select(node);
+        List<StateMachineNodeDraft> nodes = nodeMapper.select(node);
         if (nodes.isEmpty()) {
             throw new CommonException("error.initNode.null");
         }

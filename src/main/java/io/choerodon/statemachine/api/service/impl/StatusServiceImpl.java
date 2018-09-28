@@ -8,8 +8,8 @@ import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeDeployMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -28,10 +28,10 @@ public class StatusServiceImpl extends BaseServiceImpl<Status> implements Status
     private StatusMapper stateMapper;
 
     @Autowired
-    private StateMachineNodeMapper nodeMapper;
+    private StateMachineNodeDraftMapper nodeMapper;
 
     @Autowired
-    private StateMachineNodeDeployMapper nodeDeployMapper;
+    private StateMachineNodeMapper nodeDeployMapper;
 
     private ModelMapper modelMapper = new ModelMapper();
 

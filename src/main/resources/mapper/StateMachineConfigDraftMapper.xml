@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.choerodon.statemachine.infra.mapper.StateMachineTransfDeployMapper">
+<mapper namespace="io.choerodon.statemachine.infra.mapper.StateMachineConfigDraftMapper">
 
-    <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachineTransfDeploy">
+    <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachineConfigDraft">
         SELECT *
-        FROM state_machine_transf_deploy
+        FROM state_machine_config_draft
         WHERE organization_id = #{organizationId}
         and id = #{id}
     </select>
-
 </mapper>

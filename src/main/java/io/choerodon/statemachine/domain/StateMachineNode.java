@@ -4,7 +4,8 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.*;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * @author peng.jiang@hand-china.com
@@ -13,8 +14,6 @@ import javax.persistence.*;
 @VersionAudit
 @Table(name = "state_machine_node")
 public class StateMachineNode extends AuditDomain {
-    @Id
-    @GeneratedValue
     private Long id;
     private Long stateMachineId;
     private Long statusId;
@@ -23,15 +22,15 @@ public class StateMachineNode extends AuditDomain {
     private Long width;
     private Long height;
     private String type;
+    private Long organizationId;
     /**
      * 所有状态都转换此状态的转换id
      */
-    private Long allStatusTransfId;
-
-    private Long organizationId;
+    private Long allStatusTransformId;
 
     @Transient
     private Status state;
+
 
     public Long getId() {
         return id;
@@ -39,22 +38,6 @@ public class StateMachineNode extends AuditDomain {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getStateMachineId() {
-        return stateMachineId;
-    }
-
-    public void setStateMachineId(Long stateMachineId) {
-        this.stateMachineId = stateMachineId;
-    }
-
-    public Long getStatusId() {
-        return statusId;
-    }
-
-    public void setStatusId(Long statusId) {
-        this.statusId = statusId;
     }
 
     public Long getPositionX() {
@@ -89,14 +72,6 @@ public class StateMachineNode extends AuditDomain {
         this.height = height;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public Status getState() {
         return state;
     }
@@ -105,12 +80,28 @@ public class StateMachineNode extends AuditDomain {
         this.state = state;
     }
 
-    public Long getAllStatusTransfId() {
-        return allStatusTransfId;
+    public Long getStateMachineId() {
+        return stateMachineId;
     }
 
-    public void setAllStatusTransfId(Long allStatusTransfId) {
-        this.allStatusTransfId = allStatusTransfId;
+    public void setStateMachineId(Long stateMachineId) {
+        this.stateMachineId = stateMachineId;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Long getOrganizationId() {
@@ -119,5 +110,13 @@ public class StateMachineNode extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getAllStatusTransformId() {
+        return allStatusTransformId;
+    }
+
+    public void setAllStatusTransformId(Long allStatusTransformId) {
+        this.allStatusTransformId = allStatusTransformId;
     }
 }

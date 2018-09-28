@@ -1,18 +1,12 @@
-package io.choerodon.statemachine.domain;
+package io.choerodon.statemachine.api.dto;
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-
-import javax.persistence.Table;
+import javax.persistence.Column;
+import java.util.List;
 
 /**
  * @author peng.jiang@hand-china.com
  */
-@ModifyAudit
-@VersionAudit
-@Table(name = "state_machine_transf_deploy")
-public class StateMachineTransfDeploy extends AuditDomain {
+public class StateMachineTransformDTO {
     private Long id;
     private String name;
     private String description;
@@ -23,10 +17,18 @@ public class StateMachineTransfDeploy extends AuditDomain {
      * 页面方案id
      */
     private String url;
+    private Long objectVersionNumber;
     private String type;
     private String style;
     private String conditionStrategy;
     private Long organizationId;
+
+    private StateMachineNodeDTO startNodeDTO;
+    private StateMachineNodeDTO endNodeDTO;
+    private List<StateMachineConfigDTO> conditions;
+    private List<StateMachineConfigDTO> validators;
+    private List<StateMachineConfigDTO> triggers;
+    private List<StateMachineConfigDTO> postpositions;
 
     public Long getId() {
         return id;
@@ -80,6 +82,14 @@ public class StateMachineTransfDeploy extends AuditDomain {
         return stateMachineId;
     }
 
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
+    }
+
     public void setStateMachineId(Long stateMachineId) {
         this.stateMachineId = stateMachineId;
     }
@@ -98,6 +108,54 @@ public class StateMachineTransfDeploy extends AuditDomain {
 
     public void setStyle(String style) {
         this.style = style;
+    }
+
+    public List<StateMachineConfigDTO> getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(List<StateMachineConfigDTO> conditions) {
+        this.conditions = conditions;
+    }
+
+    public List<StateMachineConfigDTO> getValidators() {
+        return validators;
+    }
+
+    public void setValidators(List<StateMachineConfigDTO> validators) {
+        this.validators = validators;
+    }
+
+    public List<StateMachineConfigDTO> getTriggers() {
+        return triggers;
+    }
+
+    public void setTriggers(List<StateMachineConfigDTO> triggers) {
+        this.triggers = triggers;
+    }
+
+    public List<StateMachineConfigDTO> getPostpositions() {
+        return postpositions;
+    }
+
+    public void setPostpositions(List<StateMachineConfigDTO> postpositions) {
+        this.postpositions = postpositions;
+    }
+
+    public StateMachineNodeDTO getStartNodeDTO() {
+        return startNodeDTO;
+    }
+
+    public void setStartNodeDTO(StateMachineNodeDTO startNodeDTO) {
+        this.startNodeDTO = startNodeDTO;
+    }
+
+    public StateMachineNodeDTO getEndNodeDTO() {
+        return endNodeDTO;
+    }
+
+    public void setEndNodeDTO(StateMachineNodeDTO endNodeDTO) {
+        this.endNodeDTO = endNodeDTO;
     }
 
     public String getConditionStrategy() {

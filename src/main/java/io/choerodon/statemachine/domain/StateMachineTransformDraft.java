@@ -1,12 +1,24 @@
-package io.choerodon.statemachine.api.dto;
+package io.choerodon.statemachine.domain;
+
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.List;
 
 /**
  * @author peng.jiang@hand-china.com
  */
-public class StateMachineTransfDTO {
+@ModifyAudit
+@VersionAudit
+@Table(name = "state_machine_transform_draft")
+public class StateMachineTransformDraft extends AuditDomain {
+    @Id
+    @GeneratedValue
     private Long id;
     private String name;
     private String description;
@@ -17,18 +29,10 @@ public class StateMachineTransfDTO {
      * 页面方案id
      */
     private String url;
-    private Long objectVersionNumber;
     private String type;
     private String style;
     private String conditionStrategy;
     private Long organizationId;
-
-    private StateMachineNodeDTO startNodeDTO;
-    private StateMachineNodeDTO endNodeDTO;
-    private List<StateMachineConfigDTO> conditions;
-    private List<StateMachineConfigDTO> validators;
-    private List<StateMachineConfigDTO> triggers;
-    private List<StateMachineConfigDTO> postpositions;
 
     public Long getId() {
         return id;
@@ -82,24 +86,8 @@ public class StateMachineTransfDTO {
         return stateMachineId;
     }
 
-    public Long getObjectVersionNumber() {
-        return objectVersionNumber;
-    }
-
-    public void setObjectVersionNumber(Long objectVersionNumber) {
-        this.objectVersionNumber = objectVersionNumber;
-    }
-
     public void setStateMachineId(Long stateMachineId) {
         this.stateMachineId = stateMachineId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getStyle() {
@@ -108,54 +96,6 @@ public class StateMachineTransfDTO {
 
     public void setStyle(String style) {
         this.style = style;
-    }
-
-    public List<StateMachineConfigDTO> getConditions() {
-        return conditions;
-    }
-
-    public void setConditions(List<StateMachineConfigDTO> conditions) {
-        this.conditions = conditions;
-    }
-
-    public List<StateMachineConfigDTO> getValidators() {
-        return validators;
-    }
-
-    public void setValidators(List<StateMachineConfigDTO> validators) {
-        this.validators = validators;
-    }
-
-    public List<StateMachineConfigDTO> getTriggers() {
-        return triggers;
-    }
-
-    public void setTriggers(List<StateMachineConfigDTO> triggers) {
-        this.triggers = triggers;
-    }
-
-    public List<StateMachineConfigDTO> getPostpositions() {
-        return postpositions;
-    }
-
-    public void setPostpositions(List<StateMachineConfigDTO> postpositions) {
-        this.postpositions = postpositions;
-    }
-
-    public StateMachineNodeDTO getStartNodeDTO() {
-        return startNodeDTO;
-    }
-
-    public void setStartNodeDTO(StateMachineNodeDTO startNodeDTO) {
-        this.startNodeDTO = startNodeDTO;
-    }
-
-    public StateMachineNodeDTO getEndNodeDTO() {
-        return endNodeDTO;
-    }
-
-    public void setEndNodeDTO(StateMachineNodeDTO endNodeDTO) {
-        this.endNodeDTO = endNodeDTO;
     }
 
     public String getConditionStrategy() {
@@ -172,5 +112,13 @@ public class StateMachineTransfDTO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

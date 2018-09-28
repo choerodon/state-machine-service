@@ -5,8 +5,11 @@ import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.ConfigEnumDTO;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
+import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.domain.StateMachineConfig;
+import io.choerodon.statemachine.domain.StateMachineConfigDraft;
 import io.choerodon.statemachine.infra.enums.ConfigType;
+import io.choerodon.statemachine.infra.mapper.StateMachineConfigDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineConfigMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -23,10 +26,14 @@ import java.util.List;
  */
 @Component
 @Transactional(rollbackFor = Exception.class)
-public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineConfig> implements StateMachineConfigService {
+public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineConfigDraft> implements StateMachineConfigService {
 
     @Autowired
-    private StateMachineConfigMapper configMapper;
+    private StateMachineConfigDraftMapper configDraftMapper;
+    @Autowired
+    private StateMachineConfigMapper configDeployMapper;
+    @Autowired
+    private StateMachineConfigAssembler stateMachineConfigAssembler;
 
     @Autowired
     private StateMachineConfigService configService;
@@ -36,22 +43,22 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     @Override
     public StateMachineConfigDTO create(Long organizationId, Long stateMachineId, StateMachineConfigDTO configDTO) {
         configDTO.setOrganizationId(organizationId);
-        StateMachineConfig config = modelMapper.map(configDTO, StateMachineConfig.class);
+        StateMachineConfigDraft config = modelMapper.map(configDTO, StateMachineConfigDraft.class);
         config.setStateMachineId(stateMachineId);
-        int isInsert = configMapper.insert(config);
+        int isInsert = configDraftMapper.insert(config);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineConfig.create");
         }
-        config = configMapper.queryById(organizationId,config.getId());
+        config = configDraftMapper.queryById(organizationId,config.getId());
         return modelMapper.map(config, StateMachineConfigDTO.class);
     }
 
     @Override
     public Boolean delete(Long organizationId, Long configId) {
-        StateMachineConfig config = new StateMachineConfig();
+        StateMachineConfigDraft config = new StateMachineConfigDraft();
         config.setId(configId);
         config.setOrganizationId(organizationId);
-        int isDelete = configMapper.delete(config);
+        int isDelete = configDraftMapper.delete(config);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineConfig.delete");
         }
@@ -59,17 +66,23 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<StateMachineConfigDTO> queryByTransfId(Long organizationId,Long transfId, String type) {
-        StateMachineConfig config = new StateMachineConfig();
-        config.setOrganizationId(organizationId);
-        config.setTransfId(transfId);
-        config.setType(type);
-        List<StateMachineConfig> list = configMapper.select(config);
-        if (list == null || list.isEmpty()) {
-            return Collections.emptyList();
+    public List<StateMachineConfigDTO> queryByTransformId(Long organizationId,Long transformId, String type,Boolean isDraft) {
+        List<StateMachineConfigDTO> configDTOS = null;
+        if (isDraft) {
+            StateMachineConfigDraft config = new StateMachineConfigDraft();
+            config.setTransformId(transformId);
+            config.setOrganizationId(organizationId);
+            config.setType(type);
+            List<StateMachineConfigDraft> configs = configDraftMapper.select(config);
+            configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
+        } else {
+            StateMachineConfig config = new StateMachineConfig();
+            config.setTransformId(transformId);
+            config.setOrganizationId(organizationId);
+            config.setType(type);
+            List<StateMachineConfig> configs = configDeployMapper.select(config);
+            configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
         }
-        List<StateMachineConfigDTO> configDTOS = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
-        }.getType());
         //todo 这里是代码中构建的数据，后面可以考虑放在数据库中维护
         List<ConfigEnumDTO> enumDTOS = configService.buildConfigEnum(type);
         for (StateMachineConfigDTO configDTO : configDTOS) {
@@ -83,17 +96,17 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     }
 
     @Override
-    public List<ConfigEnumDTO> queryConfig(Long organizationId,Long transfId, String type) {
+    public List<ConfigEnumDTO> queryConfig(Long organizationId,Long transformId, String type) {
         List<ConfigEnumDTO> configEnumDTOS = buildConfigEnum(type);
-        StateMachineConfig config = new StateMachineConfig();
+        StateMachineConfigDraft config = new StateMachineConfigDraft();
         config.setOrganizationId(organizationId);
-        config.setTransfId(transfId);
+        config.setTransformId(transformId);
         config.setType(type);
-        List<StateMachineConfig> configs = configMapper.select(config);
+        List<StateMachineConfigDraft> configs = configDraftMapper.select(config);
         if (configs != null && !configs.isEmpty()) {
             List<ConfigEnumDTO> removeEnums = new ArrayList<>();
             for (ConfigEnumDTO enumDTO : configEnumDTOS) {
-                for (StateMachineConfig temp : configs) {
+                for (StateMachineConfigDraft temp : configs) {
                     if (enumDTO.getCode().equals(temp.getCode())) {
                         removeEnums.add(enumDTO);
                     }

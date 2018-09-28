@@ -3,7 +3,7 @@ package io.choerodon.statemachine.api.controller.v1;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
-import io.choerodon.statemachine.api.dto.StateMachineTransfDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -38,26 +38,26 @@ public class InstanceController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "执行状态转换，并返回转换后的状态")
-    @GetMapping(value = "/execute_transf")
-    public ResponseEntity<ExecuteResult> executeTransf(@PathVariable("organization_id") Long organizationId,
+    @GetMapping(value = "/execute_transform")
+    public ResponseEntity<ExecuteResult> executeTransform(@PathVariable("organization_id") Long organizationId,
                                                        @RequestParam("service_code") String serviceCode,
                                                        @RequestParam("state_machine_id") Long stateMachineId,
                                                        @RequestParam("instance_id") Long instanceId,
-                                                       @RequestParam("current_state_id") Long currentStatusId,
-                                                       @RequestParam("transf_id") Long transfId) {
-        ExecuteResult result = instanceService.executeTransf(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transfId);
+                                                       @RequestParam("current_status_id") Long currentStatusId,
+                                                       @RequestParam("transform_id") Long transformId) {
+        ExecuteResult result = instanceService.executeTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transformId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取当前状态拥有的转换列表，feign调用对应服务的条件验证")
-    @GetMapping(value = "/transf_list")
-    public ResponseEntity<List<StateMachineTransfDTO>> queryListTransf(@PathVariable("organization_id") Long organizationId,
+    @GetMapping(value = "/transform_list")
+    public ResponseEntity<List<StateMachineTransformDTO>> queryListTransform(@PathVariable("organization_id") Long organizationId,
                                                                        @RequestParam("service_code") String serviceCode,
                                                                        @RequestParam("state_machine_id") Long stateMachineId,
                                                                        @RequestParam("instance_id") Long instanceId,
-                                                                       @RequestParam("current_state_id") Long currentStateId) {
-        return new ResponseEntity<>(instanceService.queryListTransf(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
+                                                                       @RequestParam("current_status_id") Long currentStateId) {
+        return new ResponseEntity<>(instanceService.queryListTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
     }
 
 }
