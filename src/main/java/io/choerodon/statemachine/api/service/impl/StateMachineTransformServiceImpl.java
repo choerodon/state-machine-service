@@ -55,11 +55,13 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     private StateMachineNodeAssembler stateMachineNodeAssembler;
     @Autowired
     private StateMachineService stateMachineService;
+    private StateMachineNodeDraft node;
 
     @Override
     public StateMachineTransformDTO create(Long organizationId, StateMachineTransformDTO transformDTO) {
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setType(TransformType.CUSTOM);
+        transform.setOrganizationId(organizationId);
         int isInsert = transformDraftMapper.insert(transform);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransform.create");
@@ -67,13 +69,14 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         transform = transformDraftMapper.queryById(organizationId, transform.getId());
         stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
         return stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
-
     }
 
     @Override
     public StateMachineTransformDTO update(Long organizationId, Long transformId, StateMachineTransformDTO transformDTO) {
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setId(transformId);
+        transform.setType(TransformType.CUSTOM);
+        transform.setOrganizationId(organizationId);
         int isUpdate = transformDraftMapper.updateByPrimaryKeySelective(transform);
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachineTransform.update");
@@ -208,10 +211,16 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         }
         //创建【全部转换到当前】的transform
         Status state = stateMapper.queryById(organizationId, node.getStatusId());
+        if (state == null) {
+            throw new CommonException("error.createAllStatusTransform.state.null");
+        }
+        //todo 增加当前节点判断是否已存在【全部】的转换id
+
+        //创建
         transformDTO.setName(state.getName());
         transformDTO.setDescription("全部转换");
         transformDTO.setEndNodeId(endNodeId);
-        transformDTO.setStartNodeId(null);
+        transformDTO.setStartNodeId(0L);
         transformDTO.setOrganizationId(organizationId);
         transformDTO.setType(TransformType.ALL);
         transformDTO.setConditionStrategy(StateMachineTransformStatus.CONDITION_STRATEGY_ONE);
@@ -222,16 +231,23 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         }
         //更新node的【全部转换到当前】转换id
         node.setAllStatusTransformId(transform.getId());
-        nodeService.updateOptional(node, "allStateTransformId");
+        nodeService.updateOptional(node, "allStatusTransformId");
         transform = transformDraftMapper.queryById(organizationId, transform.getId());
         stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
         return stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
-
     }
 
     @Override
-    public Boolean deleteAllStatusTransform(Long organizationId, Long nodeId) {
-        StateMachineNodeDraft node = nodeDraftMapper.getNodeById(nodeId);
+    public Boolean deleteAllStatusTransform(Long organizationId, Long transformId) {
+        StateMachineTransformDraft transformDraft = transformDraftMapper.queryById(organizationId, transformId);
+        if (transformDraft == null) {
+            throw new CommonException("error.stateMachineTransform.null");
+        }
+        if (TransformType.ALL.equals(transformDraft)) {
+            throw new CommonException("error.stateMachineTransform.type.illegal");
+        }
+        //目标节点
+        StateMachineNodeDraft node = nodeDraftMapper.getNodeById(transformDraft.getEndNodeId());
         if (node == null) {
             throw new CommonException("error.stateMachineNode.null");
         }
@@ -239,7 +255,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         Boolean result = delete(organizationId, node.getAllStatusTransformId());
         //更新node的【全部转换到当前】转换id
         node.setAllStatusTransformId(null);
-        int updateResult = nodeService.updateOptional(node, "allStateTransformId");
+        int updateResult = nodeService.updateOptional(node, "allStatusTransformId");
         if (updateResult != 1) {
             throw new CommonException("error.StateMachineTransformServiceImpl.updateOptional");
         }

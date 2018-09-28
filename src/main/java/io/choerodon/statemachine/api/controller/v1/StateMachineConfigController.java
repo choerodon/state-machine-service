@@ -29,8 +29,9 @@ public class StateMachineConfigController extends BaseController {
     @PostMapping(value = "/{state_machine_id}")
     public ResponseEntity<StateMachineConfigDTO> create(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("state_machine_id") Long stateMachineId,
+                                                        @RequestParam("transform_id") Long transformId,
                                                         @RequestBody StateMachineConfigDTO configDTO) {
-        return new ResponseEntity<>(configService.create(organizationId, stateMachineId, configDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(configService.create(organizationId, stateMachineId, transformId, configDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

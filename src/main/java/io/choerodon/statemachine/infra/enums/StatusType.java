@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.infra.enums;
 
+import java.lang.reflect.Field;
+
 /**
  * @author shinan.chen
  * @date 2018/9/27

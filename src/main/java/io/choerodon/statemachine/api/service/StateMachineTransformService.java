@@ -87,8 +87,8 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
     /**
      * 删除【全部转换到此状态】转换
      * @param organizationId
-     * @param nodeId
+     * @param transformId
      * @return
      */
-    Boolean deleteAllStatusTransform(Long organizationId, Long nodeId);
+    Boolean deleteAllStatusTransform(Long organizationId, Long transformId);
 }

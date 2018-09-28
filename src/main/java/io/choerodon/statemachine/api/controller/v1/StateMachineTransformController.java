@@ -81,9 +81,9 @@ public class StateMachineTransformController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除【全部】转换（草稿）")
-    @DeleteMapping(value = "/delete_type_all/{node_id}")
+    @DeleteMapping(value = "/delete_type_all/{transform_id}")
     public ResponseEntity<Boolean> deleteAllStatusTransform(@PathVariable("organization_id") Long organizationId,
-                                                        @PathVariable("node_id") Long nodeId) {
-        return new ResponseEntity<>(transformService.deleteAllStatusTransform(organizationId, nodeId), HttpStatus.NO_CONTENT);
+                                                        @PathVariable("transform_id") Long transformId) {
+        return new ResponseEntity<>(transformService.deleteAllStatusTransform(organizationId, transformId), HttpStatus.NO_CONTENT);
     }
 }

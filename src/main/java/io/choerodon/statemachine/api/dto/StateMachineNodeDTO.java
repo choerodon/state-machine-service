@@ -20,6 +20,9 @@ public class StateMachineNodeDTO {
 
     private StatusDTO stateDTO;
 
+    /**
+     * 前端要用到
+     */
     private List<StateMachineTransformDTO> intoTransform;
     private List<StateMachineTransformDTO> outTransform;
 

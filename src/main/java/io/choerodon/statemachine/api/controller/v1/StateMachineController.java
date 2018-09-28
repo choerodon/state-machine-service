@@ -20,6 +20,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +47,7 @@ public class StateMachineController extends BaseController {
                                                              @RequestParam(required = false) String description,
                                                              @RequestParam(required = false) String[] param) {
         return new ResponseEntity<>(stateMachineService.pageQuery(pageRequest, new StateMachineDTO(name, description, organizationId),
-                Arrays.stream(param).collect(Collectors.joining(","))), HttpStatus.OK);
+                param!=null?Arrays.stream(param).collect(Collectors.joining(",")):null), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

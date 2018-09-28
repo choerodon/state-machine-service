@@ -24,6 +24,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +52,7 @@ public class StatusController extends BaseController {
                                                        @RequestParam(required = false) String type,
                                                        @RequestParam(required = false) String[] param) {
         return new ResponseEntity<>(statusService.pageQuery(pageRequest, new StatusDTO(name, description, type, organizationId),
-                Arrays.stream(param).collect(Collectors.joining(","))), HttpStatus.OK);
+                param!=null?Arrays.stream(param).collect(Collectors.joining(",")):null), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
