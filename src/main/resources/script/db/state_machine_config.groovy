@@ -1,10 +1,9 @@
 package script.db
 
 databaseChangeLog(logicalFilePath: 'script/db/state_machine_config.groovy') {
-
     changeSet(author: 'shinan.chenX@gmail.com', id: '2018-09-12-state-machine-config') {
         createTable(tableName: 'state_machine_config') {
-            column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
+            column(name: 'id', type: 'BIGINT UNSIGNED', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
             }
             column(name: 'transform_id', type: 'BIGINT UNSIGNED', remarks: '转换id') {

@@ -7,10 +7,13 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
+import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.app.assembler.StateMachineAssembler;
+import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
+import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.NodeType;
@@ -24,8 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author peng.jiang@hand-china.com
@@ -38,24 +44,27 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     private StateMachineMapper stateMachineMapper;
 
     @Autowired
-    private StateMachineNodeMapper nodeMapper;
+    private StateMachineNodeMapper nodeDeployMapper;
 
     @Autowired
-    private StateMachineTransformMapper transformMapper;
+    private StateMachineNodeDraftMapper nodeDraftMapper;
 
     @Autowired
-    private StateMachineNodeDeployMapper nodeDeployMapper;
+    private StateMachineTransformMapper transformDeployMapper;
 
     @Autowired
-    private StateMachineTransformDeployMapper transformDeployMapper;
+    private StateMachineTransformDraftMapper transformDraftMapper;
 
     @Autowired
-    private StateMachineConfigMapper configMapper;
-
+    private StateMachineConfigMapper configDeployMapper;
     @Autowired
-    private StateMachineConfigDeployMapper configDeployMapper;
+    private StateMachineConfigDraftMapper configDraftMapper;
     @Autowired
     private StateMachineNodeAssembler stateMachineNodeAssembler;
+    @Autowired
+    private StateMachineTransformAssembler stateMachineTransformAssembler;
+    @Autowired
+    private StateMachineConfigAssembler stateMachineConfigAssembler;
     @Autowired
     private StateMachineAssembler stateMachineAssembler;
 
@@ -94,21 +103,22 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         }
 
         //创建默认开始节点
-        StateMachineNode startNode = new StateMachineNode();
+        StateMachineNodeDraft startNode = new StateMachineNodeDraft();
         startNode.setStateMachineId(stateMachine.getId());
+        startNode.setOrganizationId(organizationId);
         startNode.setPositionX(25L);
         startNode.setPositionY(0L);
         startNode.setWidth(50L);
         startNode.setHeight(50L);
         startNode.setStatusId(0L);
         startNode.setType(NodeType.START);
-        int isStartNodeInsert = nodeMapper.insert(startNode);
+        int isStartNodeInsert = nodeDraftMapper.insert(startNode);
         if (isStartNodeInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
         }
 
         //创建默认的节点和转换
-        StateMachineNode node = new StateMachineNode();
+        StateMachineNodeDraft node = new StateMachineNodeDraft();
         node.setStateMachineId(stateMachine.getId());
         //TODO 初始化默认状态
         node.setStatusId(1L);
@@ -117,27 +127,30 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         node.setWidth(100L);
         node.setHeight(50L);
         node.setType(NodeType.INIT);
-        int isNodeInsert = nodeMapper.insert(node);
+        node.setOrganizationId(organizationId);
+        int isNodeInsert = nodeDraftMapper.insert(node);
         if (isNodeInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
         }
 
-        StateMachineTransform transform = new StateMachineTransform();
+        StateMachineTransformDraft transform = new StateMachineTransformDraft();
         transform.setStateMachineId(stateMachine.getId());
         transform.setStartNodeId(startNode.getId());
         transform.setEndNodeId(node.getId());
         transform.setType(TransformType.INIT);
-        int isTransformInsert = transformMapper.insert(transform);
+        transform.setOrganizationId(organizationId);
+        int isTransformInsert = transformDraftMapper.insert(transform);
         if (isTransformInsert != 1) {
             throw new CommonException("error.stateMachineTransform.create");
         }
-        return queryStateMachineWithConfigById(organizationId, stateMachine.getId());
+        return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), true);
     }
 
     @Override
     public StateMachineDTO update(Long organizationId, Long stateMachineId, StateMachineDTO stateMachineDTO) {
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
         stateMachine.setId(stateMachineId);
+        stateMachine.setOrganizationId(organizationId);
         int isUpdate = stateMachineMapper.updateByPrimaryKeySelective(stateMachine);
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachine.update");
@@ -157,29 +170,36 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             throw new CommonException("error.stateMachine.delete");
         }
         //删除节点
-        StateMachineNode node = new StateMachineNode();
+        StateMachineNodeDraft node = new StateMachineNodeDraft();
         node.setStateMachineId(stateMachineId);
-        nodeMapper.delete(node);
+        node.setOrganizationId(organizationId);
+        nodeDraftMapper.delete(node);
         //删除转换
-        StateMachineTransform transform = new StateMachineTransform();
+        StateMachineTransformDraft transform = new StateMachineTransformDraft();
         transform.setStateMachineId(stateMachineId);
-        transformMapper.delete(transform);
+        transform.setOrganizationId(organizationId);
+        transformDraftMapper.delete(transform);
+        //删除配置
+        StateMachineConfigDraft config = new StateMachineConfigDraft();
+        config.setStateMachineId(stateMachineId);
+        config.setOrganizationId(organizationId);
+        configDraftMapper.delete(config);
         //删除发布节点
-        StateMachineNodeDeploy nodeDeploy = new StateMachineNodeDeploy();
+        StateMachineNode nodeDeploy = new StateMachineNode();
         nodeDeploy.setStateMachineId(stateMachineId);
+        nodeDeploy.setOrganizationId(organizationId);
         nodeDeployMapper.delete(nodeDeploy);
         //删除发布转换
-        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        StateMachineTransform transformDeploy = new StateMachineTransform();
         transformDeploy.setStateMachineId(stateMachineId);
+        transformDeploy.setOrganizationId(organizationId);
         transformDeployMapper.delete(transformDeploy);
-        //删除配置
-        StateMachineConfig config = new StateMachineConfig();
-        config.setStateMachineId(stateMachineId);
-        configMapper.delete(config);
         //删除发布配置
-        StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
+        StateMachineConfig configDeploy = new StateMachineConfig();
         configDeploy.setStateMachineId(stateMachineId);
+        configDeploy.setOrganizationId(organizationId);
         configDeployMapper.delete(configDeploy);
+
         return true;
     }
 
@@ -187,255 +207,242 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     public StateMachineDTO deploy(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (null == stateMachine) {
-            throw new CommonException("stateMachine.deploy.no.found");
+            throw new CommonException("error.stateMachine.null");
         }
         if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
-            throw new CommonException("stateMachine.status.deployed");
+            throw new CommonException("error.stateMachine.status.deployed");
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeySelective(stateMachine);
+        int stateMachineDeploy = updateOptional(stateMachine, "status");
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deploy");
         }
         //删除上一版本的节点
-        StateMachineNodeDeploy nodeDeploy = new StateMachineNodeDeploy();
+        StateMachineNode nodeDeploy = new StateMachineNode();
         nodeDeploy.setStateMachineId(stateMachineId);
+        nodeDeploy.setOrganizationId(organizationId);
         nodeDeployMapper.delete(nodeDeploy);
         //删除上一版本的转换
-        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        StateMachineTransform transformDeploy = new StateMachineTransform();
         transformDeploy.setStateMachineId(stateMachineId);
+        transformDeploy.setOrganizationId(organizationId);
         transformDeployMapper.delete(transformDeploy);
         //删除上一版本的配置
-        StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
+        StateMachineConfig configDeploy = new StateMachineConfig();
         configDeploy.setStateMachineId(stateMachineId);
+        configDeploy.setOrganizationId(organizationId);
         configDeployMapper.delete(configDeploy);
         //写入发布的节点
-        StateMachineNode node = new StateMachineNode();
+        StateMachineNodeDraft node = new StateMachineNodeDraft();
         node.setStateMachineId(stateMachineId);
-        List<StateMachineNode> nodes = nodeMapper.select(node);
+        node.setOrganizationId(organizationId);
+        List<StateMachineNodeDraft> nodes = nodeDraftMapper.select(node);
         if (nodes != null && !nodes.isEmpty()) {
-            List<StateMachineNodeDeploy> nodeDeploys = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNodeDeploy.class);
+            List<StateMachineNode> nodeDeploys = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNode.class);
             int nodeDeployInsert = nodeDeployMapper.insertList(nodeDeploys);
-            if (nodeDeployInsert < 1) {
+            if (nodeDeployInsert == 0) {
                 throw new CommonException("error.stateMachineNodeDeploy.create");
             }
         }
         //写入发布的转换
-        StateMachineTransform transform = new StateMachineTransform();
+        StateMachineTransformDraft transform = new StateMachineTransformDraft();
         transform.setStateMachineId(stateMachineId);
-        List<StateMachineTransform> transforms = transformMapper.select(transform);
+        transform.setOrganizationId(organizationId);
+        List<StateMachineTransformDraft> transforms = transformDraftMapper.select(transform);
         if (transforms != null && !transforms.isEmpty()) {
-            List<StateMachineTransformDeploy> transformDeploys = modelMapper.map(transforms, new TypeToken<List<StateMachineTransformDeploy>>() {
+            List<StateMachineTransform> transformDeploys = modelMapper.map(transforms, new TypeToken<List<StateMachineTransform>>() {
             }.getType());
             int transformDeployInsert = transformDeployMapper.insertList(transformDeploys);
-            if (transformDeployInsert < 1) {
+            if (transformDeployInsert == 0) {
                 throw new CommonException("error.stateMachineTransformDeploy.create");
             }
         }
         //写入发布的配置
-        StateMachineConfig config = new StateMachineConfig();
+        StateMachineConfigDraft config = new StateMachineConfigDraft();
         config.setStateMachineId(stateMachineId);
-        List<StateMachineConfig> configs = configMapper.select(config);
+        config.setOrganizationId(organizationId);
+        List<StateMachineConfigDraft> configs = configDraftMapper.select(config);
         if (configs != null && !configs.isEmpty()) {
-            List<StateMachineConfigDeploy> configDeploys = modelMapper.map(configs, new TypeToken<List<StateMachineConfigDeploy>>() {
+            List<StateMachineConfig> configDeploys = modelMapper.map(configs, new TypeToken<List<StateMachineConfig>>() {
             }.getType());
             int configDeployInsert = configDeployMapper.insertList(configDeploys);
-            if (configDeployInsert < 1) {
+            if (configDeployInsert == 0) {
                 throw new CommonException("error.stateMachineConfigDeploy.create");
             }
         }
         //清理内存中的旧状态机构建器与实例
         machineFactory.deployStateMachine(stateMachineId);
-        return queryStateMachineWithConfigById(organizationId, stateMachine.getId());
+
+        return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
     }
 
     @Override
-    public StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId) {
+    public StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId, Boolean isDraft) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
-            throw new CommonException("error.stateMachine.nofound");
+            throw new CommonException("error.stateMachine.notFound");
         }
-        //获取节点
-        List<StateMachineNode> nodes = nodeMapper.selectByStateMachineId(stateMachineId);
-        stateMachine.setStateMachineNodes(nodes);
-        //获取转换
-        StateMachineTransform stateMachineTransform = new StateMachineTransform();
-        stateMachineTransform.setStateMachineId(stateMachineId);
-        List<StateMachineTransform> transforms = transformMapper.select(stateMachineTransform);
-        stateMachine.setStateMachineTransforms(transforms);
-        StateMachineDTO dto = stateMachineAssembler.covertStateMachine(stateMachine);
-        List<StateMachineTransformDTO> transformDTOS = dto.getTransformDTOs();
+        List<StateMachineNodeDTO> nodeDTOS;
+        List<StateMachineTransformDTO> transformDTOS;
+        if (isDraft) {
+            //获取节点
+            List<StateMachineNodeDraft> nodes = nodeDraftMapper.selectByStateMachineId(stateMachineId);
+            nodeDTOS = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNodeDTO.class);
+            //获取转换
+            StateMachineTransformDraft select = new StateMachineTransformDraft();
+            select.setStateMachineId(stateMachineId);
+            select.setOrganizationId(organizationId);
+            List<StateMachineTransformDraft> transforms = transformDraftMapper.select(select);
+            transformDTOS = stateMachineTransformAssembler.toTargetList(transforms, StateMachineTransformDTO.class);
+        } else {
+            List<StateMachineNode> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+            nodeDTOS = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNodeDTO.class);
+            StateMachineTransform select = new StateMachineTransform();
+            select.setStateMachineId(stateMachineId);
+            select.setOrganizationId(organizationId);
+            List<StateMachineTransform> transforms = transformDeployMapper.select(select);
+            transformDTOS = stateMachineTransformAssembler.toTargetList(transforms, StateMachineTransformDTO.class);
+        }
+
+
+        StateMachineDTO stateMachineDTO = stateMachineAssembler.toTarget(stateMachine, StateMachineDTO.class);
+        stateMachineDTO.setNodeDTOs(nodeDTOS);
+        stateMachineDTO.setTransformDTOs(transformDTOS);
+
+        //获取转换中的配置
         for (StateMachineTransformDTO transformDTO : transformDTOS) {
-            List<StateMachineConfigDTO> conditions = new ArrayList<>();
-            List<StateMachineConfigDTO> validators = new ArrayList<>();
-            List<StateMachineConfigDTO> triggers = new ArrayList<>();
-            List<StateMachineConfigDTO> postpositions = new ArrayList<>();
-            List<StateMachineConfigDTO> dtoList = new ArrayList<>();
-            StateMachineConfig config = new StateMachineConfig();
-            config.setTransformId(transformDTO.getId());
-            List<StateMachineConfig> list = configMapper.select(config);
-            if (list != null && !list.isEmpty()) {
-                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
-                }.getType());
-                for (StateMachineConfigDTO configDto : dtoList) {
-                    if (ConfigType.CONDITION.equals(configDto.getType())) {
-                        conditions.add(configDto);
-                    } else if (ConfigType.VALIDATOR.equals(configDto.getType())) {
-                        validators.add(configDto);
-                    } else if (ConfigType.TRIGGER.equals(configDto.getType())) {
-                        triggers.add(configDto);
-                    } else {
-                        postpositions.add(configDto);
-                    }
-                }
-                transformDTO.setConditions(conditions);
-                transformDTO.setValidators(validators);
-                transformDTO.setTriggers(triggers);
-                transformDTO.setPostpositions(postpositions);
+            List<StateMachineConfigDTO> configDTOS = null;
+            if (isDraft) {
+                StateMachineConfigDraft config = new StateMachineConfigDraft();
+                config.setTransformId(transformDTO.getId());
+                config.setOrganizationId(organizationId);
+                List<StateMachineConfigDraft> configs = configDraftMapper.select(config);
+                configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
+            } else {
+                StateMachineConfig config = new StateMachineConfig();
+                config.setTransformId(transformDTO.getId());
+                config.setOrganizationId(organizationId);
+                List<StateMachineConfig> configs = configDeployMapper.select(config);
+                configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
+            }
+            if (configDTOS != null && !configDTOS.isEmpty()) {
+                Map<String, List<StateMachineConfigDTO>> map = configDTOS.stream().collect(Collectors.groupingBy(StateMachineConfigDTO::getType));
+                transformDTO.setConditions(Optional.ofNullable(map.get(ConfigType.CONDITION)).orElse(Collections.emptyList()));
+                transformDTO.setValidators(Optional.ofNullable(map.get(ConfigType.VALIDATOR)).orElse(Collections.emptyList()));
+                transformDTO.setTriggers(Optional.ofNullable(map.get(ConfigType.TRIGGER)).orElse(Collections.emptyList()));
+                transformDTO.setPostpositions(Optional.ofNullable(map.get(ConfigType.POSTPOSITION)).orElse(Collections.emptyList()));
             }
         }
-        dto.setTransformDTOs(transformDTOS);
-        return dto;
+        return stateMachineDTO;
     }
 
     @Override
-    public StateMachine getOriginalById(Long organizationId, Long stateMachineId) {
+    public StateMachine queryDeployForInstance(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notExist");
         }
+        if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
+            throw new CommonException("error.buildInstance.stateMachine.inActive");
+        }
         //获取原件节点
-        List<StateMachineNodeDeploy> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
         if (nodeDeploys != null && !nodeDeploys.isEmpty()) {
             List<StateMachineNode> nodes = stateMachineNodeAssembler.toTargetList(nodeDeploys, StateMachineNode.class);
-            stateMachine.setStateMachineNodes(nodes);
+            stateMachine.setNodes(nodes);
         }
         //获取原件转换
-        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        StateMachineTransform transformDeploy = new StateMachineTransform();
         transformDeploy.setStateMachineId(stateMachineId);
-        List<StateMachineTransformDeploy> transformDeploys = transformDeployMapper.select(transformDeploy);
+        List<StateMachineTransform> transformDeploys = transformDeployMapper.select(transformDeploy);
         if (transformDeploys != null && !transformDeploys.isEmpty()) {
             List<StateMachineTransform> transforms = modelMapper.map(transformDeploys, new TypeToken<List<StateMachineTransform>>() {
             }.getType());
-            stateMachine.setStateMachineTransforms(transforms);
+            stateMachine.setTransforms(transforms);
         }
         return stateMachine;
     }
 
     @Override
-    public StateMachineDTO queryOriginalById(Long organizationId, Long stateMachineId) {
-        StateMachineDTO dto = stateMachineAssembler.covertStateMachine(getOriginalById(organizationId, stateMachineId));
-        List<StateMachineTransformDTO> transformDTOS = dto.getTransformDTOs();
-        for (StateMachineTransformDTO transformDTO : transformDTOS) {
-            List<StateMachineConfigDTO> conditions = new ArrayList<>();
-            List<StateMachineConfigDTO> validators = new ArrayList<>();
-            List<StateMachineConfigDTO> triggers = new ArrayList<>();
-            List<StateMachineConfigDTO> postpositions = new ArrayList<>();
-            List<StateMachineConfigDTO> dtoList = new ArrayList<>();
-            StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
-            configDeploy.setTransformId(transformDTO.getId());
-            List<StateMachineConfigDeploy> list = configDeployMapper.select(configDeploy);
-            if (list != null && !list.isEmpty()) {
-                dtoList = modelMapper.map(list, new TypeToken<List<StateMachineConfigDTO>>() {
-                }.getType());
-                for (StateMachineConfigDTO configDto : dtoList) {
-                    if (ConfigType.CONDITION.equals(configDto.getType())) {
-                        conditions.add(configDto);
-                    } else if (ConfigType.VALIDATOR.equals(configDto.getType())) {
-                        validators.add(configDto);
-                    } else if (ConfigType.TRIGGER.equals(configDto.getType())) {
-                        triggers.add(configDto);
-                    } else {
-                        postpositions.add(configDto);
-                    }
-                }
-                transformDTO.setConditions(conditions);
-                transformDTO.setValidators(validators);
-                transformDTO.setTriggers(triggers);
-                transformDTO.setPostpositions(postpositions);
-            }
-        }
-        dto.setTransformDTOs(transformDTOS);
-        return dto;
-    }
-
-    @Override
     public StateMachineDTO deleteDraft(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
-        if (null == stateMachine) {
-            throw new CommonException("stateMachine.deleteDraft.no.found");
+        if (stateMachine == null) {
+            throw new CommonException("error.stateMachine.deleteDraft.noFound");
         }
-        if (!StateMachineStatus.DRAFT.equals(stateMachine.getStatus())) {
-            throw new CommonException("stateMachine.status.is.not.draft");
+        int isDelete = stateMachineMapper.deleteByPrimaryKey(stateMachineId);
+        if (isDelete != 1) {
+            throw new CommonException("error.stateMachine.deleteDraft");
         }
         stateMachine.setStatus(StateMachineStatus.DRAFT);
-        int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeySelective(stateMachine);
+        int stateMachineDeploy = updateOptional(stateMachine, "status");
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deleteDraft");
         }
         //删除草稿节点
-        StateMachineNode node = new StateMachineNode();
+        StateMachineNodeDraft node = new StateMachineNodeDraft();
         node.setStateMachineId(stateMachineId);
-        nodeMapper.delete(node);
+        node.setOrganizationId(organizationId);
+        nodeDraftMapper.delete(node);
         //删除草稿转换
-        StateMachineTransform transform = new StateMachineTransform();
+        StateMachineTransformDraft transform = new StateMachineTransformDraft();
         transform.setStateMachineId(stateMachineId);
-        transformMapper.delete(transform);
+        transform.setOrganizationId(organizationId);
+        transformDraftMapper.delete(transform);
         //删除草稿配置
-        StateMachineConfig config = new StateMachineConfig();
+        StateMachineConfigDraft config = new StateMachineConfigDraft();
         config.setStateMachineId(stateMachineId);
-        configMapper.delete(config);
-        //写入活跃的节点
-        StateMachineNodeDeploy nodeDeploy = new StateMachineNodeDeploy();
+        config.setOrganizationId(organizationId);
+        configDraftMapper.delete(config);
+        //写入活跃的节点到草稿中，id一致
+        StateMachineNode nodeDeploy = new StateMachineNode();
         nodeDeploy.setStateMachineId(stateMachineId);
-        List<StateMachineNodeDeploy> nodeDeploys = nodeDeployMapper.select(nodeDeploy);
+        nodeDeploy.setOrganizationId(organizationId);
+        List<StateMachineNode> nodeDeploys = nodeDeployMapper.select(nodeDeploy);
         if (nodeDeploys != null && !nodeDeploys.isEmpty()) {
-            List<StateMachineNode> nodes = stateMachineNodeAssembler.toTargetList(nodeDeploys, StateMachineNode.class);
-            for (StateMachineNode insertNode : nodes) {
-                int nodeInsert = nodeMapper.insertWithId(insertNode);
-                if (nodeInsert < 1) {
+            List<StateMachineNodeDraft> nodes = stateMachineNodeAssembler.toTargetList(nodeDeploys, StateMachineNodeDraft.class);
+            for (StateMachineNodeDraft insertNode : nodes) {
+                int nodeInsert = nodeDraftMapper.insert(insertNode);
+                if (nodeInsert != 1) {
                     throw new CommonException("error.stateMachineNode.create");
                 }
             }
         }
-        //写入活跃的转换
-        StateMachineTransformDeploy transformDeploy = new StateMachineTransformDeploy();
+        //写入活跃的转换到草稿中，id一致
+        StateMachineTransform transformDeploy = new StateMachineTransform();
         transformDeploy.setStateMachineId(stateMachineId);
-        List<StateMachineTransformDeploy> transformDeploys = transformDeployMapper.select(transformDeploy);
+        transformDeploy.setOrganizationId(organizationId);
+        List<StateMachineTransform> transformDeploys = transformDeployMapper.select(transformDeploy);
         if (transformDeploys != null && !transformDeploys.isEmpty()) {
-            List<StateMachineTransform> transformInserts = modelMapper.map(transformDeploys, new TypeToken<List<StateMachineTransform>>() {
+            List<StateMachineTransformDraft> transformInserts = modelMapper.map(transformDeploys, new TypeToken<List<StateMachineTransformDraft>>() {
             }.getType());
-            for (StateMachineTransform insertTransform : transformInserts) {
-                int transformInsert = transformMapper.insertWithId(insertTransform);
-                if (transformInsert < 1) {
+            for (StateMachineTransformDraft insertTransform : transformInserts) {
+                int transformInsert = transformDraftMapper.insert(insertTransform);
+                if (transformInsert != 1) {
                     throw new CommonException("error.stateMachineTransform.create");
                 }
             }
         }
-        //写入活跃的配置
-        StateMachineConfigDeploy configDeploy = new StateMachineConfigDeploy();
+        //写入活跃的配置到草稿中，id一致
+        StateMachineConfig configDeploy = new StateMachineConfig();
         configDeploy.setStateMachineId(stateMachineId);
-        List<StateMachineConfigDeploy> configDeploys = configDeployMapper.select(configDeploy);
+        List<StateMachineConfig> configDeploys = configDeployMapper.select(configDeploy);
         if (configDeploys != null && !configDeploys.isEmpty()) {
-            List<StateMachineConfig> configs = modelMapper.map(configDeploys, new TypeToken<List<StateMachineConfig>>() {
+            List<StateMachineConfigDraft> configs = modelMapper.map(configDeploys, new TypeToken<List<StateMachineConfigDraft>>() {
             }.getType());
-            for (StateMachineConfig insertConfig : configs) {
-                int configInsert = configMapper.insertWithId(insertConfig);
-                if (configInsert < 1) {
+            for (StateMachineConfigDraft insertConfig : configs) {
+                int configInsert = configDraftMapper.insert(insertConfig);
+                if (configInsert != 1) {
                     throw new CommonException("error.stateMachineCreate.create");
                 }
             }
         }
-        return queryStateMachineWithConfigById(organizationId, stateMachine.getId());
+        return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
     }
 
     @Override
     public StateMachineDTO queryStateMachineById(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
-        if (stateMachine != null) {
-            return modelMapper.map(stateMachine, StateMachineDTO.class);
-        }
-        return null;
+        return stateMachine != null ? modelMapper.map(stateMachine, StateMachineDTO.class) : null;
     }
 
     @Override
@@ -452,7 +459,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-            int stateMachineUpdate = stateMachineMapper.updateByPrimaryKey(stateMachine);
+            int stateMachineUpdate = updateOptional(stateMachine, "status");
             if (stateMachineUpdate != 1) {
                 throw new CommonException("error.stateMachine.update");
             }

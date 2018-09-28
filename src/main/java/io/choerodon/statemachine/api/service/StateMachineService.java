@@ -61,30 +61,22 @@ public interface StateMachineService extends BaseService<StateMachine> {
     StateMachineDTO deploy(Long organizationId, Long stateMachineId);
 
     /**
-     * 获取状态机及配置
+     * 获取状态机及配置（草稿、活跃）
      *
-     * @param organizationId organizationId
-     * @param stateMachineId 状态机id
-     * @return StateMachineDTO
+     * @param organizationId
+     * @param stateMachineId
+     * @param isDraft  是否为草稿
+     * @return
      */
-    StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId);
+    StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId, Boolean isDraft);
 
     /**
-     * 获取状态机原件DTO
-     *
-     * @param organizationId organizationId
-     * @param stateMachineId 状态机id
-     * @return StateMachineDTO
-     */
-    StateMachineDTO queryOriginalById(Long organizationId, Long stateMachineId);
-
-    /**
-     * 获取状态机原件
+     * 获取状态机及配置，用于内部状态机实例构建
      *
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachine getOriginalById(Long organizationId, Long stateMachineId);
+    StateMachine queryDeployForInstance(Long organizationId, Long stateMachineId);
 
     /**
      * 删除草稿
@@ -121,7 +113,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
 
     /**
      * 修改状态机状态
-     * 发布 -> 修改
+     * 活跃 -> 草稿
      *
      * @param organizationId organizationId
      * @param stateMachineId stateMachineId

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper">
 
-    <resultMap id="nodeWithState" type="io.choerodon.statemachine.domain.StateMachineNode">
+    <resultMap id="nodeDeployWithState" type="io.choerodon.statemachine.domain.StateMachineNode">
         <id property="id" column="id"/>
         <result property="stateMachineId" column="state_machine_id"/>
         <result property="statusId" column="status_id"/>
@@ -37,7 +37,7 @@
         and id = #{id}
     </select>
 
-    <select id="getNodeById" resultMap="nodeWithState">
+    <select id="getNodeDeployById" resultMap="nodeDeployWithState">
         SELECT
         SMN.*,
         STATE.id as s_id,
@@ -55,7 +55,7 @@
         WHERE SMN.id = #{nodeId}
     </select>
 
-    <select id="getNodeByStatusId" resultMap="nodeWithState">
+    <select id="getNodeDeployByStatusId" resultMap="nodeDeployWithState">
         SELECT
         SMN.*,
         STATE.id as s_id,
@@ -74,7 +74,7 @@
         AND SMN.state_machine_id = #{stateMachineId}
     </select>
 
-    <select id="selectByStateMachineId" resultMap="nodeWithState">
+    <select id="selectByStateMachineId" resultMap="nodeDeployWithState">
         SELECT
         SMN.*,
         STATE.id as s_id,
@@ -94,47 +94,13 @@
 
     <select id="checkStateDelete" resultType="java.lang.Long">
         SELECT
-            count( SMN.id )
+        count( SMN.id )
         FROM
-            state_machine_node SMN
-            LEFT JOIN state_machine SM ON SMN.state_machine_id = SM.id
+        state_machine_node SMN
+        LEFT JOIN state_machine SM ON SMN.state_machine_id = SM.id
         WHERE
-            SMN.status_id = #{statusId}
-            AND SM.organization_id = #{organizationId}
+        SMN.status_id = #{statusId}
+        AND SM.organization_id = #{organizationId}
     </select>
-
-    <insert id="insertWithId">
-        INSERT INTO state_machine_node (
-            id,
-            state_machine_id,
-            status_id,
-            position_x,
-            position_y,
-            width,
-            height,
-            type,
-            creation_date,
-            created_by,
-            last_update_date,
-            last_updated_by,
-            object_version_number
-        )
-        VALUES
-        (
-        #{stateMachineNode.id},
-        #{stateMachineNode.stateMachineId},
-        #{stateMachineNode.statusId},
-        #{stateMachineNode.positionX},
-        #{stateMachineNode.positionY},
-        #{stateMachineNode.width},
-        #{stateMachineNode.height},
-        #{stateMachineNode.type},
-        #{stateMachineNode.creationDate},
-        #{stateMachineNode.createdBy},
-        #{stateMachineNode.lastUpdateDate},
-        #{stateMachineNode.lastUpdatedBy},
-        #{stateMachineNode.objectVersionNumber}
-        );
-    </insert>
 
 </mapper>

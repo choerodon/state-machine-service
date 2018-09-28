@@ -1,11 +1,9 @@
 package script.db
 
-databaseChangeLog(logicalFilePath: 'script/db/state_machine_deploy.groovy') {
-
-
-    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-09-12-state-machine-config-deploy') {
-        createTable(tableName: 'state_machine_config_deploy') {
-            column(name: 'id', type: 'BIGINT UNSIGNED', remarks: 'ID,主键') {
+databaseChangeLog(logicalFilePath: 'script/db/state_machine_config_draft.groovy') {
+    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-09-12-state-machine-config-draft') {
+        createTable(tableName: 'state_machine_config_draft') {
+            column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
             }
             column(name: 'transform_id', type: 'BIGINT UNSIGNED', remarks: '转换id') {
@@ -29,10 +27,10 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_deploy.groovy') {
             column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
-        createIndex(tableName: "state_machine_config_deploy", indexName: "state_machine_config_deploy_n1") {
+        createIndex(tableName: "state_machine_config_draft", indexName: "state_machine_config_n1") {
             column(name: "transform_id", type: "BIGINT UNSIGNED")
         }
-        createIndex(tableName: "state_machine_config_deploy", indexName: "state_machine_config_deploy_n2") {
+        createIndex(tableName: "state_machine_config_draft", indexName: "state_machine_config_n2") {
             column(name: "type", type: "VARCHAR(30)")
         }
     }

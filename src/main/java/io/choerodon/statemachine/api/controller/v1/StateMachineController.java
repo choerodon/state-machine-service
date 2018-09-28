@@ -84,20 +84,28 @@ public class StateMachineController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "获取状态机及配置")
-    @GetMapping(value = "/{state_machine_id}")
-    public ResponseEntity<StateMachineDTO> queryStateMachineWithConfigById(@PathVariable("organization_id") Long organizationId,
-                                                                           @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.queryStateMachineWithConfigById(organizationId, stateMachineId), HttpStatus.OK);
+    @ApiOperation(value = "获取状态机及配置（草稿）")
+    @GetMapping(value = "/with_config_draft/{state_machine_id}")
+    public ResponseEntity<StateMachineDTO> queryStateMachineWithConfigDraftById(@PathVariable("organization_id") Long organizationId,
+                                                                                @PathVariable("state_machine_id") Long stateMachineId) {
+        return new ResponseEntity<>(stateMachineService.queryStateMachineWithConfigById(organizationId, stateMachineId, true), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "获取状态机原件及配置")
-    @GetMapping(value = "/original/{state_machine_id}")
-    public ResponseEntity<StateMachineDTO> queryOriginalById(@PathVariable("organization_id") Long organizationId,
-                                                             @PathVariable("state_machine_id") Long stateMachineId) {
+    @ApiOperation(value = "获取状态机原件及配置（活跃）")
+    @GetMapping(value = "/with_config_deploy/{state_machine_id}")
+    public ResponseEntity<StateMachineDTO> queryStateMachineWithConfigOriginById(@PathVariable("organization_id") Long organizationId,
+                                                                                 @PathVariable("state_machine_id") Long stateMachineId) {
 
-        return new ResponseEntity<>(stateMachineService.queryOriginalById(organizationId, stateMachineId), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.queryStateMachineWithConfigById(organizationId, stateMachineId, false), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "获取状态机（无配置）")
+    @GetMapping(value = "/{state_machine_id}")
+    public ResponseEntity<StateMachineDTO> queryStateMachineById(@PathVariable("organization_id") Long organizationId,
+                                                                 @PathVariable("state_machine_id") Long stateMachineId) {
+        return new ResponseEntity<>(stateMachineService.queryStateMachineById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -106,14 +114,6 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<StateMachineDTO> deleteDraft(@PathVariable("organization_id") Long organizationId,
                                                        @PathVariable("state_machine_id") Long stateMachineId) {
         return new ResponseEntity<>(stateMachineService.deleteDraft(organizationId, stateMachineId), HttpStatus.NO_CONTENT);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "获取状态机")
-    @GetMapping(value = "/get_stateMachine/{state_machine_id}")
-    public ResponseEntity<StateMachineDTO> getStateMachineById(@PathVariable("organization_id") Long organizationId,
-                                                               @PathVariable("state_machine_id") Long stateMachineId) {
-        return new ResponseEntity<>(stateMachineService.queryStateMachineById(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

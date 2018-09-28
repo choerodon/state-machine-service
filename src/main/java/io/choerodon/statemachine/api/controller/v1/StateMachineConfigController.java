@@ -25,7 +25,7 @@ public class StateMachineConfigController extends BaseController {
     private StateMachineConfigService configService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "创建配置")
+    @ApiOperation(value = "创建配置（草稿）")
     @PostMapping(value = "/{state_machine_id}")
     public ResponseEntity<StateMachineConfigDTO> create(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("state_machine_id") Long stateMachineId,
@@ -34,19 +34,19 @@ public class StateMachineConfigController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "删除配置")
+    @ApiOperation(value = "删除配置（草稿）")
     @DeleteMapping(value = "/{config_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("config_id") Long configId) {
         return new ResponseEntity<>(configService.delete(organizationId, configId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "获取转换下的配置")
+    @ApiOperation(value = "获取转换下的配置（草稿）")
     @GetMapping(value = "/query")
     public ResponseEntity<List<StateMachineConfigDTO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,
                                                                        @RequestParam Long transformId,
                                                                        @RequestParam String type) {
-        return new ResponseEntity<>(configService.queryByTransformId(organizationId,transformId, type), HttpStatus.OK);
+        return new ResponseEntity<>(configService.queryByTransformId(organizationId,transformId, type, true), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

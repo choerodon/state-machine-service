@@ -26,10 +26,9 @@ public class StateMachine extends AuditDomain {
     private Long organizationId;
 
     @Transient
-    private List<StateMachineNode> stateMachineNodes;
-
+    private List<StateMachineNode> nodes;
     @Transient
-    private List<StateMachineTransform> stateMachineTransforms;
+    private List<StateMachineTransform> transforms;
 
     public Long getId() {
         return id;
@@ -71,20 +70,19 @@ public class StateMachine extends AuditDomain {
         this.organizationId = organizationId;
     }
 
-    public List<StateMachineNode> getStateMachineNodes() {
-        return stateMachineNodes;
+    public List<StateMachineNode> getNodes() {
+        return nodes;
     }
 
-    public void setStateMachineNodes(List<StateMachineNode> stateMachineNodes) {
-        this.stateMachineNodes = stateMachineNodes;
+    public void setNodes(List<StateMachineNode> nodes) {
+        this.nodes = nodes;
     }
 
-    public List<StateMachineTransform> getStateMachineTransforms() {
-        return stateMachineTransforms;
+    public List<StateMachineTransform> getTransforms() {
+        return transforms;
     }
 
-    public void setStateMachineTransforms(List<StateMachineTransform> stateMachineTransforms) {
-        this.stateMachineTransforms = stateMachineTransforms;
+    public void setTransforms(List<StateMachineTransform> transforms) {
+        this.transforms = transforms;
     }
-
 }

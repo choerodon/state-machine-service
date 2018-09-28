@@ -27,7 +27,7 @@ public class StateMachineTransformController extends BaseController {
     private StateMachineTransformValidator transformValidator;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "创建转换")
+    @ApiOperation(value = "创建转换（草稿）")
     @PostMapping
     public ResponseEntity<StateMachineTransformDTO> create(@PathVariable("organization_id") Long organizationId,
                                                         @RequestBody StateMachineTransformDTO transformDTO) {
@@ -36,7 +36,7 @@ public class StateMachineTransformController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "更新转换")
+    @ApiOperation(value = "更新转换（草稿）")
     @PutMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformDTO> update(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("transform_id") Long transformId,
@@ -46,7 +46,7 @@ public class StateMachineTransformController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "删除转换")
+    @ApiOperation(value = "删除转换（草稿）")
     @DeleteMapping(value = "/{transform_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
                                           @PathVariable("transform_id") Long transformId) {
@@ -64,7 +64,7 @@ public class StateMachineTransformController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "根据id获取转换")
+    @ApiOperation(value = "根据id获取转换（草稿）")
     @GetMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformDTO> queryById(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("transform_id") Long transformId) {
@@ -72,7 +72,7 @@ public class StateMachineTransformController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点")
+    @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点（草稿）")
     @PostMapping(value = "/create_type_all")
     public ResponseEntity<StateMachineTransformDTO> createAllStatusTransform(@PathVariable("organization_id") Long organizationId,
                                                                       @RequestBody StateMachineTransformDTO transformDTO) {
@@ -80,7 +80,7 @@ public class StateMachineTransformController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "删除【全部】转换")
+    @ApiOperation(value = "删除【全部】转换（草稿）")
     @DeleteMapping(value = "/delete_type_all/{node_id}")
     public ResponseEntity<Boolean> deleteAllStatusTransform(@PathVariable("organization_id") Long organizationId,
                                                         @PathVariable("node_id") Long nodeId) {

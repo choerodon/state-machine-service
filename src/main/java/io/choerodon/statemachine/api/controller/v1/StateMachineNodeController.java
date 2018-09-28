@@ -29,7 +29,7 @@ public class StateMachineNodeController extends BaseController {
 
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "创建节点")
+    @ApiOperation(value = "创建节点（草稿）")
     @PostMapping
     public ResponseEntity<List<StateMachineNodeDTO>> create(@PathVariable("organization_id") Long organizationId,
                                                             @RequestBody StateMachineNodeDTO nodeDTO) {
@@ -38,7 +38,7 @@ public class StateMachineNodeController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "更新节点")
+    @ApiOperation(value = "更新节点（草稿）")
     @PutMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeDTO>> update(@PathVariable("organization_id") Long organizationId,
                                                             @PathVariable("node_id") Long nodeId,
@@ -48,7 +48,7 @@ public class StateMachineNodeController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "删除节点")
+    @ApiOperation(value = "删除节点（草稿）")
     @DeleteMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeDTO>> deleteNode(@PathVariable("organization_id") Long organizationId,
                                                                 @PathVariable("node_id") Long nodeId) {
@@ -56,7 +56,7 @@ public class StateMachineNodeController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "根据id获取节点")
+    @ApiOperation(value = "根据id获取节点（草稿）")
     @GetMapping(value = "/{node_id}")
     public ResponseEntity<StateMachineNodeDTO> queryById(@PathVariable("organization_id") Long organizationId,
                                                          @PathVariable("node_id") Long nodeId) {

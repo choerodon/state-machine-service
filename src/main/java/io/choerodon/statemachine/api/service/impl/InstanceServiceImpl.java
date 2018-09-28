@@ -34,7 +34,7 @@ import java.util.Optional;
 public class InstanceServiceImpl implements InstanceService {
 
     @Autowired
-    private StateMachineNodeMapper nodeMapper;
+    private StateMachineNodeMapper nodeDeployMapper;
     @Autowired
     private StateMachineConfigService configService;
     @Autowired
@@ -77,7 +77,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public List<StateMachineTransformDTO> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId) {
-        List<StateMachineTransformDTO> list = transformService.queryListByStatusId(organizationId, stateMachineId, statusId);
+        List<StateMachineTransformDTO> list = transformService.queryListByStatusIdByDeloy(organizationId, stateMachineId, statusId);
         //获取转换的条件配置
         list.forEach(stateMachineTransformDTO -> stateMachineTransformDTO.setConditions(condition(stateMachineTransformDTO.getOrganizationId(), stateMachineTransformDTO.getId())));
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
@@ -119,7 +119,7 @@ public class InstanceServiceImpl implements InstanceService {
     public Boolean postpositionAction(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context) {
         List<StateMachineConfigDTO> configs = postposition(organizationId, transformId);
         //节点转状态
-        Long targetStatusId = nodeMapper.getNodeById(Long.parseLong(context.getTarget().getId())).getStatusId();
+        Long targetStatusId = nodeDeployMapper.getNodeDeployById(Long.parseLong(context.getTarget().getId())).getStatusId();
         ExecuteResult executeResult;
         //调用对应服务，执行动作，返回是否成功
         try {
@@ -141,25 +141,25 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public List<StateMachineConfigDTO> condition(Long organizationId, Long transformId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.CONDITION);
+        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.CONDITION, false);
         return configs == null ? Collections.emptyList() : configs;
     }
 
     @Override
     public List<StateMachineConfigDTO> validator(Long organizationId, Long transformId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.VALIDATOR);
+        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.VALIDATOR, false);
         return configs == null ? Collections.emptyList() : configs;
     }
 
     @Override
     public List<StateMachineConfigDTO> trigger(Long organizationId, Long transformId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.TRIGGER);
+        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.TRIGGER, false);
         return configs == null ? Collections.emptyList() : configs;
     }
 
     @Override
     public List<StateMachineConfigDTO> postposition(Long organizationId, Long transformId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.POSTPOSITION);
+        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.POSTPOSITION, false);
         return configs == null ? Collections.emptyList() : configs;
     }
 

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -81,7 +82,7 @@ abstract class AbstractAssembler {
             });
             return targetList;
         } else {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 
@@ -103,7 +104,7 @@ abstract class AbstractAssembler {
             });
             return targetList;
         } else {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 

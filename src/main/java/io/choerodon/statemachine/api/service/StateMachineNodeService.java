@@ -2,14 +2,14 @@ package io.choerodon.statemachine.api.service;
 
 import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
-import io.choerodon.statemachine.domain.StateMachineNode;
+import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 
 import java.util.List;
 
 /**
  * @author peng.jiang@hand-china.com
  */
-public interface StateMachineNodeService extends BaseService<StateMachineNode> {
+public interface StateMachineNodeService extends BaseService<StateMachineNodeDraft> {
     /**
      * 创建状态节点
      * @param organizationId

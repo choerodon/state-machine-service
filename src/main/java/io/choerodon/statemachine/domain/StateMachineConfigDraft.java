@@ -4,6 +4,8 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
@@ -11,8 +13,10 @@ import javax.persistence.Table;
  */
 @ModifyAudit
 @VersionAudit
-@Table(name = "state_machine_config_deploy")
-public class StateMachineConfigDeploy extends AuditDomain {
+@Table(name = "state_machine_config_draft")
+public class StateMachineConfigDraft extends AuditDomain {
+    @Id
+    @GeneratedValue
     private Long id;
     private Long transformId;
     private Long stateMachineId;

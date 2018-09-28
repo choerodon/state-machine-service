@@ -4,16 +4,17 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * @author peng.jiang@hand-china.com
  */
 @ModifyAudit
 @VersionAudit
-@Table(name = "state_machine_node_deploy")
-public class StateMachineNodeDeploy extends AuditDomain {
+@Table(name = "state_machine_node_draft")
+public class StateMachineNodeDraft extends AuditDomain {
+    @Id
+    @GeneratedValue
     private Long id;
     private Long stateMachineId;
     private Long statusId;
@@ -22,15 +23,15 @@ public class StateMachineNodeDeploy extends AuditDomain {
     private Long width;
     private Long height;
     private String type;
-    private Long organizationId;
     /**
      * 所有状态都转换此状态的转换id
      */
     private Long allStatusTransformId;
 
+    private Long organizationId;
+
     @Transient
     private Status state;
-
 
     public Long getId() {
         return id;
@@ -38,6 +39,22 @@ public class StateMachineNodeDeploy extends AuditDomain {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getStateMachineId() {
+        return stateMachineId;
+    }
+
+    public void setStateMachineId(Long stateMachineId) {
+        this.stateMachineId = stateMachineId;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
     public Long getPositionX() {
@@ -72,30 +89,6 @@ public class StateMachineNodeDeploy extends AuditDomain {
         this.height = height;
     }
 
-    public Status getState() {
-        return state;
-    }
-
-    public void setState(Status state) {
-        this.state = state;
-    }
-
-    public Long getStateMachineId() {
-        return stateMachineId;
-    }
-
-    public void setStateMachineId(Long stateMachineId) {
-        this.stateMachineId = stateMachineId;
-    }
-
-    public Long getStatusId() {
-        return statusId;
-    }
-
-    public void setStatusId(Long statusId) {
-        this.statusId = statusId;
-    }
-
     public String getType() {
         return type;
     }
@@ -104,12 +97,12 @@ public class StateMachineNodeDeploy extends AuditDomain {
         this.type = type;
     }
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Status getState() {
+        return state;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setState(Status state) {
+        this.state = state;
     }
 
     public Long getAllStatusTransformId() {
@@ -118,5 +111,13 @@ public class StateMachineNodeDeploy extends AuditDomain {
 
     public void setAllStatusTransformId(Long allStatusTransformId) {
         this.allStatusTransformId = allStatusTransformId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

@@ -2,14 +2,14 @@ package io.choerodon.statemachine.api.service;
 
 import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
-import io.choerodon.statemachine.domain.StateMachineTransform;
+import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 
 import java.util.List;
 
 /**
  * @author peng.jiang@hand-china.com
  */
-public interface StateMachineTransformService extends BaseService<StateMachineTransform> {
+public interface StateMachineTransformService extends BaseService<StateMachineTransformDraft> {
 
     /**
      * 创建转换
@@ -73,7 +73,7 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @param statusId
      * @return
      */
-    List<StateMachineTransformDTO> queryListByStatusId(Long organizationId, Long stateMachineId, Long statusId);
+    List<StateMachineTransformDTO> queryListByStatusIdByDeloy(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 创建【全部转换到此状态】转换，所有节点均可转换到当前节点

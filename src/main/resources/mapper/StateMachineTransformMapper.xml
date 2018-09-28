@@ -9,47 +9,4 @@
         and id = #{id}
     </select>
 
-    <update id="deleteByNodeId">
-        DELETE FROM state_machine_transform
-        WHERE start_node_id = #{nodeId} OR end_node_id = #{nodeId}
-    </update>
-
-    <insert id="insertWithId">
-        INSERT INTO state_machine_transform (
-        id,
-        name,
-        description,
-        state_machine_id,
-        start_node_id,
-        end_node_id,
-        url,
-        type,
-        style,
-        condition_strategy,
-        creation_date,
-        created_by,
-        last_update_date,
-        last_updated_by,
-        object_version_number
-        )
-        VALUES
-        (
-        #{stateMachineTransform.id},
-        #{stateMachineTransform.name},
-        #{stateMachineTransform.description},
-        #{stateMachineTransform.stateMachineId},
-        #{stateMachineTransform.startNodeId},
-        #{stateMachineTransform.endNodeId},
-        #{stateMachineTransform.url},
-        #{stateMachineTransform.type},
-        #{stateMachineTransform.style},
-        #{stateMachineTransform.conditionStrategy},
-        #{stateMachineTransform.creationDate},
-        #{stateMachineTransform.createdBy},
-        #{stateMachineTransform.lastUpdateDate},
-        #{stateMachineTransform.lastUpdatedBy},
-        #{stateMachineTransform.objectVersionNumber}
-        );
-    </insert>
-
 </mapper>

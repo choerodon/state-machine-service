@@ -11,6 +11,7 @@ import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
 import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +46,7 @@ public class MachineFactory {
     @Autowired
     private StateMachineNodeService nodeService;
     @Autowired
-    private StateMachineNodeMapper nodeMapper;
-    @Autowired
-    private StateMachineMapper stateMachineMapper;
+    private StateMachineNodeMapper nodeDeployMapper;
     @Autowired
     private InstanceService instanceService;
     /**
@@ -61,9 +60,10 @@ public class MachineFactory {
     private static Map<String, StateMachine<String, String>> stateMachineMap = new ConcurrentHashMap<>();
 
     private StateMachineBuilder.Builder<String, String> getBuilder(Long organizationId, String serviceCode, Long stateMachineId) {
-        io.choerodon.statemachine.domain.StateMachine stateMachine = stateMachineService.getOriginalById(organizationId, stateMachineId);
-        List<StateMachineNode> nodes = stateMachine.getStateMachineNodes();
-        List<StateMachineTransform> transforms = stateMachine.getStateMachineTransforms();
+        io.choerodon.statemachine.domain.StateMachine stateMachine = stateMachineService.queryDeployForInstance(organizationId, stateMachineId);
+        List<StateMachineNode> nodes = stateMachine.getNodes();
+        List<StateMachineTransform> transforms = stateMachine.getTransforms();
+        Long initNodeId = nodeService.getInitNode(organizationId, stateMachineId);
 
         StateMachineBuilder.Builder<String, String> builder = StateMachineBuilder.builder();
         try {
@@ -72,7 +72,7 @@ public class MachineFactory {
                     .machineId(stateMachineId.toString());
             builder.configureStates()
                     .withStates()
-                    .initial(nodeService.getInitNode(organizationId, stateMachineId).toString(), initialAction(organizationId, serviceCode))
+                    .initial(initNodeId.toString(), initialAction(organizationId, serviceCode))
                     .states(nodes.stream().map(x -> x.getId().toString()).collect(Collectors.toSet()));
             for (StateMachineTransform transform : transforms) {
                 if (transform.getType().equals(TransformType.ALL)) {
@@ -111,10 +111,6 @@ public class MachineFactory {
     private StateMachine<String, String> buildInstance(Long organizationId, String serviceCode, Long stateMachineId) {
         StateMachineBuilder.Builder<String, String> builder = builderMaps.get(stateMachineId);
         if (builder == null) {
-            io.choerodon.statemachine.domain.StateMachine sm = stateMachineMapper.queryById(organizationId, stateMachineId);
-            if (sm.getStatus().equals(StateMachineStatus.CREATE)) {
-                throw new CommonException("error.buildInstance.stateMachine.inActive");
-            }
             builder = getBuilder(organizationId, serviceCode, stateMachineId);
             logger.info("build StateMachineBuilder successful,stateMachineId:{}", stateMachineId);
             builderMaps.put(stateMachineId, builder);
@@ -156,7 +152,7 @@ public class MachineFactory {
      */
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transformId) {
         //状态转节点
-        Long currentNodeId = nodeMapper.getNodeByStatusId(stateMachineId, currentStatusId).getId();
+        Long currentNodeId = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, currentStatusId).getId();
 
         String instanceCode = serviceCode + ":" + stateMachineId + ":" + instanceId;
         StateMachine<String, String> instance = stateMachineMap.get(instanceCode);
@@ -176,7 +172,7 @@ public class MachineFactory {
         instance.sendEvent(transformId.toString());
 
         //节点转状态
-        Long statusId = nodeMapper.getNodeById(Long.parseLong(instance.getState().getId())).getStatusId();
+        Long statusId = nodeDeployMapper.getNodeDeployById(Long.parseLong(instance.getState().getId())).getStatusId();
         Object executeResult = instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
         if (executeResult == null) {
             executeResult = new ExecuteResult(true, statusId, null);
