@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author peng.jiang,dinghuang123@gmail.com
  */
-public interface StatusService extends BaseService<Status> {
+public interface StatusService {
 
     /**
      * 分页查询状态列表
@@ -68,5 +68,7 @@ public interface StatusService extends BaseService<Status> {
      * @return
      */
     Boolean checkName(Long organizationId, Long statusId, String name);
+
+    void initSystemStateMachineDetail(Long organizationId, Long stateMachineId, Long startNodeId);
 
 }
