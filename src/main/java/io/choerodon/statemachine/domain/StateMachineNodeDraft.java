@@ -7,7 +7,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import javax.persistence.*;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 @ModifyAudit
 @VersionAudit

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 @Component
 @Transactional(rollbackFor = Exception.class)
@@ -55,7 +55,6 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     private StateMachineNodeAssembler stateMachineNodeAssembler;
     @Autowired
     private StateMachineService stateMachineService;
-    private StateMachineNodeDraft node;
 
     @Override
     public StateMachineTransformDTO create(Long organizationId, StateMachineTransformDTO transformDTO) {
@@ -205,12 +204,12 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         if (endNodeId == null) {
             throw new CommonException("error.endNodeId.null");
         }
-        StateMachineNodeDraft node = nodeDraftMapper.getNodeById(endNodeId);
-        if (node == null) {
+        StateMachineNodeDraft stateMachineNodeDraft = nodeDraftMapper.getNodeById(endNodeId);
+        if (stateMachineNodeDraft == null) {
             throw new CommonException("error.stateMachineNode.null");
         }
         //创建【全部转换到当前】的transform
-        Status state = stateMapper.queryById(organizationId, node.getStatusId());
+        Status state = stateMapper.queryById(organizationId, stateMachineNodeDraft.getStatusId());
         if (state == null) {
             throw new CommonException("error.createAllStatusTransform.state.null");
         }
@@ -230,8 +229,8 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
             throw new CommonException("error.stateMachineTransform.create");
         }
         //更新node的【全部转换到当前】转换id
-        node.setAllStatusTransformId(transform.getId());
-        nodeService.updateOptional(node, "allStatusTransformId");
+        stateMachineNodeDraft.setAllStatusTransformId(transform.getId());
+        nodeService.updateOptional(stateMachineNodeDraft, "allStatusTransformId");
         transform = transformDraftMapper.queryById(organizationId, transform.getId());
         stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
         return stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
@@ -243,7 +242,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         if (transformDraft == null) {
             throw new CommonException("error.stateMachineTransform.null");
         }
-        if (TransformType.ALL.equals(transformDraft)) {
+        if (TransformType.ALL.equals(transformDraft.getType())) {
             throw new CommonException("error.stateMachineTransform.type.illegal");
         }
         //目标节点

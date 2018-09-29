@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 @Component
 public class StateValidator {
@@ -18,7 +18,7 @@ public class StateValidator {
             throw new CommonException("error.status.name.empty");
         }
         if (StringUtils.isEmpty(statusDTO.getType())) {
-            throw new CommonException("error.status.name.empty");
+            throw new CommonException("error.status.type.empty");
         }
 
         if (!EnumUtil.contain(StatusType.class, statusDTO.getType())) {

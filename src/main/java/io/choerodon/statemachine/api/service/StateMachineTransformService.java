@@ -7,7 +7,7 @@ import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import java.util.List;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public interface StateMachineTransformService extends BaseService<StateMachineTransformDraft> {
 

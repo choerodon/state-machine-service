@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public class StatusDTO {
 

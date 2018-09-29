@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.infra.enums;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public interface StateMachineTransformStatus {
     /**
