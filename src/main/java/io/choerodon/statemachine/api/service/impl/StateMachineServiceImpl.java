@@ -10,6 +10,7 @@ import io.choerodon.statemachine.api.dto.StateMachineDTO;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineService;
+import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.app.assembler.StateMachineAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
@@ -40,6 +41,8 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> implements StateMachineService {
 
+    private final String STATE_MACHINE_CREATE = "state_machine_create";
+
     @Autowired
     private StateMachineMapper stateMachineMapper;
 
@@ -67,6 +70,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     private StateMachineConfigAssembler stateMachineConfigAssembler;
     @Autowired
     private StateMachineAssembler stateMachineAssembler;
+
+    @Autowired
+    private StatusService statusService;
 
     @Autowired
     private MachineFactory machineFactory;
@@ -477,5 +483,34 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             return stateMachine.getId().equals(stateMachineId);
         }
         return true;
+    }
+
+    @Override
+    public void initSystemStateMachine(Long organizationId) {
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.setOrganizationId(organizationId);
+        stateMachine.setName("默认状态机");
+        stateMachine.setDescription("默认状态机");
+        stateMachine.setStatus(STATE_MACHINE_CREATE);
+        if(stateMachineMapper.insert(stateMachine) != 1) {
+            throw new CommonException("error.stateMachine.insert");
+        }
+
+        //创建默认开始节点
+        StateMachineNodeDraft startNode = new StateMachineNodeDraft();
+        startNode.setStateMachineId(stateMachine.getId());
+        startNode.setOrganizationId(organizationId);
+        startNode.setPositionX(25L);
+        startNode.setPositionY(0L);
+        startNode.setWidth(50L);
+        startNode.setHeight(50L);
+        startNode.setStatusId(0L);
+        startNode.setType(NodeType.START);
+        int isStartNodeInsert = nodeDraftMapper.insert(startNode);
+        if (isStartNodeInsert != 1) {
+            throw new CommonException("error.stateMachineNode.create");
+        }
+        statusService.initSystemStateMachineDetail(organizationId, stateMachine.getId(), startNode.getId());
+
     }
 }

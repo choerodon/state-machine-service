@@ -120,4 +120,6 @@ public interface StateMachineService extends BaseService<StateMachine> {
      */
     void updateStateMachineStatus(Long organizationId, Long stateMachineId);
 
+    void initSystemStateMachine(Long organizationId);
+
 }

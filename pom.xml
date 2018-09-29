@@ -110,6 +110,18 @@
             <artifactId>spring-cloud-sleuth-stream</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.choerodon</groupId>
+            <artifactId>choerodon-starter-asgard</artifactId>
+            <version>${choerodon.starters.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.47</version>
+        </dependency>
+
         <!-- 添加cpu监控 -->
         <dependency>
             <groupId>io.choerodon</groupId>
