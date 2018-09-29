@@ -7,7 +7,7 @@ import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import java.util.List;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public interface StateMachineNodeService extends BaseService<StateMachineNodeDraft> {
     /**

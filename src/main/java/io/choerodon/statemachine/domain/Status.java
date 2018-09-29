@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 @ModifyAudit
 @VersionAudit

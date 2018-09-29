@@ -6,7 +6,7 @@ then
 fi
 java -Dspring.datasource.url="jdbc:mysql://localhost/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
  -Dspring.datasource.username=root \
- -Dspring.datasource.password=test123 \
+ -Dspring.datasource.password=root \
  -Ddata.drop=false -Ddata.init=false \
  -Ddata.dir=src/main/resources \
  -jar target/choerodon-tool-liquibase.jar

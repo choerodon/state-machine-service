@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public interface StateMachineNodeMapper extends BaseMapper<StateMachineNode> {
 
     StateMachineNode getNodeDeployById(@Param("nodeId") Long nodeId);
 
-    StateMachineNodeDraft getNodeDeployByStatusId(@Param("stateMachineId") Long stateMachineId, @Param("statusId") Long statusId);
+    StateMachineNode getNodeDeployByStatusId(@Param("stateMachineId") Long stateMachineId, @Param("statusId") Long statusId);
 
 
     List<StateMachineNode> selectByStateMachineId(@Param("stateMachineId") Long stateMachineId);

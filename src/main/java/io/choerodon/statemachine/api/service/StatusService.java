@@ -9,7 +9,7 @@ import io.choerodon.statemachine.domain.Status;
 import java.util.List;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public interface StatusService extends BaseService<Status> {
 

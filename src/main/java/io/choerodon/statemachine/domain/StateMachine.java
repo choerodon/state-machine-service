@@ -11,7 +11,7 @@ import javax.persistence.Transient;
 import java.util.List;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 @ModifyAudit
 @VersionAudit

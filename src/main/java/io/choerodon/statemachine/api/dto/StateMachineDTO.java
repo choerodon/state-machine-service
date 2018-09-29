@@ -3,7 +3,7 @@ package io.choerodon.statemachine.api.dto;
 import java.util.List;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public class StateMachineDTO {
 

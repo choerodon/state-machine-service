@@ -5,7 +5,7 @@ import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * @author peng.jiang@hand-china.com
+ * @author peng.jiang,dinghuang123@gmail.com
  */
 public interface StateMachineTransformDraftMapper extends BaseMapper<StateMachineTransformDraft> {
 
