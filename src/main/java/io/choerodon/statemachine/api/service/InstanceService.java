@@ -3,6 +3,7 @@ package io.choerodon.statemachine.api.service;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
+import io.choerodon.statemachine.infra.feign.TransformInfo;
 import org.springframework.statemachine.StateContext;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public interface InstanceService {
      * @param statusId
      * @return
      */
-    List<StateMachineTransformDTO> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId);
+    List<TransformInfo> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId);
 
     /**
      * 调用相应服务，验证转换

@@ -17,6 +17,7 @@ import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.StateMachineTransformStatus;
 import io.choerodon.statemachine.infra.enums.TransformType;
+import io.choerodon.statemachine.infra.feign.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -190,12 +191,19 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
-    public List<StateMachineTransformDTO> queryListByStatusIdByDeloy(Long organizationId, Long stateMachineId, Long statusId) {
+    public List<TransformInfo> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId) {
         Long startNodeId = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, statusId).getId();
-        StateMachineTransform transform = new StateMachineTransform();
-        transform.setStateMachineId(stateMachineId);
-        transform.setStartNodeId(startNodeId);
-        return stateMachineTransformAssembler.toTargetList(transformDeployMapper.select(transform), StateMachineTransformDTO.class);
+        StateMachineTransform select1 = new StateMachineTransform();
+        select1.setStateMachineId(stateMachineId);
+        select1.setStartNodeId(startNodeId);
+        List<StateMachineTransform> stateMachineTransforms = transformDeployMapper.select(select1);
+        //增加【全部】类型的转换
+        StateMachineTransform select2 = new StateMachineTransform();
+        select2.setStateMachineId(stateMachineId);
+        select2.setType(TransformType.ALL);
+        List<StateMachineTransform> typeAllTransforms = transformDeployMapper.select(select2);
+        stateMachineTransforms.addAll(typeAllTransforms);
+        return stateMachineTransformAssembler.toTransformInfo(stateMachineId,stateMachineTransforms);
     }
 
     @Override

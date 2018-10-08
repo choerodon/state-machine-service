@@ -5,6 +5,7 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
+import io.choerodon.statemachine.infra.feign.TransformInfo;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +53,11 @@ public class InstanceController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取当前状态拥有的转换列表，feign调用对应服务的条件验证")
     @GetMapping(value = "/transform_list")
-    public ResponseEntity<List<StateMachineTransformDTO>> queryListTransform(@PathVariable("organization_id") Long organizationId,
-                                                                       @RequestParam("service_code") String serviceCode,
-                                                                       @RequestParam("state_machine_id") Long stateMachineId,
-                                                                       @RequestParam("instance_id") Long instanceId,
-                                                                       @RequestParam("current_status_id") Long currentStateId) {
+    public ResponseEntity<List<TransformInfo>> queryListTransform(@PathVariable("organization_id") Long organizationId,
+                                                                  @RequestParam("service_code") String serviceCode,
+                                                                  @RequestParam("state_machine_id") Long stateMachineId,
+                                                                  @RequestParam("instance_id") Long instanceId,
+                                                                  @RequestParam("current_status_id") Long currentStateId) {
         return new ResponseEntity<>(instanceService.queryListTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
     }
 

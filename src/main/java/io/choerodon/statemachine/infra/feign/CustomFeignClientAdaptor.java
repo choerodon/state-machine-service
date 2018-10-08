@@ -28,7 +28,7 @@ public interface CustomFeignClientAdaptor {
      * @return
      */
     @RequestLine("POST")
-    ResponseEntity<List<StateMachineTransformDTO>> filterTransformsByConfig(URI baseUri, List<StateMachineTransformDTO> transforms);
+    ResponseEntity<List<TransformInfo>> filterTransformsByConfig(URI baseUri, List<TransformInfo> transforms);
 
     /**
      * 调用对应服务，执行条件，验证，后置处理

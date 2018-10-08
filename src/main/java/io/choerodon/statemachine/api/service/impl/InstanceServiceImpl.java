@@ -2,13 +2,13 @@ package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
+import io.choerodon.statemachine.infra.feign.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,20 +76,20 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public List<StateMachineTransformDTO> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId) {
-        List<StateMachineTransformDTO> list = transformService.queryListByStatusIdByDeloy(organizationId, stateMachineId, statusId);
+    public List<TransformInfo> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId) {
+        List<TransformInfo> transformInfos = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, statusId);
         //获取转换的条件配置
-        list.forEach(stateMachineTransformDTO -> stateMachineTransformDTO.setConditions(condition(stateMachineTransformDTO.getOrganizationId(), stateMachineTransformDTO.getId())));
+        transformInfos.forEach(transformInfo -> transformInfo.setConditions(condition(transformInfo.getOrganizationId(), transformInfo.getId())));
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
-        list = list == null ? Collections.emptyList() : list;
+        transformInfos = transformInfos == null ? Collections.emptyList() : transformInfos;
         try {
-            ResponseEntity<List<StateMachineTransformDTO>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getURI(serviceCode, organizationId, METHOD_FILTER_TRANSF, instanceId, null, null, null), list);
-            list = listEntity.getBody();
+            ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getURI(serviceCode, organizationId, METHOD_FILTER_TRANSF, instanceId, null, null, null), transformInfos);
+            transformInfos = listEntity.getBody();
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
-            list = Collections.emptyList();
+            transformInfos = Collections.emptyList();
         }
-        return list;
+        return transformInfos;
     }
 
     @Override
