@@ -23,7 +23,7 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_transform.groovy') {
                 constraints(nullable: false)
             }
             column(name: 'style', type: 'clob', remarks: '样式')
-            column(name: 'condition_strategy', type: 'varchar(20)', remarks: '条件策略', defaultValue: "all")
+            column(name: 'condition_strategy', type: 'VARCHAR(20)', remarks: '条件策略', defaultValue: "condition_all")
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }

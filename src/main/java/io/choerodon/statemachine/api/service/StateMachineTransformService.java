@@ -3,6 +3,7 @@ package io.choerodon.statemachine.api.service;
 import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
+import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 
 import java.util.List;
 
@@ -67,13 +68,13 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
     StateMachineTransformDTO queryById(Long organizationId, Long transformId);
 
     /**
-     * 获取当前状态拥有的转换列表
-     *
+     * 获取当前状态拥有的转换列表，包括【全部】类型的转换
      * @param organizationId
+     * @param stateMachineId
      * @param statusId
      * @return
      */
-    List<StateMachineTransformDTO> queryListByStatusIdByDeloy(Long organizationId, Long stateMachineId, Long statusId);
+    List<TransformInfo> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 创建【全部转换到此状态】转换，所有节点均可转换到当前节点

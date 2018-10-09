@@ -3,8 +3,8 @@ package io.choerodon.statemachine.infra.feign.fallback;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
+import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ public class CustomFeignClientAdaptorFallBack implements CustomFeignClientAdapto
     }
 
     @Override
-    public ResponseEntity<List<StateMachineTransformDTO>> filterTransformsByConfig(URI baseUri, List<StateMachineTransformDTO> transforms) {
+    public ResponseEntity<List<TransformInfo>> filterTransformsByConfig(URI baseUri, List<TransformInfo> transforms) {
         throw new CommonException("error.customFeignClientAdaptor.filterTransformsByConfig");
     }
 

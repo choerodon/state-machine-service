@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.infra.enums;
 
 /**
+ * 转换的类型
  * @author shinan.chen
  * @date 2018/9/27
  */

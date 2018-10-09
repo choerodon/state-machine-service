@@ -117,16 +117,16 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public StatusDTO queryStateById(Long organizationId, Long stateId) {
+    public StatusDTO queryStatusById(Long organizationId, Long stateId) {
         Status status = stateMapper.queryById(organizationId, stateId);
         if(status==null){
-            throw new CommonException("error.queryStateById.notExist");
+            throw new CommonException("error.queryStatusById.notExist");
         }
         return modelMapper.map(status, StatusDTO.class);
     }
 
     @Override
-    public List<StatusDTO> queryAllState(Long organizationId) {
+    public List<StatusDTO> queryAllStatus(Long organizationId) {
         Status status = new Status();
         status.setOrganizationId(organizationId);
         List<Status> statuses = stateMapper.select(status);
