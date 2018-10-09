@@ -1,4 +1,4 @@
-package io.choerodon.statemachine.infra.feign;
+package io.choerodon.statemachine.infra.feign.dto;
 
 import org.hibernate.validator.constraints.NotEmpty;
 

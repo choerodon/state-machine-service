@@ -87,15 +87,15 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id查询状态对象")
     @GetMapping(value = "/{status_id}")
-    public ResponseEntity<StatusDTO> queryStateById(@PathVariable("organization_id") Long organizationId, @PathVariable("status_id") Long statusId) {
-        return new ResponseEntity<>(statusService.queryStateById(organizationId, statusId), HttpStatus.OK);
+    public ResponseEntity<StatusDTO> queryStatusById(@PathVariable("organization_id") Long organizationId, @PathVariable("status_id") Long statusId) {
+        return new ResponseEntity<>(statusService.queryStatusById(organizationId, statusId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询组织下的所有状态")
     @GetMapping(value = "/query_all")
-    public ResponseEntity<List<StatusDTO>> queryAllState(@PathVariable("organization_id") Long organizationId) {
-        return new ResponseEntity<>(statusService.queryAllState(organizationId), HttpStatus.OK);
+    public ResponseEntity<List<StatusDTO>> queryAllStatus(@PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(statusService.queryAllStatus(organizationId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

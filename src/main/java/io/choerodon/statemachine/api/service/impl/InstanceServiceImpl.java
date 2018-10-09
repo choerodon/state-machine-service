@@ -8,7 +8,7 @@ import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
-import io.choerodon.statemachine.infra.feign.TransformInfo;
+import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

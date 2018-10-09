@@ -3,7 +3,7 @@ package io.choerodon.statemachine.infra.feign;
 import feign.RequestLine;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
+import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.feign.fallback.CustomFeignClientAdaptorFallBack;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.ResponseEntity;

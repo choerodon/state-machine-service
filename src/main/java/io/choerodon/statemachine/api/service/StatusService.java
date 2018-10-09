@@ -20,7 +20,7 @@ public interface StatusService {
      * @param param 模糊查询参数
      * @return 状态列表
      */
-    public Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param);
+    Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param);
 
     /**
      * 创建状态
@@ -51,14 +51,14 @@ public interface StatusService {
      * @param statusId 状态id
      * @return
      */
-    StatusDTO queryStateById(Long organizationId, Long statusId);
+    StatusDTO queryStatusById(Long organizationId, Long statusId);
 
     /**
      * 获取所有
      * @param organizationId 组织id
      * @return
      */
-    List<StatusDTO> queryAllState(Long organizationId);
+    List<StatusDTO> queryAllStatus(Long organizationId);
 
     /**
      * 校验状态名字是否未被使用

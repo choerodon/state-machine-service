@@ -3,7 +3,7 @@ package io.choerodon.statemachine.api.service;
 import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
-import io.choerodon.statemachine.infra.feign.TransformInfo;
+import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 
 import java.util.List;
 

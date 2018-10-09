@@ -15,10 +15,11 @@ import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.ConfigType;
-import io.choerodon.statemachine.infra.enums.StateMachineTransformStatus;
+import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
 import io.choerodon.statemachine.infra.enums.TransformType;
-import io.choerodon.statemachine.infra.feign.TransformInfo;
+import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.*;
+import io.choerodon.statemachine.infra.utils.EnumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @Component
 @Transactional(rollbackFor = Exception.class)
@@ -62,6 +63,9 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setType(TransformType.CUSTOM);
         transform.setOrganizationId(organizationId);
+        if (!EnumUtil.contain(TransformConditionStrategy.class, transform.getConditionStrategy())) {
+            throw new CommonException("error.stateMachineTransform.conditionStrategy.illegal");
+        }
         int isInsert = transformDraftMapper.insert(transform);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransform.create");
@@ -203,7 +207,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         select2.setType(TransformType.ALL);
         List<StateMachineTransform> typeAllTransforms = transformDeployMapper.select(select2);
         stateMachineTransforms.addAll(typeAllTransforms);
-        return stateMachineTransformAssembler.toTransformInfo(stateMachineId,stateMachineTransforms);
+        return stateMachineTransformAssembler.toTransformInfo(stateMachineId, stateMachineTransforms);
     }
 
     @Override
@@ -230,7 +234,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         transformDTO.setStartNodeId(0L);
         transformDTO.setOrganizationId(organizationId);
         transformDTO.setType(TransformType.ALL);
-        transformDTO.setConditionStrategy(StateMachineTransformStatus.CONDITION_STRATEGY_ONE);
+        transformDTO.setConditionStrategy(TransformConditionStrategy.ALL);
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         int isInsert = transformDraftMapper.insert(transform);
         if (isInsert != 1) {

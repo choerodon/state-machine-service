@@ -2,8 +2,7 @@ package io.choerodon.statemachine.app.assembler;
 
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineTransform;
-import io.choerodon.statemachine.infra.feign.TransformInfo;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
+import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

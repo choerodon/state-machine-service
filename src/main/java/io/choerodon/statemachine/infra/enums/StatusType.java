@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
  * @author shinan.chen
  * @date 2018/9/27
  */
-public final class StatusType {
+public class StatusType {
     /**
      * 待处理
      */
