@@ -43,12 +43,20 @@ public interface StateMachineNodeService extends BaseService<StateMachineNodeDra
     Long getInitNode(Long organizationId,Long stateMachineId);
 
     /**
-     * 根据id获取转换
+     * 根据id获取节点
      *
      * @param organizationId
      * @param nodeId
      * @return
      */
     StateMachineNodeDTO queryById(Long organizationId, Long nodeId);
+    /**
+     * 根据状态机id获取所有节点
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @return
+     */
+    List<StateMachineNodeDTO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft);
 
 }

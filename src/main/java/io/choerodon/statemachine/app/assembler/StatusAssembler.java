@@ -7,5 +7,5 @@ import org.springframework.stereotype.Component;
  * @since 2018/9/27
  */
 @Component
-public class StateAssembler extends AbstractAssembler {
+public class StatusAssembler extends AbstractAssembler {
 }

@@ -85,7 +85,7 @@ public class StateMachineController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "获取状态机及配置（草稿）")
+    @ApiOperation(value = "获取状态机及配置（草稿/新建）")
     @GetMapping(value = "/with_config_draft/{state_machine_id}")
     public ResponseEntity<StateMachineDTO> queryStateMachineWithConfigDraftById(@PathVariable("organization_id") Long organizationId,
                                                                                 @PathVariable("state_machine_id") Long stateMachineId) {

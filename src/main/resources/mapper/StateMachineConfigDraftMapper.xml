@@ -8,4 +8,16 @@
         WHERE organization_id = #{organizationId}
         and id = #{id}
     </select>
+
+    <select id="queryWithCodeInfo" resultType="io.choerodon.statemachine.domain.StateMachineConfigDraft">
+        SELECT smcd.*,
+        cc.name code_name,
+        cc.description code_description
+        FROM state_machine_config_draft smcd
+        LEFT JOIN config_code cc on cc.code = smcd.code
+        WHERE smcd.organization_id = #{organizationId}
+        and smcd.transform_id = #{transformId}
+        and smcd.type = #{type}
+    </select>
+
 </mapper>

@@ -5,9 +5,10 @@ import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @ModifyAudit
 @VersionAudit
@@ -18,6 +19,11 @@ public class StateMachineConfig extends AuditDomain {
     private Long stateMachineId;
     private String code;
     private String type;
+
+    @Transient
+    private String codeName;
+    @Transient
+    private String codeDescription;
 
     private Long organizationId;
 

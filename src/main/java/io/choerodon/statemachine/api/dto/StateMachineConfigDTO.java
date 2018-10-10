@@ -13,9 +13,13 @@ public class StateMachineConfigDTO {
     private Long organizationId;
 
     /**
-     * 条件描述
+     * code名称
      */
-    private String description;
+    private String codeName;
+    /**
+     * code描述
+     */
+    private String codeDescription;
 
     public Long getId() {
         return id;
@@ -57,19 +61,27 @@ public class StateMachineConfigDTO {
         this.type = type;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public Long getOrganizationId() {
         return organizationId;
     }
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getCodeName() {
+        return codeName;
+    }
+
+    public void setCodeName(String codeName) {
+        this.codeName = codeName;
+    }
+
+    public String getCodeDescription() {
+        return codeDescription;
+    }
+
+    public void setCodeDescription(String codeDescription) {
+        this.codeDescription = codeDescription;
     }
 }

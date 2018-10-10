@@ -33,7 +33,7 @@ public class StateMachineNode extends AuditDomain {
     private Long allStatusTransformId;
 
     @Transient
-    private Status state;
+    private Status status;
 
 
     public Long getId() {
@@ -76,12 +76,12 @@ public class StateMachineNode extends AuditDomain {
         this.height = height;
     }
 
-    public Status getState() {
-        return state;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setState(Status state) {
-        this.state = state;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Long getStateMachineId() {
