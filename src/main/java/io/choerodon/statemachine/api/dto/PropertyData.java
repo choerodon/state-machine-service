@@ -26,4 +26,12 @@ public class PropertyData {
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
     }
+
+    @Override
+    public String toString() {
+        return "PropertyData{" +
+                "serviceName='" + serviceName + '\'' +
+                ", list=" + list +
+                '}';
+    }
 }

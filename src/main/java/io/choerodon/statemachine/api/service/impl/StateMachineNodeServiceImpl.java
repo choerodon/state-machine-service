@@ -8,11 +8,14 @@ import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
+import io.choerodon.statemachine.app.assembler.StatusAssembler;
+import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +25,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @Component
 @Transactional(rollbackFor = Exception.class)
 public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNodeDraft> implements StateMachineNodeService {
 
     @Autowired
-    private StateMachineNodeDraftMapper nodeMapper;
-
+    private StateMachineNodeDraftMapper nodeDraftMapper;
+    @Autowired
+    private StateMachineNodeMapper nodeDeployMapper;
     @Autowired
     private StateMachineTransformDraftMapper transformMapper;
     @Autowired
@@ -39,7 +43,8 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     private StateMachineNodeAssembler stateMachineNodeAssembler;
     @Autowired
     private StateMachineTransformAssembler stateMachineTransformAssembler;
-
+    @Autowired
+    private StatusAssembler statusAssembler;
     @Autowired
     private StatusMapper statusMapper;
 
@@ -49,13 +54,12 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         createStatus(organizationId, nodeDTO);
         StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
         node.setType(NodeType.CUSTOM);
-        int isInsert = nodeMapper.insert(node);
+        int isInsert = nodeDraftMapper.insert(node);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
         }
-        node = nodeMapper.getNodeById(node.getId());
         stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
-        return stateMachineNodeAssembler.toTargetList(nodeMapper.selectByStateMachineId(node.getStateMachineId()), StateMachineNodeDTO.class);
+        return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
     }
 
     @Override
@@ -65,34 +69,34 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
         node.setId(nodeId);
         node.setType(NodeType.CUSTOM);
-        int isUpdate = nodeMapper.updateByPrimaryKeySelective(node);
+        int isUpdate = nodeDraftMapper.updateByPrimaryKeySelective(node);
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachineNode.update");
         }
-        node = nodeMapper.getNodeById(node.getId());
         stateMachineService.updateStateMachineStatus(node.getOrganizationId(), node.getStateMachineId());
-        return stateMachineNodeAssembler.toTargetList(nodeMapper.selectByStateMachineId(node.getStateMachineId()), StateMachineNodeDTO.class);
+        return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
     }
 
     @Override
     public List<StateMachineNodeDTO> delete(Long organizationId, Long nodeId) {
-        StateMachineNodeDraft node = nodeMapper.queryById(organizationId, nodeId);
-        int isDelete = nodeMapper.deleteByPrimaryKey(nodeId);
+        StateMachineNodeDraft node = nodeDraftMapper.queryById(organizationId, nodeId);
+        int isDelete = nodeDraftMapper.deleteByPrimaryKey(nodeId);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineNode.delete");
         }
         transformMapper.deleteByNodeId(nodeId);
         stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
-        return stateMachineNodeAssembler.toTargetList(nodeMapper.selectByStateMachineId(node.getStateMachineId()), StateMachineNodeDTO.class);
+        return stateMachineNodeAssembler.toTargetList(nodeDraftMapper.selectByStateMachineId(node.getStateMachineId()), StateMachineNodeDTO.class);
     }
 
     @Override
     public StateMachineNodeDTO queryById(Long organizationId, Long nodeId) {
-        StateMachineNodeDraft node = nodeMapper.getNodeById(nodeId);
+        StateMachineNodeDraft node = nodeDraftMapper.getNodeById(nodeId);
         if (node == null) {
             throw new CommonException("error.stateMachineNode.noFound");
         }
-        StateMachineNodeDTO nodeDTO = stateMachineNodeAssembler.toTarget(node, StateMachineNodeDTO.class);
+        StateMachineNodeDTO nodeDTO = stateMachineNodeAssembler.draftToNodeDTO(node);
+
         StateMachineTransformDraft intoTransformSerach = new StateMachineTransformDraft();
         intoTransformSerach.setEndNodeId(nodeId);
         List<StateMachineTransformDraft> intoTransforms = transformMapper.select(intoTransformSerach);
@@ -111,8 +115,8 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
      * @param nodeDTO        节点
      */
     private void createStatus(Long organizationId, StateMachineNodeDTO nodeDTO) {
-        if (nodeDTO.getStatusId() == null && nodeDTO.getStateDTO() != null && nodeDTO.getStateDTO().getName() != null) {
-            Status status = stateMachineNodeAssembler.toTarget(nodeDTO.getStateDTO(), Status.class);
+        if (nodeDTO.getStatusId() == null && nodeDTO.getStatusDTO() != null && nodeDTO.getStatusDTO().getName() != null) {
+            Status status = statusAssembler.toTarget(nodeDTO.getStatusDTO(), Status.class);
             status.setOrganizationId(organizationId);
             int isStateInsert = statusMapper.insert(status);
             if (isStateInsert != 1) {
@@ -134,10 +138,24 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         node.setType(NodeType.START);
         node.setStateMachineId(stateMachineId);
         node.setOrganizationId(organizationId);
-        List<StateMachineNodeDraft> nodes = nodeMapper.select(node);
+        List<StateMachineNodeDraft> nodes = nodeDraftMapper.select(node);
         if (nodes.isEmpty()) {
             throw new CommonException("error.initNode.null");
         }
         return nodes.get(0).getId();
+    }
+
+    @Override
+    public List<StateMachineNodeDTO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft) {
+        List<StateMachineNodeDTO> nodeDTOS;
+        if (isDraft) {
+            //获取节点
+            List<StateMachineNodeDraft> nodes = nodeDraftMapper.selectByStateMachineId(stateMachineId);
+            nodeDTOS = stateMachineNodeAssembler.draftToList(nodes);
+        } else {
+            List<StateMachineNode> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+            nodeDTOS = stateMachineNodeAssembler.toList(nodes);
+        }
+        return nodeDTOS;
     }
 }

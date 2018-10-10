@@ -31,7 +31,7 @@ public class StateMachineNodeDraft extends AuditDomain {
     private Long organizationId;
 
     @Transient
-    private Status state;
+    private Status status;
 
     public Long getId() {
         return id;
@@ -97,12 +97,12 @@ public class StateMachineNodeDraft extends AuditDomain {
         this.type = type;
     }
 
-    public Status getState() {
-        return state;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setState(Status state) {
-        this.state = state;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Long getAllStatusTransformId() {

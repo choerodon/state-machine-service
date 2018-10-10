@@ -9,6 +9,10 @@ public class ConfigCodeDTO {
     private String name;
     private String description;
     private String type;
+    private String service;
+
+    public  ConfigCodeDTO(){
+    }
 
     public ConfigCodeDTO(String code, String name, String description, String type) {
         this.code = code;
@@ -47,5 +51,24 @@ public class ConfigCodeDTO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigCodeDTO{" +
+                "code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", service='" + service + '\'' +
+                '}';
     }
 }

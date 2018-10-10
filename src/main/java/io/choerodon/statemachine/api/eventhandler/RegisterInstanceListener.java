@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.api.eventhandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.statemachine.api.dto.RegisterInstancePayloadDTO;
+import io.choerodon.statemachine.domain.event.RegisterInstancePayload;
 import io.choerodon.statemachine.api.service.RegisterInstanceService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class RegisterInstanceListener {
         String message = new String(record.value());
         try {
             LOGGER.info("receive message from register-server, {}", message);
-            RegisterInstancePayloadDTO payload = mapper.readValue(message, RegisterInstancePayloadDTO.class);
+            RegisterInstancePayload payload = mapper.readValue(message, RegisterInstancePayload.class);
             Observable.just(payload)
                     .map(t -> {
                         if (STATUS_UP.equals(payload.getStatus())) {
@@ -66,7 +66,7 @@ public class RegisterInstanceListener {
                                 return retryCount;
                             }).flatMap(y -> Observable.timer(2, TimeUnit.SECONDS)))
                     .subscribeOn(Schedulers.io())
-                    .subscribe((RegisterInstancePayloadDTO registerInstancePayload) -> {
+                    .subscribe((RegisterInstancePayload registerInstancePayload) -> {
                     });
         } catch (Exception e) {
             LOGGER.warn("error happened when handle message， {} cause {}", message, e.getCause());

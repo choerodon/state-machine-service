@@ -18,7 +18,7 @@ public class StateMachineNodeDTO {
     private Long allStatusTransformId;
     private Long organizationId;
 
-    private StatusDTO stateDTO;
+    private StatusDTO statusDTO;
 
     /**
      * 前端要用到
@@ -90,12 +90,12 @@ public class StateMachineNodeDTO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public StatusDTO getStateDTO() {
-        return stateDTO;
+    public StatusDTO getStatusDTO() {
+        return statusDTO;
     }
 
-    public void setStateDTO(StatusDTO stateDTO) {
-        this.stateDTO = stateDTO;
+    public void setStatusDTO(StatusDTO statusDTO) {
+        this.statusDTO = statusDTO;
     }
 
     public String getType() {

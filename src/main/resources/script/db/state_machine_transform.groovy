@@ -2,7 +2,7 @@ package script.db
 
 databaseChangeLog(logicalFilePath: 'script/db/state_machine_transform.groovy') {
 
-    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state_machine_transform') {
+    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state-machine-transform') {
         createTable(tableName: 'state_machine_transform') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID,主键') {
                 constraints(primaryKey: true)

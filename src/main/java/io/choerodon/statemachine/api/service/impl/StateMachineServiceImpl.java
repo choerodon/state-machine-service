@@ -9,6 +9,7 @@ import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
+import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.app.assembler.StateMachineAssembler;
@@ -35,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @Component
 @Transactional(rollbackFor = Exception.class)
@@ -51,6 +52,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Autowired
     private StateMachineNodeDraftMapper nodeDraftMapper;
+
+    @Autowired
+    private StateMachineNodeService nodeService;
 
     @Autowired
     private StateMachineTransformMapper transformDeployMapper;
@@ -288,12 +292,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notFound");
         }
-        List<StateMachineNodeDTO> nodeDTOS;
+        List<StateMachineNodeDTO> nodeDTOS = nodeService.queryByStateMachineId(organizationId,stateMachineId,isDraft);
         List<StateMachineTransformDTO> transformDTOS;
         if (isDraft) {
-            //获取节点
-            List<StateMachineNodeDraft> nodes = nodeDraftMapper.selectByStateMachineId(stateMachineId);
-            nodeDTOS = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNodeDTO.class);
             //获取转换
             StateMachineTransformDraft select = new StateMachineTransformDraft();
             select.setStateMachineId(stateMachineId);
@@ -301,15 +302,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             List<StateMachineTransformDraft> transforms = transformDraftMapper.select(select);
             transformDTOS = stateMachineTransformAssembler.toTargetList(transforms, StateMachineTransformDTO.class);
         } else {
-            List<StateMachineNode> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
-            nodeDTOS = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNodeDTO.class);
             StateMachineTransform select = new StateMachineTransform();
             select.setStateMachineId(stateMachineId);
             select.setOrganizationId(organizationId);
             List<StateMachineTransform> transforms = transformDeployMapper.select(select);
             transformDTOS = stateMachineTransformAssembler.toTargetList(transforms, StateMachineTransformDTO.class);
         }
-
 
         StateMachineDTO stateMachineDTO = stateMachineAssembler.toTarget(stateMachine, StateMachineDTO.class);
         stateMachineDTO.setNodeDTOs(nodeDTOS);
@@ -462,6 +460,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public void updateStateMachineStatus(Long organizationId, Long stateMachineId) {
+        if(stateMachineId==null){
+            throw new CommonException("error.updateStateMachineStatus.stateMachineId.notNull");
+        }
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
@@ -492,7 +493,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         stateMachine.setName("默认状态机");
         stateMachine.setDescription("默认状态机");
         stateMachine.setStatus(STATE_MACHINE_CREATE);
-        if(stateMachineMapper.insert(stateMachine) != 1) {
+        if (stateMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException("error.stateMachine.insert");
         }
 

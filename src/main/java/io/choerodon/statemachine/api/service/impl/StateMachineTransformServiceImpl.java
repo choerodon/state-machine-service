@@ -2,9 +2,6 @@ package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.service.BaseServiceImpl;
-import io.choerodon.statemachine.api.dto.ConfigEnumDTO;
-import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
@@ -13,18 +10,19 @@ import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
-import io.choerodon.statemachine.domain.*;
+import io.choerodon.statemachine.domain.StateMachineNodeDraft;
+import io.choerodon.statemachine.domain.StateMachineTransform;
+import io.choerodon.statemachine.domain.StateMachineTransformDraft;
+import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
 import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.*;
-import io.choerodon.statemachine.infra.utils.EnumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,8 +50,6 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     @Autowired
     private StateMachineTransformAssembler stateMachineTransformAssembler;
     @Autowired
-    private StateMachineConfigAssembler stateMachineConfigAssembler;
-    @Autowired
     private StateMachineNodeAssembler stateMachineNodeAssembler;
     @Autowired
     private StateMachineService stateMachineService;
@@ -63,16 +59,15 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setType(TransformType.CUSTOM);
         transform.setOrganizationId(organizationId);
-        if (!EnumUtil.contain(TransformConditionStrategy.class, transform.getConditionStrategy())) {
-            throw new CommonException("error.stateMachineTransform.conditionStrategy.illegal");
-        }
+        transform.setConditionStrategy(TransformConditionStrategy.ALL);
+
         int isInsert = transformDraftMapper.insert(transform);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransform.create");
         }
-        transform = transformDraftMapper.queryById(organizationId, transform.getId());
+        //更新状态机状态
         stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
-        return stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
+        return queryById(organizationId, transform.getId());
     }
 
     @Override
@@ -121,63 +116,14 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     public StateMachineTransformDTO queryById(Long organizationId, Long transformId) {
         StateMachineTransformDraft transform = transformDraftMapper.queryById(organizationId, transformId);
         StateMachineTransformDTO dto = stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
-        List<StateMachineConfigDTO> conditions = new ArrayList<>();
-        List<StateMachineConfigDTO> validators = new ArrayList<>();
-        List<StateMachineConfigDTO> triggers = new ArrayList<>();
-        List<StateMachineConfigDTO> postpositions = new ArrayList<>();
-        StateMachineConfigDraft config = new StateMachineConfigDraft();
-        config.setTransformId(transformId);
-        List<StateMachineConfigDraft> stateMachineConfigList = configMapper.select(config);
-        if (stateMachineConfigList != null && !stateMachineConfigList.isEmpty()) {
-            List<StateMachineConfigDTO> dtoList = stateMachineConfigAssembler.toTargetList(stateMachineConfigList, StateMachineConfigDTO.class);
-            for (StateMachineConfigDTO configDto : dtoList) {
-                if (ConfigType.CONDITION.equals(configDto.getType())) {
-                    List<ConfigEnumDTO> conditionConfigEnums = configService.buildConfigEnum(ConfigType.CONDITION);
-                    for (ConfigEnumDTO configEnum : conditionConfigEnums) {
-                        if (configEnum.getCode().equals(configDto.getCode())) {
-                            configDto.setDescription(configEnum.getDescription());
-                            break;
-                        }
-                    }
-                    conditions.add(configDto);
-                } else if (ConfigType.VALIDATOR.equals(configDto.getType())) {
-                    List<ConfigEnumDTO> validatorConfigEnums = configService.buildConfigEnum(ConfigType.VALIDATOR);
-                    for (ConfigEnumDTO configEnum : validatorConfigEnums) {
-                        if (configEnum.getCode().equals(configDto.getCode())) {
-                            configDto.setDescription(configEnum.getDescription());
-                            break;
-                        }
-                    }
-                    validators.add(configDto);
-                } else if (ConfigType.TRIGGER.equals(configDto.getType())) {
-                    List<ConfigEnumDTO> triggerConfigEnums = configService.buildConfigEnum(ConfigType.TRIGGER);
-                    for (ConfigEnumDTO configEnum : triggerConfigEnums) {
-                        if (configEnum.getCode().equals(configDto.getCode())) {
-                            configDto.setDescription(configEnum.getDescription());
-                            break;
-                        }
-                    }
-                    triggers.add(configDto);
-                } else {
-                    List<ConfigEnumDTO> postpositionConfigEnums = configService.buildConfigEnum(ConfigType.POSTPOSITION);
-                    for (ConfigEnumDTO configEnum : postpositionConfigEnums) {
-                        if (configEnum.getCode().equals(configDto.getCode())) {
-                            configDto.setDescription(configEnum.getDescription());
-                            break;
-                        }
-                    }
-                    postpositions.add(configDto);
-                }
-            }
-        }
-        dto.setConditions(conditions);
-        dto.setValidators(validators);
-        dto.setTriggers(triggers);
-        dto.setPostpositions(postpositions);
+        dto.setConditions(configService.queryByTransformId(organizationId, transformId, ConfigType.CONDITION, true));
+        dto.setValidators(configService.queryByTransformId(organizationId, transformId, ConfigType.VALIDATOR, true));
+        dto.setTriggers(configService.queryByTransformId(organizationId, transformId, ConfigType.TRIGGER, true));
+        dto.setPostpositions(configService.queryByTransformId(organizationId, transformId, ConfigType.POSTPOSITION, true));
         StateMachineNodeDraft startNode = nodeDraftMapper.getNodeById(dto.getStartNodeId());
         StateMachineNodeDraft endNode = nodeDraftMapper.getNodeById(dto.getEndNodeId());
-        dto.setStartNodeDTO(stateMachineNodeAssembler.toTarget(startNode, StateMachineNodeDTO.class));
-        dto.setEndNodeDTO(stateMachineNodeAssembler.toTarget(endNode, StateMachineNodeDTO.class));
+        dto.setStartNodeDTO(stateMachineNodeAssembler.draftToNodeDTO(startNode));
+        dto.setEndNodeDTO(stateMachineNodeAssembler.draftToNodeDTO(endNode));
         return dto;
     }
 

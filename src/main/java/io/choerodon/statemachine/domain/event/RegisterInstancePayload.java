@@ -1,10 +1,10 @@
-package io.choerodon.statemachine.api.dto;
+package io.choerodon.statemachine.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
-public class RegisterInstancePayloadDTO {
+public class RegisterInstancePayload {
 
     private String status;
 
