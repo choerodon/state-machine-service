@@ -4,16 +4,16 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_config.groovy') {
     changeSet(author: 'shinan.chenX@gmail.com', id: '2018-09-12-state-machine-config') {
         createTable(tableName: 'state_machine_config') {
             column(name: 'id', type: 'BIGINT UNSIGNED', remarks: 'ID,主键') {
-                constraints(primaryKey: 'true')
+                constraints(primaryKey: true)
             }
             column(name: 'transform_id', type: 'BIGINT UNSIGNED', remarks: '转换id') {
-                constraints(nullable: 'false')
+                constraints(nullable: false)
             }
             column(name: 'state_machine_id', type: 'BIGINT UNSIGNED', remarks: '状态机id') {
-                constraints(nullable: 'false')
+                constraints(nullable: false)
             }
             column(name: 'code', type: 'VARCHAR(255)', remarks: '编码') {
-                constraints(nullable: 'false')
+                constraints(nullable: false)
             }
             column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
                 constraints(nullable: false)

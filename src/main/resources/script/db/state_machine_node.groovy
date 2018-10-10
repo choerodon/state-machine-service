@@ -4,13 +4,13 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_node.groovy') {
     changeSet(author: 'shinan.chenX@gmail.com', id: '2018-07-30-state_machine_node') {
         createTable(tableName: 'state_machine_node') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'ID,主键') {
-                constraints(primaryKey: 'true')
+                constraints(primaryKey: true)
             }
             column(name: 'state_machine_id', type: 'BIGINT UNSIGNED', remarks: '状态机id') {
-                constraints(nullable: 'false')
+                constraints(nullable: false)
             }
             column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: '状态id') {
-                constraints(nullable: 'false')
+                constraints(nullable: false)
             }
             column(name: 'position_x', type: 'BIGINT', remarks: '坐标x')
             column(name: 'position_y', type: 'BIGINT', remarks: '坐标y')

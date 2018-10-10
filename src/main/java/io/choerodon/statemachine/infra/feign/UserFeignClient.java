@@ -18,5 +18,5 @@ public interface UserFeignClient {
      * 按照id查询项目
      */
     @RequestMapping(value = "/v1/projects/{project_id}", method = RequestMethod.GET)
-    public ResponseEntity<ProjectDTO> queryProject(@PathVariable(name = "project_id") Long projectId);
+    ResponseEntity<ProjectDTO> queryProject(@PathVariable(name = "project_id") Long projectId);
 }
