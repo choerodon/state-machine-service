@@ -2,10 +2,15 @@ package io.choerodon.statemachine.infra.enums;
 
 /**
  * 转换的类型
+ *
  * @author shinan.chen
  * @date 2018/9/27
  */
 public class TransformType {
+    private TransformType() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * 默认初始化转换
      */

@@ -5,6 +5,10 @@ package io.choerodon.statemachine.infra.enums;
  * @date 2018/10/9
  */
 public class TransformConditionStrategy {
+    private TransformConditionStrategy() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * 满足下列所有条件
      */

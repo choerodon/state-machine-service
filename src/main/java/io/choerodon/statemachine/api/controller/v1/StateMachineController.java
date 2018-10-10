@@ -20,11 +20,10 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/state_machines")
@@ -47,7 +46,7 @@ public class StateMachineController extends BaseController {
                                                              @RequestParam(required = false) String description,
                                                              @RequestParam(required = false) String[] param) {
         return new ResponseEntity<>(stateMachineService.pageQuery(pageRequest, new StateMachineDTO(name, description, organizationId),
-                param!=null?Arrays.stream(param).collect(Collectors.joining(",")):null), HttpStatus.OK);
+                param != null ? Arrays.stream(param).collect(Collectors.joining(",")) : null), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

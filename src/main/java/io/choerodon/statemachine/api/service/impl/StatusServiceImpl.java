@@ -4,26 +4,26 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.StatusService;
-import io.choerodon.statemachine.domain.*;
+import io.choerodon.statemachine.domain.StateMachineNode;
+import io.choerodon.statemachine.domain.StateMachineTransform;
+import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.enums.TransformType;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @Service
 public class StatusServiceImpl implements StatusService {
@@ -119,7 +119,7 @@ public class StatusServiceImpl implements StatusService {
     @Override
     public StatusDTO queryStatusById(Long organizationId, Long stateId) {
         Status status = stateMapper.queryById(organizationId, stateId);
-        if(status==null){
+        if (status == null) {
             throw new CommonException("error.queryStatusById.notExist");
         }
         return modelMapper.map(status, StatusDTO.class);
@@ -148,13 +148,13 @@ public class StatusServiceImpl implements StatusService {
     }
 
     private Long createStateMachineByDetail(Long organizationId,
-                                      String name,
-                                      String description,
-                                      String type,
-                                      Long stateMachineId,
-                                      Long startNodeId,
-                                      String nodeType,
-                                      String transformType) {
+                                            String name,
+                                            String description,
+                                            String type,
+                                            Long stateMachineId,
+                                            Long startNodeId,
+                                            String nodeType,
+                                            String transformType) {
         Status status = new Status();
         status.setOrganizationId(organizationId);
         status.setName(name);

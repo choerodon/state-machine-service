@@ -9,9 +9,6 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.api.validator.StateValidator;
-import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.infra.enums.StatusType;
-import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -24,11 +21,10 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/status")
@@ -52,7 +48,7 @@ public class StatusController extends BaseController {
                                                        @RequestParam(required = false) String type,
                                                        @RequestParam(required = false) String[] param) {
         return new ResponseEntity<>(statusService.pageQuery(pageRequest, new StatusDTO(name, description, type, organizationId),
-                param!=null?Arrays.stream(param).collect(Collectors.joining(",")):null), HttpStatus.OK);
+                param != null ? Arrays.stream(param).collect(Collectors.joining(",")) : null), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

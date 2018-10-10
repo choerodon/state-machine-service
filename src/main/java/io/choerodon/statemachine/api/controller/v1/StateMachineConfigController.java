@@ -2,7 +2,6 @@ package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.statemachine.api.dto.ConfigCodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.swagger.annotation.Permission;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_configs")
@@ -45,8 +44,8 @@ public class StateMachineConfigController extends BaseController {
     @ApiOperation(value = "获取转换下的配置（草稿）")
     @GetMapping(value = "/query")
     public ResponseEntity<List<StateMachineConfigDTO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,
-                                                                       @RequestParam Long transformId,
-                                                                       @RequestParam String type) {
-        return new ResponseEntity<>(configService.queryByTransformId(organizationId,transformId, type, true), HttpStatus.OK);
+                                                                          @RequestParam Long transformId,
+                                                                          @RequestParam String type) {
+        return new ResponseEntity<>(configService.queryByTransformId(organizationId, transformId, type, true), HttpStatus.OK);
     }
 }

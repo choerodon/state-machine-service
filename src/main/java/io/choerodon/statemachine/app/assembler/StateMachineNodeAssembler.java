@@ -33,17 +33,13 @@ public class StateMachineNodeAssembler extends AbstractAssembler {
 
     public List<StateMachineNodeDTO> draftToList(List<StateMachineNodeDraft> nodes) {
         List<StateMachineNodeDTO> nodeDTOS = new ArrayList<>(nodes.size());
-        nodes.forEach(node->{
-            nodeDTOS.add(draftToNodeDTO(node));
-        });
+        nodes.forEach(node -> nodeDTOS.add(draftToNodeDTO(node)));
         return nodeDTOS;
     }
 
     public List<StateMachineNodeDTO> toList(List<StateMachineNode> nodes) {
         List<StateMachineNodeDTO> nodeDTOS = new ArrayList<>(nodes.size());
-        nodes.forEach(node->{
-            nodeDTOS.add(toNodeDTO(node));
-        });
+        nodes.forEach(node -> nodeDTOS.add(toNodeDTO(node)));
         return nodeDTOS;
     }
 }

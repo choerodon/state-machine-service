@@ -54,8 +54,9 @@ public class ConfigCodeServiceImpl extends BaseServiceImpl<ConfigCode> implement
         config.setTransformId(transformId);
         config.setType(type);
         List<StateMachineConfigDraft> configs = configDraftMapper.select(config);
+        List<String> configCodes = configs.stream().map(StateMachineConfigDraft::getCode).collect(Collectors.toList());
         //过滤掉已经配置的，返回未配置的code
-        List<ConfigCodeDTO> configCodeDTOS = queryByType(type).stream().filter(x -> !configs.contains(x)).collect(Collectors.toList());
+        List<ConfigCodeDTO> configCodeDTOS = queryByType(type).stream().filter(configCodeDTO -> !configCodes.contains(configCodeDTO.getCode())).collect(Collectors.toList());
         return configCodeDTOS;
     }
 
