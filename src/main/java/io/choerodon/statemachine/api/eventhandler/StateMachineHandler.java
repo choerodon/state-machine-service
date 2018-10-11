@@ -3,7 +3,6 @@ package io.choerodon.statemachine.api.eventhandler;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 import io.choerodon.statemachine.api.service.StateMachineService;
-import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.domain.event.OrganizationEventPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

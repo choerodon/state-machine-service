@@ -21,6 +21,7 @@ public class RegisterInstanceServiceImpl implements RegisterInstanceService {
 
     @Override
     public void instanceDownConsumer(final RegisterInstancePayload payload) {
+        // do something
     }
 
     @Override

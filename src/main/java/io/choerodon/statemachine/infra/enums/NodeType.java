@@ -5,6 +5,9 @@ package io.choerodon.statemachine.infra.enums;
  * @date 2018/9/27
  */
 public class NodeType {
+    private NodeType() {
+        throw new IllegalStateException("Utility class");
+    }
     /**
      * 默认初始化节点
      */

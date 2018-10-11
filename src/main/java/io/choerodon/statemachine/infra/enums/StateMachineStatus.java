@@ -4,7 +4,11 @@ package io.choerodon.statemachine.infra.enums;
  * @author shinan.chen
  * @date 2018/9/27
  */
-public final class StateMachineStatus {
+public class StateMachineStatus {
+    private StateMachineStatus() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * 草稿状态（发布后修改）
      */

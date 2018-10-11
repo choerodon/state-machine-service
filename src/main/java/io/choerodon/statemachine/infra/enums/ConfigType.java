@@ -5,6 +5,9 @@ package io.choerodon.statemachine.infra.enums;
  * @date 2018/9/27
  */
 public class ConfigType {
+    private ConfigType() {
+        throw new IllegalStateException("Utility class");
+    }
     /**
      * 条件
      */

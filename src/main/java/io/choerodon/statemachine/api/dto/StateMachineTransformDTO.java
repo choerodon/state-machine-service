@@ -1,10 +1,9 @@
 package io.choerodon.statemachine.api.dto;
 
-import javax.persistence.Column;
 import java.util.List;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 public class StateMachineTransformDTO {
     private Long id;
