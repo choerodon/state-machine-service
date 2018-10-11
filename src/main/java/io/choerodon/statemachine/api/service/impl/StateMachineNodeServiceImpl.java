@@ -86,7 +86,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         }
         transformMapper.deleteByNodeId(nodeId);
         stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
-        return stateMachineNodeAssembler.toTargetList(nodeDraftMapper.selectByStateMachineId(node.getStateMachineId()), StateMachineNodeDTO.class);
+        return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
     }
 
     @Override

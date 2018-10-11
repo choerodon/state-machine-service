@@ -16,7 +16,7 @@
         <result property="lastUpdateDate" column="last_update_date"/>
         <result property="lastUpdatedBy" column="last_updated_by"/>
         <result property="objectVersionNumber" column="object_version_number"/>
-        <association property="state" javaType="io.choerodon.statemachine.domain.Status">
+        <association property="status" javaType="io.choerodon.statemachine.domain.Status">
             <id property="id" column="s_id"/>
             <result property="name" column="s_name"/>
             <result property="description" column="s_description"/>

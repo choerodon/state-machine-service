@@ -52,7 +52,7 @@ public class StateMachineNodeController extends BaseController {
     @DeleteMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeDTO>> deleteNode(@PathVariable("organization_id") Long organizationId,
                                                                 @PathVariable("node_id") Long nodeId) {
-        return new ResponseEntity<>(nodeService.delete(organizationId, nodeId), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(nodeService.delete(organizationId, nodeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

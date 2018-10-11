@@ -264,7 +264,7 @@ public class MachineFactory {
         for (Map.Entry<String, StateMachine<String, String>> entry : stateMachineMap.entrySet()) {
             Long entryStateMachineId = Long.parseLong(entry.getKey().split(":")[1]);
             if (entryStateMachineId.equals(stateMachineId)) {
-                entry.setValue(null);
+                stateMachineMap.remove(entry.getKey());
             }
         }
     }
