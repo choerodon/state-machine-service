@@ -2,7 +2,9 @@ package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.service.BaseServiceImpl;
+import io.choerodon.statemachine.api.dto.ConfigCodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
+import io.choerodon.statemachine.api.service.ConfigCodeService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.domain.StateMachineConfig;
@@ -30,6 +32,8 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     @Autowired
     private StateMachineConfigMapper configDeployMapper;
     @Autowired
+    private ConfigCodeService configCodeService;
+    @Autowired
     private StateMachineConfigAssembler stateMachineConfigAssembler;
 
     private ModelMapper modelMapper = new ModelMapper();
@@ -39,6 +43,9 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
         if (!EnumUtil.contain(ConfigType.class, configDTO.getType())) {
             throw new CommonException("error.status.type.illegal");
         }
+        //验证configCode
+        checkCode(transformId, configDTO.getType(), configDTO.getCode());
+
         configDTO.setTransformId(transformId);
         configDTO.setOrganizationId(organizationId);
         StateMachineConfigDraft config = modelMapper.map(configDTO, StateMachineConfigDraft.class);
@@ -78,5 +85,19 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
             configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
         }
         return configDTOS;
+    }
+
+    public void checkCode(Long transformId, String type, String code) {
+        List<ConfigCodeDTO> configCodeDTOs = configCodeService.queryByType(type);
+        if (configCodeDTOs.stream().noneMatch(configCodeDTO -> configCodeDTO.getCode().equals(code))) {
+            throw new CommonException("error.configCode.illegal");
+        }
+        StateMachineConfigDraft configDraft = new StateMachineConfigDraft();
+        configDraft.setTransformId(transformId);
+        configDraft.setCode(code);
+        if (!configDraftMapper.select(configDraft).isEmpty()) {
+            throw new CommonException("error.configCode.exist");
+        }
+
     }
 }

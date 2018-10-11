@@ -75,6 +75,7 @@ public class ConfigCodeServiceImpl extends BaseServiceImpl<ConfigCode> implement
         configCodeDTOS.forEach(configCodeDTO -> {
             configCodeDTO.setService(service);
             configCodeMapper.insert(configCodeAssembler.toTarget(configCodeDTO, ConfigCode.class));
+            logger.info("handlePropertyData service:{} insert code:{} successful", service, configCodeDTO.getCode());
         });
         logger.info("handlePropertyData load service:{} successful", service);
     }

@@ -249,10 +249,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<StateMachineNodeDraft> nodes = nodeDraftMapper.select(node);
         if (nodes != null && !nodes.isEmpty()) {
             List<StateMachineNode> nodeDeploys = stateMachineNodeAssembler.toTargetList(nodes, StateMachineNode.class);
-            int nodeDeployInsert = nodeDeployMapper.insertList(nodeDeploys);
-            if (nodeDeployInsert == 0) {
-                throw new CommonException("error.stateMachineNodeDeploy.create");
-            }
+            nodeDeploys.forEach(n -> nodeDeployMapper.insert(n));
         }
         //写入发布的转换
         StateMachineTransformDraft transform = new StateMachineTransformDraft();
@@ -262,10 +259,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (transforms != null && !transforms.isEmpty()) {
             List<StateMachineTransform> transformDeploys = modelMapper.map(transforms, new TypeToken<List<StateMachineTransform>>() {
             }.getType());
-            int transformDeployInsert = transformDeployMapper.insertList(transformDeploys);
-            if (transformDeployInsert == 0) {
-                throw new CommonException("error.stateMachineTransformDeploy.create");
-            }
+            transformDeploys.forEach(t -> transformDeployMapper.insert(t));
         }
         //写入发布的配置
         StateMachineConfigDraft config = new StateMachineConfigDraft();
@@ -275,10 +269,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (configs != null && !configs.isEmpty()) {
             List<StateMachineConfig> configDeploys = modelMapper.map(configs, new TypeToken<List<StateMachineConfig>>() {
             }.getType());
-            int configDeployInsert = configDeployMapper.insertList(configDeploys);
-            if (configDeployInsert == 0) {
-                throw new CommonException("error.stateMachineConfigDeploy.create");
-            }
+            configDeploys.forEach(c -> configDeployMapper.insert(c));
+
         }
         //清理内存中的旧状态机构建器与实例
         machineFactory.deployStateMachine(stateMachineId);
@@ -292,7 +284,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notFound");
         }
-        List<StateMachineNodeDTO> nodeDTOS = nodeService.queryByStateMachineId(organizationId,stateMachineId,isDraft);
+
+        //查询草稿时，若为活跃状态，则更新为草稿
+        if (isDraft) {
+            updateStateMachineStatus(organizationId, stateMachineId);
+        }
+
+        List<StateMachineNodeDTO> nodeDTOS = nodeService.queryByStateMachineId(organizationId, stateMachineId, isDraft);
         List<StateMachineTransformDTO> transformDTOS;
         if (isDraft) {
             //获取转换
@@ -460,7 +458,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public void updateStateMachineStatus(Long organizationId, Long stateMachineId) {
-        if(stateMachineId==null){
+        if (stateMachineId == null) {
             throw new CommonException("error.updateStateMachineStatus.stateMachineId.notNull");
         }
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
