@@ -86,4 +86,13 @@ public class StateMachineTransformController extends BaseController {
                                                         @PathVariable("transform_id") Long transformId) {
         return new ResponseEntity<>(transformService.deleteAllStatusTransform(organizationId, transformId), HttpStatus.NO_CONTENT);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "更改条件策略")
+    @GetMapping(value = "/update_condition_strategy/{transform_id}")
+    public ResponseEntity<Boolean> updateConditionStrategy(@PathVariable("organization_id") Long organizationId,
+                                                           @PathVariable("transform_id") Long transformId,
+                                                           @RequestParam("condition_strategy")String conditionStrategy){
+        return new ResponseEntity<>(transformService.updateConditionStrategy(organizationId, transformId, conditionStrategy), HttpStatus.CREATED);
+    }
 }

@@ -18,6 +18,7 @@ import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
 import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.*;
+import io.choerodon.statemachine.infra.utils.EnumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +83,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
         transform = transformDraftMapper.queryById(organizationId, transform.getId());
         stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
-        return stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
+        return queryById(organizationId, transform.getId());
 
     }
 
@@ -114,14 +115,21 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     @Override
     public StateMachineTransformDTO queryById(Long organizationId, Long transformId) {
         StateMachineTransformDraft transform = transformDraftMapper.queryById(organizationId, transformId);
+        if (transform == null) {
+            throw new CommonException("error.stateMachineTransform.queryById.notFound");
+        }
         StateMachineTransformDTO dto = stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
         dto.setConditions(configService.queryByTransformId(organizationId, transformId, ConfigType.CONDITION, true));
         dto.setValidators(configService.queryByTransformId(organizationId, transformId, ConfigType.VALIDATOR, true));
         dto.setTriggers(configService.queryByTransformId(organizationId, transformId, ConfigType.TRIGGER, true));
         dto.setPostpositions(configService.queryByTransformId(organizationId, transformId, ConfigType.POSTPOSITION, true));
-        StateMachineNodeDraft startNode = nodeDraftMapper.getNodeById(dto.getStartNodeId());
+        //获取开始节点，若为初始转换，则没有开始节点
+        if (TransformType.CUSTOM.equals(transform.getType())) {
+            StateMachineNodeDraft startNode = nodeDraftMapper.getNodeById(dto.getStartNodeId());
+            dto.setStartNodeDTO(stateMachineNodeAssembler.draftToNodeDTO(startNode));
+        }
+        //获取结束节点
         StateMachineNodeDraft endNode = nodeDraftMapper.getNodeById(dto.getEndNodeId());
-        dto.setStartNodeDTO(stateMachineNodeAssembler.draftToNodeDTO(startNode));
         dto.setEndNodeDTO(stateMachineNodeAssembler.draftToNodeDTO(endNode));
         return dto;
     }
@@ -213,8 +221,25 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         node.setAllStatusTransformId(null);
         int updateResult = nodeService.updateOptional(node, "allStatusTransformId");
         if (updateResult != 1) {
-            throw new CommonException("error.StateMachineTransformServiceImpl.updateOptional");
+            throw new CommonException("error.deleteAllStatusTransform.updateOptional");
         }
         return result;
+    }
+
+    @Override
+    public Boolean updateConditionStrategy(Long organizationId, Long transformId, String conditionStrategy) {
+        if (!EnumUtil.contain(TransformConditionStrategy.class, conditionStrategy)) {
+            throw new CommonException("error.updateConditionStrategy.conditionStrategy.illegal");
+        }
+        StateMachineTransformDraft transform = transformDraftMapper.queryById(organizationId, transformId);
+        if (transform == null) {
+            throw new CommonException("error.updateConditionStrategy.queryById.notFound");
+        }
+        transform.setConditionStrategy(conditionStrategy);
+        int update = updateOptional(transform, "conditionStrategy");
+        if (update != 1) {
+            throw new CommonException("error.updateConditionStrategy.updateOptional");
+        }
+        return true;
     }
 }

@@ -7,6 +7,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * @author peng.jiang,dinghuang123@gmail.com
@@ -22,6 +23,11 @@ public class StateMachineConfigDraft extends AuditDomain {
     private Long stateMachineId;
     private String code;
     private String type;
+
+    @Transient
+    private String codeName;
+    @Transient
+    private String codeDescription;
 
     private Long organizationId;
 
@@ -71,5 +77,21 @@ public class StateMachineConfigDraft extends AuditDomain {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public String getCodeName() {
+        return codeName;
+    }
+
+    public void setCodeName(String codeName) {
+        this.codeName = codeName;
+    }
+
+    public String getCodeDescription() {
+        return codeDescription;
+    }
+
+    public void setCodeDescription(String codeDescription) {
+        this.codeDescription = codeDescription;
     }
 }

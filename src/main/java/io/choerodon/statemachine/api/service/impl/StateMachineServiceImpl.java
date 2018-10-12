@@ -5,10 +5,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.service.BaseServiceImpl;
-import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.api.dto.StateMachineDTO;
-import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
-import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
+import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StatusService;
@@ -17,10 +14,7 @@ import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.*;
-import io.choerodon.statemachine.infra.enums.ConfigType;
-import io.choerodon.statemachine.infra.enums.NodeType;
-import io.choerodon.statemachine.infra.enums.StateMachineStatus;
-import io.choerodon.statemachine.infra.enums.TransformType;
+import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.modelmapper.ModelMapper;
@@ -127,27 +121,31 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             throw new CommonException("error.stateMachineNode.create");
         }
 
-        //创建默认的节点和转换
-        StateMachineNodeDraft node = new StateMachineNodeDraft();
-        node.setStateMachineId(stateMachine.getId());
-        //TODO 初始化默认状态
-        node.setStatusId(1L);
-        node.setPositionX(0L);
-        node.setPositionY(120L);
-        node.setWidth(100L);
-        node.setHeight(50L);
-        node.setType(NodeType.INIT);
-        node.setOrganizationId(organizationId);
-        int isNodeInsert = nodeDraftMapper.insert(node);
+        //创建默认的初始节点
+        StateMachineNodeDraft initNode = new StateMachineNodeDraft();
+        initNode.setStateMachineId(stateMachine.getId());
+        //获取第一个状态
+        List<StatusDTO> statusDTOS = statusService.queryAllStatus(organizationId);
+        initNode.setStatusId(statusDTOS.isEmpty() ? 0L : statusDTOS.get(0).getId());
+        initNode.setPositionX(0L);
+        initNode.setPositionY(120L);
+        initNode.setWidth(100L);
+        initNode.setHeight(50L);
+        initNode.setType(NodeType.INIT);
+        initNode.setOrganizationId(organizationId);
+        int isNodeInsert = nodeDraftMapper.insert(initNode);
         if (isNodeInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
         }
 
+        //创建默认的转换
         StateMachineTransformDraft transform = new StateMachineTransformDraft();
+        transform.setName("初始化");
         transform.setStateMachineId(stateMachine.getId());
         transform.setStartNodeId(startNode.getId());
-        transform.setEndNodeId(node.getId());
+        transform.setEndNodeId(initNode.getId());
         transform.setType(TransformType.INIT);
+        transform.setConditionStrategy(TransformConditionStrategy.ALL);
         transform.setOrganizationId(organizationId);
         int isTransformInsert = transformDraftMapper.insert(transform);
         if (isTransformInsert != 1) {
@@ -371,11 +369,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.deleteDraft.noFound");
         }
-        int isDelete = stateMachineMapper.deleteByPrimaryKey(stateMachineId);
-        if (isDelete != 1) {
-            throw new CommonException("error.stateMachine.deleteDraft");
-        }
-        stateMachine.setStatus(StateMachineStatus.DRAFT);
+        stateMachine.setStatus(StateMachineStatus.ACTIVE);
         int stateMachineDeploy = updateOptional(stateMachine, "status");
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deleteDraft");

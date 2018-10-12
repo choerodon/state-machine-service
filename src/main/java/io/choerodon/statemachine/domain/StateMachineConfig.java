@@ -74,4 +74,20 @@ public class StateMachineConfig extends AuditDomain {
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
+
+    public String getCodeName() {
+        return codeName;
+    }
+
+    public void setCodeName(String codeName) {
+        this.codeName = codeName;
+    }
+
+    public String getCodeDescription() {
+        return codeDescription;
+    }
+
+    public void setCodeDescription(String codeDescription) {
+        this.codeDescription = codeDescription;
+    }
 }
