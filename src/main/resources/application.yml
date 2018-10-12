@@ -88,5 +88,6 @@ feign:
       default:
         loggerLevel: debug
 logging:
-  level: debug
+  level:
+    io.choerodon.statemachine: debug
 

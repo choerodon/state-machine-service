@@ -92,4 +92,13 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @return
      */
     Boolean deleteAllStatusTransform(Long organizationId, Long transformId);
+
+    /**
+     * 更新转换的条件策略
+     * @param organizationId
+     * @param transformId
+     * @param conditionStrategy
+     * @return
+     */
+    Boolean updateConditionStrategy(Long organizationId, Long transformId, String conditionStrategy);
 }

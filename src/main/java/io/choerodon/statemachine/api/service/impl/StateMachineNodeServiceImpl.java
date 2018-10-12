@@ -68,7 +68,6 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         createStatus(organizationId, nodeDTO);
         StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
         node.setId(nodeId);
-        node.setType(NodeType.CUSTOM);
         int isUpdate = nodeDraftMapper.updateByPrimaryKeySelective(node);
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachineNode.update");
@@ -97,10 +96,12 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         }
         StateMachineNodeDTO nodeDTO = stateMachineNodeAssembler.draftToNodeDTO(node);
 
+        //获取进入的转换
         StateMachineTransformDraft intoTransformSerach = new StateMachineTransformDraft();
         intoTransformSerach.setEndNodeId(nodeId);
         List<StateMachineTransformDraft> intoTransforms = transformMapper.select(intoTransformSerach);
         nodeDTO.setIntoTransform(stateMachineTransformAssembler.toTargetList(intoTransforms, StateMachineTransformDTO.class));
+        //获取出去的转换
         StateMachineTransformDraft outTransformSerach = new StateMachineTransformDraft();
         outTransformSerach.setStartNodeId(nodeId);
         List<StateMachineTransformDraft> outTransforms = transformMapper.select(outTransformSerach);
