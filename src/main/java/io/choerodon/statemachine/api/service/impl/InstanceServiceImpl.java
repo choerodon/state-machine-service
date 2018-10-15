@@ -11,7 +11,6 @@ import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
-import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +50,7 @@ public class InstanceServiceImpl implements InstanceService {
     private static final String METHOD_FILTER_TRANSF = "filter_transform";
     private static final String METHOD_EXECUTE_CONFIG = "execute_config";
     private static final String ERROR_VALIDATORGUARD = "error.customFeignClientAdaptor.executeConfig.validatorGuard";
+    private static final String EXCEPTION = "Exception:{}";
 
     @Override
     public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId) {
@@ -58,7 +58,7 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             executeResult = machineFactory.startInstance(organizationId, serviceCode, stateMachineId, instanceId);
         } catch (Exception e) {
-            LOGGER.error("Exception:{}", e);
+            LOGGER.error(EXCEPTION, e);
             executeResult = new ExecuteResult(false, null, e.getMessage());
         }
         return executeResult;
@@ -70,7 +70,7 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transformId);
         } catch (Exception e) {
-            LOGGER.error("Exception:{}", e);
+            LOGGER.error(EXCEPTION, e);
             executeResult = new ExecuteResult(false, null, e.getMessage());
         }
         return executeResult;
@@ -82,12 +82,11 @@ public class InstanceServiceImpl implements InstanceService {
         //获取转换的条件配置
         transformInfos.forEach(transformInfo -> transformInfo.setConditions(condition(transformInfo.getOrganizationId(), transformInfo.getId())));
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
-        transformInfos = transformInfos == null ? Collections.emptyList() : transformInfos;
         try {
-            ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getURI(serviceCode, organizationId, METHOD_FILTER_TRANSF, instanceId, null, null, null), transformInfos);
+            ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getURI(serviceCode, METHOD_FILTER_TRANSF, instanceId, null, null, null), transformInfos);
             transformInfos = listEntity.getBody();
         } catch (Exception e) {
-            LOGGER.error("Exception:{}", e);
+            LOGGER.error(EXCEPTION, e);
             transformInfos = Collections.emptyList();
         }
         return transformInfos;
@@ -99,7 +98,7 @@ public class InstanceServiceImpl implements InstanceService {
         ExecuteResult executeResult;
         //调用对应服务，执行验证，返回是否成功
         try {
-            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, null, null, ConfigType.VALIDATOR), configs);
+            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, null, null, ConfigType.VALIDATOR), configs);
             //返回为空则调用对应服务，对应服务方法报错
             if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
@@ -107,7 +106,7 @@ public class InstanceServiceImpl implements InstanceService {
                 executeResult = new ExecuteResult(false, null, ERROR_VALIDATORGUARD);
             }
         } catch (Exception e) {
-            LOGGER.error("Exception:{}", e);
+            LOGGER.error(EXCEPTION, e);
             executeResult = new ExecuteResult(false, null, ERROR_VALIDATORGUARD);
         }
 
@@ -121,13 +120,13 @@ public class InstanceServiceImpl implements InstanceService {
         List<StateMachineConfigDTO> configs = postposition(organizationId, transformId);
         //节点转状态
         Long targetStatusId = nodeDeployMapper.getNodeDeployById(Long.parseLong(context.getTarget().getId())).getStatusId();
-        if(targetStatusId==null){
+        if (targetStatusId == null) {
             throw new CommonException("error.postpositionAction.targetStatusId.notNull");
         }
         ExecuteResult executeResult;
         //调用对应服务，执行动作，返回是否成功
         try {
-            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, organizationId, METHOD_EXECUTE_CONFIG, instanceId, targetStatusId, null, ConfigType.POSTPOSITION), configs);
+            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, targetStatusId, null, ConfigType.POSTPOSITION), configs);
             //返回为空则调用对应服务，对应服务方法报错
             if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
@@ -135,7 +134,7 @@ public class InstanceServiceImpl implements InstanceService {
                 executeResult = new ExecuteResult(false, null, "error.customFeignClientAdaptor.executeConfig.postpositionAction");
             }
         } catch (Exception e) {
-            LOGGER.error("Exception:{}", e);
+            LOGGER.error(EXCEPTION, e);
             executeResult = new ExecuteResult(false, null, ERROR_VALIDATORGUARD);
         }
         Map<Object, Object> variables = context.getExtendedState().getVariables();
@@ -178,7 +177,7 @@ public class InstanceServiceImpl implements InstanceService {
      * @param type              type
      * @return URI
      */
-    private URI getURI(String serviceCode,Long organizationId, String method, Long instanceId, Long targetStateId, String conditionStrategy, String type) {
+    private URI getURI(String serviceCode, String method, Long instanceId, Long targetStateId, String conditionStrategy, String type) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/").append(method).append("?1=1");
@@ -198,7 +197,7 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             uri = new URI(stringBuilder.toString());
         } catch (URISyntaxException e) {
-            LOGGER.error("Exception:{}", e);
+            LOGGER.error(EXCEPTION, e);
         }
         return uri;
     }
