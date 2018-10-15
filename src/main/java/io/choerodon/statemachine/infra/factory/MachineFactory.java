@@ -8,15 +8,11 @@ import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineTransform;
-import io.choerodon.statemachine.infra.enums.StateMachineStatus;
 import io.choerodon.statemachine.infra.enums.TransformType;
-import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.StateMachineBuilder;
@@ -136,8 +132,7 @@ public class MachineFactory {
         Long initTransformId = transformService.getInitTransform(organizationId, stateMachineId);
         instance.sendEvent(initTransformId.toString());
 
-        ExecuteResult result = instance.getExtendedState().getVariables().get(EXECUTE_RESULT) == null ? new ExecuteResult(false, null, null) : (ExecuteResult) instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
-        return result;
+        return instance.getExtendedState().getVariables().get(EXECUTE_RESULT) == null ? new ExecuteResult(false, null, null) : (ExecuteResult) instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
     }
 
     /**
@@ -188,12 +183,9 @@ public class MachineFactory {
      * @return
      */
     private Action<String, String> initialAction(Long organizationId, String serviceCode) {
-        return new Action<String, String>() {
-            @Override
-            public void execute(StateContext<String, String> context) {
-                logger.info("stateMachine instance execute initialAction:{}", context.getEvent());
+        return context -> {
+            logger.info("stateMachine instance execute initialAction:{}", context.getEvent());
 //                instanceService.postposition()
-            }
         };
     }
 
@@ -204,16 +196,13 @@ public class MachineFactory {
      * @return
      */
     private Action<String, String> action(Long organizationId, String serviceCode) {
-        return new Action<String, String>() {
-            @Override
-            public void execute(StateContext<String, String> context) {
-                Long transformId = Long.parseLong(context.getEvent());
-                Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
-                logger.info("stateMachine instance execute transformorm action,instanceId:{},transformId:{}", instanceId, transformId);
-                Boolean result = instanceService.postpositionAction(organizationId, serviceCode, transformId, instanceId, context);
-                if (!result) {
-                    throw new CommonException("error.stateMachine.action");
-                }
+        return context -> {
+            Long transformId = Long.parseLong(context.getEvent());
+            Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
+            logger.info("stateMachine instance execute transformorm action,instanceId:{},transformId:{}", instanceId, transformId);
+            Boolean result = instanceService.postpositionAction(organizationId, serviceCode, transformId, instanceId, context);
+            if (!result) {
+                throw new CommonException("error.stateMachine.action");
             }
         };
     }
@@ -225,14 +214,11 @@ public class MachineFactory {
      * @return
      */
     private Action<String, String> errorAction(Long organizationId, String serviceCode) {
-        return new Action<String, String>() {
-            @Override
-            public void execute(StateContext<String, String> context) {
-                Long transformId = Long.parseLong(context.getEvent());
-                Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
-                logger.error("stateMachine instance execute transformorm error,instanceId:{},transformId:{}", instanceId, transformId);
-                // do something
-            }
+        return context -> {
+            Long transformId = Long.parseLong(context.getEvent());
+            Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
+            logger.error("stateMachine instance execute transformorm error,instanceId:{},transformId:{}", instanceId, transformId);
+            // do something
         };
     }
 
@@ -243,14 +229,11 @@ public class MachineFactory {
      * @return
      */
     private Guard<String, String> guard(Long organizationId, String serviceCode) {
-        return new Guard<String, String>() {
-            @Override
-            public boolean evaluate(StateContext<String, String> context) {
-                Long transformId = Long.parseLong(context.getEvent());
-                Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
-                logger.info("stateMachine instance execute transformorm guard,instanceId:{},transformId:{}", instanceId, transformId);
-                return instanceService.validatorGuard(organizationId, serviceCode, transformId, instanceId, context);
-            }
+        return context -> {
+            Long transformId = Long.parseLong(context.getEvent());
+            Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
+            logger.info("stateMachine instance execute transformorm guard,instanceId:{},transformId:{}", instanceId, transformId);
+            return instanceService.validatorGuard(organizationId, serviceCode, transformId, instanceId, context);
         };
     }
 
