@@ -110,11 +110,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         StateMachineNodeDraft startNode = new StateMachineNodeDraft();
         startNode.setStateMachineId(stateMachine.getId());
         startNode.setOrganizationId(organizationId);
-        startNode.setPositionX(25L);
-        startNode.setPositionY(0L);
-        startNode.setWidth(50L);
-        startNode.setHeight(50L);
         startNode.setStatusId(0L);
+        startNode.setPositionX(InitNode.START.getPositionX());
+        startNode.setPositionY(InitNode.START.getPositionY());
+        startNode.setWidth(InitNode.START.getWidth());
+        startNode.setHeight(InitNode.START.getHeight());
         startNode.setType(NodeType.START);
         int isStartNodeInsert = nodeDraftMapper.insert(startNode);
         if (isStartNodeInsert != 1) {
@@ -127,10 +127,10 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         //获取第一个状态
         List<StatusDTO> statusDTOS = statusService.queryAllStatus(organizationId);
         initNode.setStatusId(statusDTOS.isEmpty() ? 0L : statusDTOS.get(0).getId());
-        initNode.setPositionX(0L);
-        initNode.setPositionY(120L);
-        initNode.setWidth(100L);
-        initNode.setHeight(50L);
+        initNode.setPositionX(InitNode.INIT.getPositionX());
+        initNode.setPositionY(InitNode.INIT.getPositionY());
+        initNode.setWidth(InitNode.INIT.getWidth());
+        initNode.setHeight(InitNode.INIT.getHeight());
         initNode.setType(NodeType.INIT);
         initNode.setOrganizationId(organizationId);
         int isNodeInsert = nodeDraftMapper.insert(initNode);
@@ -476,34 +476,5 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             return stateMachine.getId().equals(stateMachineId);
         }
         return true;
-    }
-
-    @Override
-    public void initSystemStateMachine(Long organizationId) {
-        StateMachine stateMachine = new StateMachine();
-        stateMachine.setOrganizationId(organizationId);
-        stateMachine.setName("默认状态机");
-        stateMachine.setDescription("默认状态机");
-        stateMachine.setStatus(STATE_MACHINE_CREATE);
-        if (stateMachineMapper.insert(stateMachine) != 1) {
-            throw new CommonException("error.stateMachine.insert");
-        }
-
-        //创建默认开始节点
-        StateMachineNodeDraft startNode = new StateMachineNodeDraft();
-        startNode.setStateMachineId(stateMachine.getId());
-        startNode.setOrganizationId(organizationId);
-        startNode.setPositionX(25L);
-        startNode.setPositionY(0L);
-        startNode.setWidth(50L);
-        startNode.setHeight(50L);
-        startNode.setStatusId(0L);
-        startNode.setType(NodeType.START);
-        int isStartNodeInsert = nodeDraftMapper.insert(startNode);
-        if (isStartNodeInsert != 1) {
-            throw new CommonException("error.stateMachineNode.create");
-        }
-        statusService.initSystemStateMachineDetail(organizationId, stateMachine.getId(), startNode.getId());
-
     }
 }

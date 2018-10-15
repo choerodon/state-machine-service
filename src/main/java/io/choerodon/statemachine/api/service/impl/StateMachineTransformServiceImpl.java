@@ -72,10 +72,14 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
     @Override
     public StateMachineTransformDTO update(Long organizationId, Long transformId, StateMachineTransformDTO transformDTO) {
+        StateMachineTransformDraft origin = transformDraftMapper.queryById(organizationId, transformId);
+        if (origin == null) {
+            throw new CommonException("error.stateMachineTransform.queryById.notFound");
+        }
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setId(transformId);
-        transform.setType(TransformType.CUSTOM);
         transform.setOrganizationId(organizationId);
+        transform.setType(origin.getType());
         int isUpdate = transformDraftMapper.updateByPrimaryKeySelective(transform);
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachineTransform.update");
@@ -164,8 +168,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
-    public StateMachineTransformDTO createAllStatusTransform(Long organizationId, StateMachineTransformDTO transformDTO) {
-        Long endNodeId = transformDTO.getEndNodeId();
+    public StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long endNodeId) {
         if (endNodeId == null) {
             throw new CommonException("error.endNodeId.null");
         }
@@ -181,14 +184,15 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         //todo 增加当前节点判断是否已存在【全部】的转换id
 
         //创建
-        transformDTO.setName(state.getName());
-        transformDTO.setDescription("全部转换");
-        transformDTO.setEndNodeId(endNodeId);
-        transformDTO.setStartNodeId(0L);
-        transformDTO.setOrganizationId(organizationId);
-        transformDTO.setType(TransformType.ALL);
-        transformDTO.setConditionStrategy(TransformConditionStrategy.ALL);
-        StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
+        StateMachineTransformDraft transform = new StateMachineTransformDraft();
+        transform.setName(state.getName());
+        transform.setDescription("全部转换");
+        transform.setEndNodeId(endNodeId);
+        transform.setStartNodeId(0L);
+        transform.setEndNodeId(endNodeId);
+        transform.setOrganizationId(organizationId);
+        transform.setType(TransformType.ALL);
+        transform.setConditionStrategy(TransformConditionStrategy.ALL);
         int isInsert = transformDraftMapper.insert(transform);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransform.create");

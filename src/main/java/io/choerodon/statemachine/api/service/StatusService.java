@@ -74,6 +74,4 @@ public interface StatusService {
      */
     Boolean checkName(Long organizationId, Long statusId, String name);
 
-    void initSystemStateMachineDetail(Long organizationId, Long stateMachineId, Long startNodeId);
-
 }
