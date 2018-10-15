@@ -26,12 +26,11 @@ public class FeignClientAdaptor {
      * @return
      */
     @Bean
-    public CustomFeignClientAdaptor InstanceServiceImpl(Client client, Decoder decoder, Encoder encoder, RequestInterceptor interceptor) {
-        CustomFeignClientAdaptor adaptor = Feign.builder().encoder(encoder).decoder(decoder)
+    public CustomFeignClientAdaptor instanceServiceImpl(Client client, Decoder decoder, Encoder encoder, RequestInterceptor interceptor) {
+        return Feign.builder().encoder(encoder).decoder(decoder)
                 .client(client)
                 .contract(new Contract.Default())
                 .requestInterceptor(interceptor)
                 .target(Target.EmptyTarget.create(CustomFeignClientAdaptor.class));
-        return adaptor;
     }
 }

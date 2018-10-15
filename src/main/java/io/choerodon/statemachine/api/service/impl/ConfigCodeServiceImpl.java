@@ -56,8 +56,7 @@ public class ConfigCodeServiceImpl extends BaseServiceImpl<ConfigCode> implement
         List<StateMachineConfigDraft> configs = configDraftMapper.select(config);
         List<String> configCodes = configs.stream().map(StateMachineConfigDraft::getCode).collect(Collectors.toList());
         //过滤掉已经配置的，返回未配置的code
-        List<ConfigCodeDTO> configCodeDTOS = queryByType(type).stream().filter(configCodeDTO -> !configCodes.contains(configCodeDTO.getCode())).collect(Collectors.toList());
-        return configCodeDTOS;
+        return queryByType(type).stream().filter(configCodeDTO -> !configCodes.contains(configCodeDTO.getCode())).collect(Collectors.toList());
     }
 
     @Override
