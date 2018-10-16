@@ -12,33 +12,33 @@ preJob:
   preConfig:
     configFile: application.yml
     mysql:
-      host: 192.168.12.175
-      port: 3306
+      host: kanban-mysql.db.svc
+      port: 3308
       database: manager_service
       username: root
-      password: choerodon
+      password: handhand
   preInitDB:
     mysql:
-      host: 192.168.12.175
-      port: 3306
-      database: demo_service
+      host: kanban-mysql.db.svc
+      port: 3308
+      database: state_machine_service
       username: root
-      password: choerodon
+      password: handhand
 
 deployment:
-  managementPort: 18081
+  managementPort: 8385
 
 env:
   open:
     ## register-server 
-    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://register-server.io-choerodon:8000/eureka/
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://register-server.c7nf-staging:8000/eureka/
     ## config-server
     SPRING_CLOUD_CONFIG_ENABLED: true
     SPRING_CLOUD_CONFIG_URI: http://config-server.framework:8010/
     ## mysql
-    SPRING_DATASOURCE_URL: jdbc:mysql://localhost/demo_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    SPRING_DATASOURCE_URL: jdbc:mysql://kanban-mysql.db.svc:3308/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
     SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: choerodon
+    SPRING_DATASOURCE_PASSWORD: handhand
     ## kafka
     CHOERODON_EVENT_CONSUMER_KAFKA_BOOTSTRAP_SERVERS: kafka-0.kafka-headless.kafka.svc.cluster.local:9092,kafka-1.kafka-headless.kafka.svc.cluster.local:9092,kafka-2.kafka-headless.kafka.svc.cluster.local:9092
     SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka-0.kafka-headless.kafka.svc.cluster.local:9092,kafka-1.kafka-headless.kafka.svc.cluster.local:9092,kafka-2.kafka-headless.kafka.svc.cluster.local:9092
@@ -63,7 +63,7 @@ persistence:
 service:
   enabled: false
   type: ClusterIP
-  port: 18080
+  port: 8384
   
 ingress:
   enabled: false

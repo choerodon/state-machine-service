@@ -30,7 +30,7 @@ import java.util.Optional;
  * @author shinan.chen
  * @date 2018/9/18
  */
-@Component
+@Component("instanceService")
 @Transactional(rollbackFor = Exception.class)
 public class InstanceServiceImpl implements InstanceService {
 

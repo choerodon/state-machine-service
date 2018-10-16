@@ -168,7 +168,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
-    public StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long endNodeId) {
+    public StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long stateMachineId, Long endNodeId) {
         if (endNodeId == null) {
             throw new CommonException("error.endNodeId.null");
         }
@@ -181,13 +181,20 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         if (state == null) {
             throw new CommonException("error.createAllStatusTransform.state.null");
         }
-        //todo 增加当前节点判断是否已存在【全部】的转换id
+        //判断当前节点是否已存在【全部】的转换id
+        StateMachineTransformDraft select = new StateMachineTransformDraft();
+        select.setStateMachineId(stateMachineId);
+        select.setEndNodeId(endNodeId);
+        select.setType(TransformType.ALL);
+        if (!transformDraftMapper.select(select).isEmpty()) {
+            throw new CommonException("error.stateMachineTransform.exist");
+        }
 
         //创建
         StateMachineTransformDraft transform = new StateMachineTransformDraft();
+        transform.setStateMachineId(stateMachineId);
         transform.setName(state.getName());
         transform.setDescription("全部转换");
-        transform.setEndNodeId(endNodeId);
         transform.setStartNodeId(0L);
         transform.setEndNodeId(endNodeId);
         transform.setOrganizationId(organizationId);
@@ -205,13 +212,17 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         return stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
     }
 
+    public StateMachineTransformServiceImpl() {
+        super();
+    }
+
     @Override
     public Boolean deleteAllStatusTransform(Long organizationId, Long transformId) {
         StateMachineTransformDraft transformDraft = transformDraftMapper.queryById(organizationId, transformId);
         if (transformDraft == null) {
             throw new CommonException("error.stateMachineTransform.null");
         }
-        if (TransformType.ALL.equals(transformDraft.getType())) {
+        if (!TransformType.ALL.equals(transformDraft.getType())) {
             throw new CommonException("error.stateMachineTransform.type.illegal");
         }
         //目标节点

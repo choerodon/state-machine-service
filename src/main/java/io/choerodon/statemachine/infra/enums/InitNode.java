@@ -7,10 +7,10 @@ package io.choerodon.statemachine.infra.enums;
 public enum InitNode {
     START("初始节点", 25L, 0L, 50L, 50L, NodeType.START),
     INIT("待处理", 0L, 120L, 100L, 50L, NodeType.INIT),
-    NODE2("处理中", 0L, 0L, 0L, 0L, NodeType.CUSTOM),
-    NODE3("测试中", 0L, 0L, 0L, 0L, NodeType.CUSTOM),
-    NODE4("验证中", 0L, 0L, 0L, 0L, NodeType.CUSTOM),
-    NODE5("已完成", 0L, 0L, 0L, 0L, NodeType.CUSTOM);
+    NODE2("处理中", 0L, 220L, 100L, 50L, NodeType.CUSTOM),
+    NODE3("测试中", 0L, 320L, 100L, 50L, NodeType.CUSTOM),
+    NODE4("验证中", 0L, 420L, 100L, 50L, NodeType.CUSTOM),
+    NODE5("已完成", 0L, 520L, 100L, 50L, NodeType.CUSTOM);
     String statusName;
     Long positionX;
     Long positionY;
