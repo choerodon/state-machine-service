@@ -80,10 +80,10 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * 创建【全部转换到此状态】转换，所有节点均可转换到当前节点
      *
      * @param organizationId 组织id
-     * @param transformDTO
+     * @param endNodeId
      * @return
      */
-    StateMachineTransformDTO createAllStatusTransform(Long organizationId, StateMachineTransformDTO transformDTO);
+    StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long endNodeId);
 
     /**
      * 删除【全部转换到此状态】转换

@@ -1,6 +1,5 @@
 package io.choerodon.statemachine.api.service.impl;
 
-import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.statemachine.api.dto.LookupTypeWithValuesDTO;
 import io.choerodon.statemachine.api.dto.LookupValueDTO;
 import io.choerodon.statemachine.api.service.LookupValueService;
@@ -29,7 +28,8 @@ public class LookupValueServiceImpl implements LookupValueService {
     public LookupTypeWithValuesDTO queryLookupValueByCode(Long organizationId, String typeCode) {
         LookupTypeWithValues typeWithValues = lookupValueMapper.queryLookupValueByCode(typeCode);
         LookupTypeWithValuesDTO result = modelMapper.map(typeWithValues, LookupTypeWithValuesDTO.class);
-        result.setLookupValues(modelMapper.map(typeWithValues.getLookupValues(), new TypeToken<List<LookupValueDTO>>(){}.getType()));
+        result.setLookupValues(modelMapper.map(typeWithValues.getLookupValues(), new TypeToken<List<LookupValueDTO>>() {
+        }.getType()));
         return result;
     }
 }

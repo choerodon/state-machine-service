@@ -6,14 +6,9 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.StatusService;
-import io.choerodon.statemachine.domain.StateMachineNode;
-import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.infra.enums.NodeType;
-import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -28,10 +23,6 @@ import java.util.List;
 @Service
 public class StatusServiceImpl implements StatusService {
 
-    private static final String STATUS_CATEGORY_TODO = "status_todo";
-    private static final String STATUS_CATEGORY_DOING = "status_doing";
-    private static final String STATUS_CATEGORY_DONE = "status_done";
-
     @Autowired
     private StatusMapper stateMapper;
 
@@ -40,9 +31,6 @@ public class StatusServiceImpl implements StatusService {
 
     @Autowired
     private StateMachineNodeMapper nodeDeployMapper;
-
-    @Autowired
-    private StateMachineTransformMapper stateMachineTransformMapper;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -145,60 +133,5 @@ public class StatusServiceImpl implements StatusService {
             return status.getId().equals(statusId);
         }
         return true;
-    }
-
-    private Long createStateMachineByDetail(Long organizationId,
-                                            String name,
-                                            String description,
-                                            String type,
-                                            Long stateMachineId,
-                                            Long startNodeId,
-                                            String nodeType,
-                                            String transformType) {
-        Status status = new Status();
-        status.setOrganizationId(organizationId);
-        status.setName(name);
-        status.setDescription(description);
-        status.setType(type);
-        if (stateMapper.insert(status) != 1) {
-            throw new CommonException("error.status.insrt");
-        }
-
-        StateMachineNode node = new StateMachineNode();
-        node.setStateMachineId(stateMachineId);
-        node.setStatusId(status.getId());
-        node.setPositionX(0L);
-        node.setPositionY(120L);
-        node.setWidth(100L);
-        node.setHeight(50L);
-        node.setType(nodeType);
-        node.setOrganizationId(organizationId);
-        int isNodeInsert = nodeDeployMapper.insert(node);
-        if (isNodeInsert != 1) {
-            throw new CommonException("error.stateMachineNode.create");
-        }
-
-        StateMachineTransform transform = new StateMachineTransform();
-        transform.setStateMachineId(stateMachineId);
-        transform.setStartNodeId(startNodeId);
-        transform.setEndNodeId(node.getId());
-        transform.setType(transformType);
-        transform.setOrganizationId(organizationId);
-        int isTransformInsert = stateMachineTransformMapper.insert(transform);
-        if (isTransformInsert != 1) {
-            throw new CommonException("error.stateMachineTransform.create");
-        }
-
-        return node.getId();
-    }
-
-    @Override
-    public void initSystemStateMachineDetail(Long organizationId, Long stateMachineId, Long startNodeId) {
-        Long startId;
-        startId = createStateMachineByDetail(organizationId, "待处理", "待处理", STATUS_CATEGORY_TODO, stateMachineId, startNodeId, NodeType.INIT, TransformType.INIT);
-        startId = createStateMachineByDetail(organizationId, "处理中", "处理中", STATUS_CATEGORY_DOING, stateMachineId, startId, NodeType.CUSTOM, TransformType.CUSTOM);
-        startId = createStateMachineByDetail(organizationId, "已完成", "已完成", STATUS_CATEGORY_DONE, stateMachineId, startId, NodeType.CUSTOM, TransformType.CUSTOM);
-        startId = createStateMachineByDetail(organizationId, "测试中", "测试中", STATUS_CATEGORY_DOING, stateMachineId, startId, NodeType.CUSTOM, TransformType.CUSTOM);
-        createStateMachineByDetail(organizationId, "待部署", "待部署", STATUS_CATEGORY_DOING, stateMachineId, startId, NodeType.CUSTOM, TransformType.CUSTOM);
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_transforms")
@@ -30,7 +30,7 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "创建转换（草稿）")
     @PostMapping
     public ResponseEntity<StateMachineTransformDTO> create(@PathVariable("organization_id") Long organizationId,
-                                                        @RequestBody StateMachineTransformDTO transformDTO) {
+                                                           @RequestBody StateMachineTransformDTO transformDTO) {
         transformValidator.createValidate(transformDTO);
         return new ResponseEntity<>(transformService.create(organizationId, transformDTO), HttpStatus.CREATED);
     }
@@ -39,8 +39,8 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "更新转换（草稿）")
     @PutMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformDTO> update(@PathVariable("organization_id") Long organizationId,
-                                                        @PathVariable("transform_id") Long transformId,
-                                                        @RequestBody StateMachineTransformDTO transformDTO) {
+                                                           @PathVariable("transform_id") Long transformId,
+                                                           @RequestBody StateMachineTransformDTO transformDTO) {
         transformValidator.updateValidate(transformDTO);
         return new ResponseEntity<>(transformService.update(organizationId, transformId, transformDTO), HttpStatus.CREATED);
     }
@@ -67,7 +67,7 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "根据id获取转换（草稿）")
     @GetMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformDTO> queryById(@PathVariable("organization_id") Long organizationId,
-                                                           @PathVariable("transform_id") Long transformId) {
+                                                              @PathVariable("transform_id") Long transformId) {
         return new ResponseEntity<>(transformService.queryById(organizationId, transformId), HttpStatus.OK);
     }
 
@@ -75,15 +75,15 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点（草稿）")
     @PostMapping(value = "/create_type_all")
     public ResponseEntity<StateMachineTransformDTO> createAllStatusTransform(@PathVariable("organization_id") Long organizationId,
-                                                                      @RequestBody StateMachineTransformDTO transformDTO) {
-        return new ResponseEntity<>(transformService.createAllStatusTransform(organizationId, transformDTO), HttpStatus.CREATED);
+                                                                             @RequestParam("endNodeId") Long endNodeId) {
+        return new ResponseEntity<>(transformService.createAllStatusTransform(organizationId, endNodeId), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除【全部】转换（草稿）")
     @DeleteMapping(value = "/delete_type_all/{transform_id}")
     public ResponseEntity<Boolean> deleteAllStatusTransform(@PathVariable("organization_id") Long organizationId,
-                                                        @PathVariable("transform_id") Long transformId) {
+                                                            @PathVariable("transform_id") Long transformId) {
         return new ResponseEntity<>(transformService.deleteAllStatusTransform(organizationId, transformId), HttpStatus.NO_CONTENT);
     }
 
@@ -92,7 +92,7 @@ public class StateMachineTransformController extends BaseController {
     @GetMapping(value = "/update_condition_strategy/{transform_id}")
     public ResponseEntity<Boolean> updateConditionStrategy(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("transform_id") Long transformId,
-                                                           @RequestParam("condition_strategy")String conditionStrategy){
+                                                           @RequestParam("condition_strategy") String conditionStrategy) {
         return new ResponseEntity<>(transformService.updateConditionStrategy(organizationId, transformId, conditionStrategy), HttpStatus.CREATED);
     }
 }

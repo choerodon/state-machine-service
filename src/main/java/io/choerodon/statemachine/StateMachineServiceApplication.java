@@ -8,7 +8,7 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import io.choerodon.resource.annoation.EnableChoerodonResourceServer;
 
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients("io.choerodon")
 @EnableEurekaClient
 @EnableChoerodonResourceServer
 public class StateMachineServiceApplication {

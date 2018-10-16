@@ -7,6 +7,10 @@ import java.lang.reflect.Field;
  * @date 2018/9/28
  */
 public class EnumUtil {
+
+    private EnumUtil(){
+        throw new IllegalStateException("Utility class");
+    }
     /**
      * 枚举类通用校验
      * @param cls
