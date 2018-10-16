@@ -12,8 +12,8 @@ preJob:
   preConfig:
     configFile: application.yml
     mysql:
-      host: kanban-mysql.db.svc
-      port: 3308
+      host: hapcloud-mysql.db.svc
+      port: 3306
       database: manager_service
       username: root
       password: handhand
@@ -34,7 +34,7 @@ env:
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://register-server.c7nf-staging:8000/eureka/
     ## config-server
     SPRING_CLOUD_CONFIG_ENABLED: true
-    SPRING_CLOUD_CONFIG_URI: http://config-server.framework:8010/
+    SPRING_CLOUD_CONFIG_URI: http://config-server.c7nf-staging:8010
     ## mysql
     SPRING_DATASOURCE_URL: jdbc:mysql://kanban-mysql.db.svc:3308/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
     SPRING_DATASOURCE_USERNAME: root
