@@ -23,14 +23,14 @@ spring:
     listener:
       ack-mode: record
       poll-timeout: 3000
-#  cloud:
-#    bus:
-#      enabled: true
-#    stream:
-#      kafka:
-#        binder:
-#          brokers: 127.0.0.1:9092
-#          zkNodes: 127.0.0.1:218
+  cloud:
+    bus:
+      enabled: true
+    stream:
+      kafka:
+        binder:
+          brokers: 127.0.0.1:9092
+          zkNodes: 127.0.0.1:2181
 event:
   store:
     service:

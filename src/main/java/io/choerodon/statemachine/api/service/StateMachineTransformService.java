@@ -83,7 +83,7 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @param endNodeId
      * @return
      */
-    StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long endNodeId);
+    StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long stateMachineId, Long endNodeId);
 
     /**
      * 删除【全部转换到此状态】转换

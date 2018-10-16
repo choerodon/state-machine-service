@@ -2,6 +2,7 @@ package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.service.InitService;
+import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
@@ -37,6 +38,8 @@ public class InitServiceImpl implements InitService {
     private StateMachineMapper stateMachineMapper;
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
+    @Autowired
+    private StateMachineNodeService nodeService;
 
     @Override
     public List<Status> initStatus(Long organizationId) {
@@ -89,6 +92,7 @@ public class InitServiceImpl implements InitService {
             if (isNodeInsert != 1) {
                 throw new CommonException("error.stateMachineNode.create");
             }
+            node.setObjectVersionNumber(1L);
             nodeMap.put(initNode.getStatusName(), node);
         }
         //初始化转换
@@ -96,18 +100,28 @@ public class InitServiceImpl implements InitService {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
             transform.setStateMachineId(stateMachine.getId());
             transform.setName(initTransform.getName());
-            if (initTransform.getType().equals(TransformType.CUSTOM)) {
-                transform.setStartNodeId(nodeMap.get(initTransform.getStartNodeName()).getId());
-            } else {
+            transform.setDescription("'全部'转换");
+            if (initTransform.getType().equals(TransformType.ALL)) {
                 transform.setStartNodeId(0L);
+            } else {
+                transform.setStartNodeId(nodeMap.get(initTransform.getStartNodeName()).getId());
             }
-            transform.setEndNodeId(nodeMap.get(initTransform.getStartNodeName()).getId());
+            transform.setEndNodeId(nodeMap.get(initTransform.getEndNodeName()).getId());
             transform.setType(initTransform.getType());
             transform.setConditionStrategy(initTransform.getConditionStrategy());
             transform.setOrganizationId(organizationId);
             int isTransformInsert = transformDraftMapper.insert(transform);
             if (isTransformInsert != 1) {
                 throw new CommonException("error.stateMachineTransform.create");
+            }
+            //如果是ALL类型的转换，要更新节点的allStatusTransformId
+            if (initTransform.getType().equals(TransformType.ALL)) {
+                StateMachineNodeDraft nodeDraft = nodeMap.get(initTransform.getEndNodeName());
+                nodeDraft.setAllStatusTransformId(transform.getId());
+                int update = nodeService.updateOptional(nodeDraft, "allStatusTransformId");
+                if (update != 1) {
+                    throw new CommonException("error.stateMachineNode.allStatusTransformId.update");
+                }
             }
         }
     }
