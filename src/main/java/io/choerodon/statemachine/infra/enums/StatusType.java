@@ -6,7 +6,6 @@ package io.choerodon.statemachine.infra.enums;
  */
 public class StatusType {
     private StatusType() {
-        throw new IllegalStateException("Utility class");
     }
 
     /**

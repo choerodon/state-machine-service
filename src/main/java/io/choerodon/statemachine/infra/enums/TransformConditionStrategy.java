@@ -6,7 +6,6 @@ package io.choerodon.statemachine.infra.enums;
  */
 public class TransformConditionStrategy {
     private TransformConditionStrategy() {
-        throw new IllegalStateException("Utility class");
     }
 
     /**

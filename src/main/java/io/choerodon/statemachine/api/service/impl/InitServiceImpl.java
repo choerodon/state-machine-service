@@ -2,7 +2,6 @@ package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.service.InitService;
-import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
@@ -38,8 +37,6 @@ public class InitServiceImpl implements InitService {
     private StateMachineMapper stateMachineMapper;
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
-    @Autowired
-    private StateMachineNodeService nodeService;
 
     @Override
     public List<Status> initStatus(Long organizationId) {
@@ -92,7 +89,6 @@ public class InitServiceImpl implements InitService {
             if (isNodeInsert != 1) {
                 throw new CommonException("error.stateMachineNode.create");
             }
-            node.setObjectVersionNumber(1L);
             nodeMap.put(initNode.getStatusName(), node);
         }
         //初始化转换
@@ -117,8 +113,7 @@ public class InitServiceImpl implements InitService {
             //如果是ALL类型的转换，要更新节点的allStatusTransformId
             if (initTransform.getType().equals(TransformType.ALL)) {
                 StateMachineNodeDraft nodeDraft = nodeMap.get(initTransform.getEndNodeName());
-                nodeDraft.setAllStatusTransformId(transform.getId());
-                int update = nodeService.updateOptional(nodeDraft, "allStatusTransformId");
+                int update = nodeDraftMapper.updateAllStatusTransformId(organizationId, nodeDraft.getId(), transform.getId());
                 if (update != 1) {
                     throw new CommonException("error.stateMachineNode.allStatusTransformId.update");
                 }

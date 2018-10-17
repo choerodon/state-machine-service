@@ -8,7 +8,6 @@ package io.choerodon.statemachine.infra.enums;
  */
 public class TransformType {
     private TransformType() {
-        throw new IllegalStateException("Utility class");
     }
 
     /**

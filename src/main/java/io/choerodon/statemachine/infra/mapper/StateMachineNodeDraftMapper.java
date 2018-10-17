@@ -18,4 +18,9 @@ public interface StateMachineNodeDraftMapper extends BaseMapper<StateMachineNode
     Long checkStateDelete(@Param("organizationId") Long organizationId, @Param("statusId") Long statusId);
 
     StateMachineNodeDraft queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
+
+    /**
+     * 单独写更新，版本号不变，否则前端处理复杂
+     */
+    int updateAllStatusTransformId(@Param("organizationId") Long organizationId, @Param("id") Long id, @Param("allStatusTransformId") Long allStatusTransformId);
 }
