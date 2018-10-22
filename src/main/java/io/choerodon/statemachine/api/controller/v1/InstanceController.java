@@ -3,6 +3,7 @@ package io.choerodon.statemachine.api.controller.v1;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
+import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.domain.Status;
@@ -32,7 +33,7 @@ public class InstanceController extends BaseController {
     private InitService initService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "创建状态机实例，并返回初始状态")
+    @ApiOperation(value = "创建状态机实例")
     @GetMapping(value = "/start_instance")
     public ResponseEntity<ExecuteResult> startInstance(@PathVariable("organization_id") Long organizationId,
                                                        @RequestParam("service_code") String serviceCode,
@@ -64,6 +65,14 @@ public class InstanceController extends BaseController {
                                                                   @RequestParam("instance_id") Long instanceId,
                                                                   @RequestParam("current_status_id") Long currentStateId) {
         return new ResponseEntity<>(instanceService.queryListTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "获取状态机的初始状态")
+    @GetMapping(value = "/query_init_status_id")
+    public ResponseEntity<Long> queryInitStatusId(@PathVariable("organization_id") Long organizationId,
+                                                     @RequestParam("state_machine_id") Long stateMachineId) {
+        return new ResponseEntity<>(instanceService.queryInitStatusId(organizationId, stateMachineId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

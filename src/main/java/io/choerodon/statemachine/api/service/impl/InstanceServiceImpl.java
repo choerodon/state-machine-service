@@ -6,11 +6,15 @@ import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
+import io.choerodon.statemachine.domain.StateMachineNode;
+import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.infra.enums.ConfigType;
+import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
+import io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,8 @@ public class InstanceServiceImpl implements InstanceService {
     @Autowired
     private StateMachineTransformService transformService;
     @Autowired
+    private StateMachineTransformMapper transformMapper;
+    @Autowired
     private MachineFactory machineFactory;
     @Autowired
     private CustomFeignClientAdaptor customFeignClientAdaptor;
@@ -49,7 +55,6 @@ public class InstanceServiceImpl implements InstanceService {
 
     private static final String METHOD_FILTER_TRANSF = "filter_transform";
     private static final String METHOD_EXECUTE_CONFIG = "execute_config";
-    private static final String ERROR_VALIDATORGUARD = "error.customFeignClientAdaptor.executeConfig.validatorGuard";
     private static final String EXCEPTION = "Exception:{}";
 
     @Override
@@ -58,10 +63,23 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             executeResult = machineFactory.startInstance(organizationId, serviceCode, stateMachineId, instanceId);
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION, e);
-            executeResult = new ExecuteResult(false, null, e.getMessage());
+            e.printStackTrace();
+            executeResult = new ExecuteResult(false, null, "创建状态机实例失败");
         }
         return executeResult;
+    }
+
+    @Override
+    public Long queryInitStatusId(Long organizationId, Long stateMachineId) {
+        StateMachineNode select = new StateMachineNode();
+        select.setOrganizationId(organizationId);
+        select.setStateMachineId(stateMachineId);
+        select.setType(NodeType.INIT);
+        List<StateMachineNode> nodes = nodeDeployMapper.select(select);
+        if (nodes.isEmpty()) {
+            throw new CommonException("error.queryInitStatusId.notFound");
+        }
+        return nodes.get(0).getStatusId();
     }
 
     @Override
@@ -70,8 +88,8 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transformId);
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION, e);
-            executeResult = new ExecuteResult(false, null, e.getMessage());
+            e.printStackTrace();
+            executeResult = new ExecuteResult(false, null, "执行转换失败");
         }
         return executeResult;
     }
@@ -94,20 +112,19 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public Boolean validatorGuard(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context) {
-        List<StateMachineConfigDTO> configs = validator(organizationId, transformId);
+        StateMachineTransform transform = transformMapper.queryById(organizationId, transformId);
+        List<StateMachineConfigDTO> conditionConfigs = condition(organizationId, transformId);
+        List<StateMachineConfigDTO> validatorConfigs = validator(organizationId, transformId);
         ExecuteResult executeResult;
-        //调用对应服务，执行验证，返回是否成功
+        //调用对应服务，执行条件和验证，返回是否成功
         try {
-            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, null, null, ConfigType.VALIDATOR), configs);
-            //返回为空则调用对应服务，对应服务方法报错
-            if (executeResultEntity.getBody().getSuccess() != null) {
-                executeResult = executeResultEntity.getBody();
-            } else {
-                executeResult = new ExecuteResult(false, null, ERROR_VALIDATORGUARD);
+            executeResult = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, null, transform.getConditionStrategy(), ConfigType.CONDITION), conditionConfigs).getBody();
+            if (executeResult.getSuccess()) {
+                executeResult = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, null, null, ConfigType.VALIDATOR), validatorConfigs).getBody();
             }
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
-            executeResult = new ExecuteResult(false, null, ERROR_VALIDATORGUARD);
+            executeResult = new ExecuteResult(false, null, "验证调用失败");
         }
 
         Map<Object, Object> variables = context.getExtendedState().getVariables();
@@ -131,11 +148,11 @@ public class InstanceServiceImpl implements InstanceService {
             if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
             } else {
-                executeResult = new ExecuteResult(false, null, "error.customFeignClientAdaptor.executeConfig.postpositionAction");
+                executeResult = new ExecuteResult(false, null, "后置动作调用失败");
             }
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
-            executeResult = new ExecuteResult(false, null, ERROR_VALIDATORGUARD);
+            executeResult = new ExecuteResult(false, null, "后置动作调用失败");
         }
         Map<Object, Object> variables = context.getExtendedState().getVariables();
         variables.put("executeResult", executeResult);

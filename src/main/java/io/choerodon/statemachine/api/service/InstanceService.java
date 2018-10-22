@@ -24,6 +24,14 @@ public interface InstanceService {
     ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId);
 
     /**
+     * 查询状态机的初始状态id
+     * @param organizationId
+     * @param stateMachineId
+     * @return
+     */
+    Long queryInitStatusId(Long organizationId, Long stateMachineId);
+
+    /**
      * 执行状态转换，并返回转换后的状态
      *
      * @param stateMachineId 状态机Id

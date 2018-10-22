@@ -11,7 +11,6 @@ public class StatusDTO {
     private String type;
     private Long organizationId;
     private Long objectVersionNumber;
-    private Long associationMachine;
 
     public StatusDTO(){}
 
@@ -70,14 +69,6 @@ public class StatusDTO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
-    }
-
-    public Long getAssociationMachine() {
-        return associationMachine;
-    }
-
-    public void setAssociationMachine(Long associationMachine) {
-        this.associationMachine = associationMachine;
     }
 
     public Boolean getCanDelete() {
