@@ -10,6 +10,9 @@ databaseChangeLog(logicalFilePath: 'script/db/status.groovy') {
             column(name: 'name', type: 'VARCHAR(64)', remarks: '名称') {
                 constraints(nullable: false)
             }
+            column(name: 'code', type: 'VARCHAR(30)', remarks: '编码') {
+                constraints(nullable: false)
+            }
             column(name: 'description', type: 'VARCHAR(255)', remarks: '描述')
             column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
                 constraints(nullable: false)

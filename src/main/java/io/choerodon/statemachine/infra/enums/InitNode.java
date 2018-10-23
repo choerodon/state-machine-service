@@ -5,21 +5,19 @@ package io.choerodon.statemachine.infra.enums;
  * @date 2018/10/15
  */
 public enum InitNode {
-    START("初始节点", 25L, 0L, 50L, 50L, NodeType.START),
-    INIT("待处理", 0L, 120L, 100L, 50L, NodeType.INIT),
-    NODE2("处理中", 0L, 220L, 100L, 50L, NodeType.CUSTOM),
-    NODE3("测试中", 0L, 320L, 100L, 50L, NodeType.CUSTOM),
-    NODE4("验证中", 0L, 420L, 100L, 50L, NodeType.CUSTOM),
-    NODE5("已完成", 0L, 520L, 100L, 50L, NodeType.CUSTOM);
-    String statusName;
+    START("start", 25L, 0L, 50L, 50L, NodeType.START),
+    INIT("create", 0L, 120L, 100L, 50L, NodeType.INIT),
+    NODE2("processing", 0L, 220L, 100L, 50L, NodeType.CUSTOM),
+    NODE5("complete", 0L, 520L, 100L, 50L, NodeType.CUSTOM);
+    String code;
     Long positionX;
     Long positionY;
     Long width;
     Long height;
     String type;
 
-    InitNode(String statusName, Long positionX, Long positionY, Long width, Long height, String type) {
-        this.statusName = statusName;
+    InitNode(String code, Long positionX, Long positionY, Long width, Long height, String type) {
+        this.code = code;
         this.positionX = positionX;
         this.positionY = positionY;
         this.width = width;
@@ -27,12 +25,12 @@ public enum InitNode {
         this.type = type;
     }
 
-    public String getStatusName() {
-        return statusName;
+    public String getCode() {
+        return code;
     }
 
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public Long getPositionX() {

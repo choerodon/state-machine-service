@@ -44,6 +44,7 @@ public class InitServiceImpl implements InitService {
         for (InitStatus initStatus : InitStatus.values()) {
             Status status = new Status();
             status.setOrganizationId(organizationId);
+            status.setCode(initStatus.getCode());
             status.setName(initStatus.getName());
             status.setDescription(initStatus.getName());
             status.setType(initStatus.getType());
@@ -56,13 +57,16 @@ public class InitServiceImpl implements InitService {
     }
 
     @Override
-    public void initAGStateMachine(Long organizationId, List<Status> initStatuses) {
+    public Long initAGStateMachine(Long organizationId, String projectCode) {
+        Status select = new Status();
+        select.setOrganizationId(organizationId);
+        List<Status> initStatuses = statusMapper.select(select);
 
         //初始化状态机
         StateMachine stateMachine = new StateMachine();
         stateMachine.setOrganizationId(organizationId);
-        stateMachine.setName("默认状态机");
-        stateMachine.setDescription("默认状态机");
+        stateMachine.setName(projectCode + "默认状态机");
+        stateMachine.setDescription(projectCode + "默认状态机");
         stateMachine.setStatus(StateMachineStatus.CREATE);
         if (stateMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException("error.stateMachine.create");
@@ -70,14 +74,14 @@ public class InitServiceImpl implements InitService {
 
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
-        Map<String, Status> statusMap = initStatuses.stream().collect(Collectors.toMap(Status::getName, x -> x));
+        Map<String, Status> statusMap = initStatuses.stream().filter(x->x.getCode()!=null).collect(Collectors.toMap(Status::getCode, x -> x));
         for (InitNode initNode : InitNode.values()) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
             node.setStateMachineId(stateMachine.getId());
             if (initNode.getType().equals(NodeType.START)) {
                 node.setStatusId(0L);
             } else {
-                node.setStatusId(statusMap.get(initNode.getStatusName()).getId());
+                node.setStatusId(statusMap.get(initNode.getCode()).getId());
             }
             node.setPositionX(initNode.getPositionX());
             node.setPositionY(initNode.getPositionY());
@@ -89,7 +93,7 @@ public class InitServiceImpl implements InitService {
             if (isNodeInsert != 1) {
                 throw new CommonException("error.stateMachineNode.create");
             }
-            nodeMap.put(initNode.getStatusName(), node);
+            nodeMap.put(initNode.getCode(), node);
         }
         //初始化转换
         for (InitTransform initTransform : InitTransform.values()) {
@@ -100,9 +104,9 @@ public class InitServiceImpl implements InitService {
             if (initTransform.getType().equals(TransformType.ALL)) {
                 transform.setStartNodeId(0L);
             } else {
-                transform.setStartNodeId(nodeMap.get(initTransform.getStartNodeName()).getId());
+                transform.setStartNodeId(nodeMap.get(initTransform.getStartNodeCode()).getId());
             }
-            transform.setEndNodeId(nodeMap.get(initTransform.getEndNodeName()).getId());
+            transform.setEndNodeId(nodeMap.get(initTransform.getEndNodeCode()).getId());
             transform.setType(initTransform.getType());
             transform.setConditionStrategy(initTransform.getConditionStrategy());
             transform.setOrganizationId(organizationId);
@@ -112,12 +116,13 @@ public class InitServiceImpl implements InitService {
             }
             //如果是ALL类型的转换，要更新节点的allStatusTransformId
             if (initTransform.getType().equals(TransformType.ALL)) {
-                StateMachineNodeDraft nodeDraft = nodeMap.get(initTransform.getEndNodeName());
+                StateMachineNodeDraft nodeDraft = nodeMap.get(initTransform.getEndNodeCode());
                 int update = nodeDraftMapper.updateAllStatusTransformId(organizationId, nodeDraft.getId(), transform.getId());
                 if (update != 1) {
                     throw new CommonException("error.stateMachineNode.allStatusTransformId.update");
                 }
             }
         }
+        return stateMachine.getId();
     }
 }

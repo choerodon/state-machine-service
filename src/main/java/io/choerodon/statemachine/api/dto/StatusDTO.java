@@ -7,6 +7,10 @@ public class StatusDTO {
 
     private Long id;
     private String name;
+    /**
+     * code是用来识别是否是初始化状态
+     */
+    private String code;
     private String description;
     private String type;
     private Long organizationId;
@@ -79,5 +83,11 @@ public class StatusDTO {
         this.canDelete = canDelete;
     }
 
+    public String getCode() {
+        return code;
+    }
 
+    public void setCode(String code) {
+        this.code = code;
+    }
 }

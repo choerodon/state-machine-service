@@ -14,6 +14,6 @@ public interface InitService {
      * @param organizationId
      */
     List<Status> initStatus(Long organizationId);
-    void initAGStateMachine(Long organizationId, List<Status> initStatuses);
+    Long initAGStateMachine(Long organizationId, String projectCode);
 }
 
