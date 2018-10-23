@@ -85,4 +85,11 @@
             AND SM.organization_id = #{organizationId}
     </select>
 
+    <update id="updateAllStatusTransformId">
+        UPDATE state_machine_node_draft
+        SET all_status_transform_id = #{allStatusTransformId}
+        WHERE organization_id = #{organizationId}
+        AND id = #{id}
+    </update>
+
 </mapper>
