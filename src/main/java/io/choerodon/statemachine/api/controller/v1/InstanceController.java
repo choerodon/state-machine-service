@@ -83,6 +83,6 @@ public class InstanceController extends BaseController {
         //初始化状态
         List<Status> initStatuses = initService.initStatus(organizationId);
         //初始化敏捷状态机
-        initService.initAGStateMachine(organizationId, initStatuses);
+//        initService.initAGStateMachine(organizationId);
     }
 }

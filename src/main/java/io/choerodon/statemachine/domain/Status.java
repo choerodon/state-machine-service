@@ -19,6 +19,7 @@ public class Status extends AuditDomain {
     @GeneratedValue
     private Long id;
     private String name;
+    private String code;
     private String description;
     private String type;
     private Long organizationId;
@@ -63,4 +64,11 @@ public class Status extends AuditDomain {
         this.organizationId = organizationId;
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 }

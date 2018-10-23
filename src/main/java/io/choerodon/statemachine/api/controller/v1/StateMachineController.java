@@ -7,6 +7,7 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
+import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.validator.StateMachineValidator;
 import io.choerodon.swagger.annotation.CustomPageRequest;
@@ -34,6 +35,8 @@ public class StateMachineController extends BaseController {
 
     @Autowired
     private StateMachineValidator stateMachineValidator;
+    @Autowired
+    private InitService initService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "分页查询状态机列表")
@@ -130,5 +133,13 @@ public class StateMachineController extends BaseController {
     @GetMapping(value = "/query_all")
     public ResponseEntity<List<StateMachineDTO>> queryAll(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(stateMachineService.queryAll(organizationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "【初始化项目】创建项目时创建该项目的状态机，返回状态机id")
+    @GetMapping(value = "/create_with_create_project")
+    public ResponseEntity<Long> createStateMachineWithCreateProject(@PathVariable("organization_id") Long organizationId,
+                                                                               @RequestParam("project_code") String projectCode) {
+        return new ResponseEntity<>(initService.initAGStateMachine(organizationId, projectCode), HttpStatus.CREATED);
     }
 }
