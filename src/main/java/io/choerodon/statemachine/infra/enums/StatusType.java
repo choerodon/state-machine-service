@@ -11,17 +11,17 @@ public class StatusType {
     /**
      * 待处理
      */
-    public static final String TODO = "status_todo";
+    public static final String TODO = "todo";
     /**
      * 处理中
      */
-    public static final String DOING = "status_doing";
+    public static final String DOING = "doing";
     /**
      * 已完成
      */
-    public static final String DONE = "status_done";
+    public static final String DONE = "done";
     /**
      * 无类型
      */
-    public static final String NONE = "status_none";
+    public static final String NONE = "none";
 }
