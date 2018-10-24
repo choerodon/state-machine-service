@@ -3,8 +3,11 @@ package io.choerodon.statemachine.api.service;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.StatusDTO;
+import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.StatusForMoveDataDO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -73,5 +76,9 @@ public interface StatusService {
      * @return
      */
     Boolean checkName(Long organizationId, Long statusId, String name);
+
+    Map<Long, List<Status>> init(List<StatusForMoveDataDO> statusForMoveDataDOList);
+
+    Map<Long, Status> batchStatusGet(List<Long> ids);
 
 }
