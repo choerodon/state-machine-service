@@ -21,4 +21,6 @@ public interface StatusMapper extends BaseMapper<Status> {
     List<Status> fulltextSearch(@Param("status") Status status, @Param("param") String param);
 
     Status queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
+
+    List<Status> batchStatusGet(@Param("ids") List<Long> ids);
 }
