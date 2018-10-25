@@ -1,7 +1,8 @@
 package io.choerodon.statemachine.api.dto;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author shinan.chen
+ * @date 2018/10/24
  */
 public class StatusDTO {
 
@@ -15,8 +16,10 @@ public class StatusDTO {
     private String type;
     private Long organizationId;
     private Long objectVersionNumber;
+    private Boolean canDelete;
 
-    public StatusDTO(){}
+    public StatusDTO() {
+    }
 
     public StatusDTO(String name, String description, String type, Long organizationId) {
         this.name = name;
@@ -24,8 +27,6 @@ public class StatusDTO {
         this.type = type;
         this.organizationId = organizationId;
     }
-
-    private Boolean canDelete;
 
     public Long getId() {
         return id;

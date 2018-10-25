@@ -2,6 +2,7 @@ package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.service.InitService;
+import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
@@ -33,6 +34,8 @@ public class InitServiceImpl implements InitService {
     private StatusMapper statusMapper;
     @Autowired
     private StateMachineNodeDraftMapper nodeDraftMapper;
+    @Autowired
+    private StateMachineService stateMachineService;
     @Autowired
     private StateMachineMapper stateMachineMapper;
     @Autowired
@@ -123,6 +126,9 @@ public class InitServiceImpl implements InitService {
                 }
             }
         }
+        //发布状态机
+        stateMachineService.deploy(organizationId,stateMachine.getId());
+
         return stateMachine.getId();
     }
 }
