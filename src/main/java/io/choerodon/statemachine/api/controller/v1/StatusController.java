@@ -11,7 +11,6 @@ import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.api.validator.StateValidator;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.domain.StatusForMoveDataDO;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -107,14 +106,6 @@ public class StatusController extends BaseController {
                                              @RequestParam(value = "status_id", required = false) Long statusId,
                                              @RequestParam("name") String name) {
         return new ResponseEntity<>(statusService.checkName(organizationId, statusId, name), HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "初始化状态数据，其它勿调用")
-    @PostMapping(value = "/status/init")
-    public ResponseEntity<Map<Long, List<Status>>> initStatus(@ApiParam(value = "状态数据", required = true)
-                                                              @RequestBody List<StatusForMoveDataDO> statusForMoveDataDOList) {
-        return new ResponseEntity<>(statusService.init(statusForMoveDataDOList), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
