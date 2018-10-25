@@ -14,6 +14,13 @@ public interface InitService {
      * @param organizationId
      */
     List<Status> initStatus(Long organizationId);
+
+    /**
+     * 创建敏捷项目时初始化项目的状态机，并发布
+     * @param organizationId
+     * @param projectCode
+     * @return
+     */
     Long initAGStateMachine(Long organizationId, String projectCode);
 }
 

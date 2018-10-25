@@ -8,7 +8,7 @@ public enum InitNode {
     START("start", 25L, 0L, 50L, 50L, NodeType.START),
     INIT("create", 0L, 120L, 100L, 50L, NodeType.INIT),
     NODE2("processing", 0L, 220L, 100L, 50L, NodeType.CUSTOM),
-    NODE5("complete", 0L, 520L, 100L, 50L, NodeType.CUSTOM);
+    NODE5("complete", 0L, 320L, 100L, 50L, NodeType.CUSTOM);
     String code;
     Long positionX;
     Long positionY;
