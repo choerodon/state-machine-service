@@ -1,4 +1,4 @@
-package io.choerodon.statemachine.domain;
+package io.choerodon.statemachine.fixdata.dto;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/24.

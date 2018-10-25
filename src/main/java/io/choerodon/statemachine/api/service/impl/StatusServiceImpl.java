@@ -1,6 +1,5 @@
 package io.choerodon.statemachine.api.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -8,7 +7,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.domain.StatusForMoveDataDO;
+import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
@@ -138,34 +137,6 @@ public class StatusServiceImpl implements StatusService {
             return status.getId().equals(statusId);
         }
         return true;
-    }
-
-    @Override
-    public Map<Long, List<Status>> init(List<StatusForMoveDataDO> statusForMoveDataDOList) {
-        Map<Long, List<Status>> result = new HashMap<>();
-        for (StatusForMoveDataDO statusForMoveDataDO : statusForMoveDataDOList) {
-            Status status = new Status();
-            status.setOrganizationId(statusForMoveDataDO.getOrganizationId());
-            status.setName(statusForMoveDataDO.getName());
-            List<Status> temp = stateMapper.select(status);
-            if (temp == null || temp.isEmpty()) {
-                status.setDescription(statusForMoveDataDO.getName());
-                status.setType(statusForMoveDataDO.getCategoryCode());
-                if (stateMapper.insert(status) != 1) {
-                    throw new CommonException("error.status.insert");
-                }
-                if (result.get(status.getOrganizationId()) == null) {
-                    List<Status> statusList = new ArrayList<>();
-                    statusList.add(status);
-                    result.put(status.getOrganizationId(), statusList);
-                } else {
-                    List<Status> statusList = result.get(status.getOrganizationId());
-                    statusList.add(status);
-                    result.put(status.getOrganizationId(), statusList);
-                }
-            }
-        }
-        return result;
     }
 
     @Override
