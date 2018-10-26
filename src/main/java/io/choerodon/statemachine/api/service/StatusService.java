@@ -3,6 +3,8 @@ package io.choerodon.statemachine.api.service;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.StatusDTO;
+import io.choerodon.statemachine.api.dto.StatusInfoDTO;
+import io.choerodon.statemachine.api.dto.StatusMapDTO;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
 
@@ -57,7 +59,7 @@ public interface StatusService {
      * @param statusId       状态id
      * @return
      */
-    StatusDTO queryStatusById(Long organizationId, Long statusId);
+    StatusInfoDTO queryStatusById(Long organizationId, Long statusId);
 
     /**
      * 获取所有
@@ -66,6 +68,8 @@ public interface StatusService {
      * @return
      */
     List<StatusDTO> queryAllStatus(Long organizationId);
+
+    Map<Long, StatusMapDTO> queryAllStatusMap(Long organizationId);
 
     /**
      * 校验状态名字是否未被使用
