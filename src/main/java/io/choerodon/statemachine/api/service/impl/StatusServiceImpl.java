@@ -5,6 +5,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.StatusDTO;
+import io.choerodon.statemachine.api.dto.StatusInfoDTO;
+import io.choerodon.statemachine.api.dto.StatusMapDTO;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
@@ -109,12 +111,12 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public StatusDTO queryStatusById(Long organizationId, Long stateId) {
+    public StatusInfoDTO queryStatusById(Long organizationId, Long stateId) {
         Status status = stateMapper.queryById(organizationId, stateId);
         if (status == null) {
             throw new CommonException("error.queryStatusById.notExist");
         }
-        return modelMapper.map(status, StatusDTO.class);
+        return modelMapper.map(status, StatusInfoDTO.class);
     }
 
     @Override
@@ -124,6 +126,19 @@ public class StatusServiceImpl implements StatusService {
         List<Status> statuses = stateMapper.select(status);
         return modelMapper.map(statuses, new TypeToken<List<StatusDTO>>() {
         }.getType());
+    }
+
+    @Override
+    public Map<Long, StatusMapDTO> queryAllStatusMap(Long organizationId) {
+        Status status = new Status();
+        status.setOrganizationId(organizationId);
+        List<Status> statuses = stateMapper.select(status);
+        Map<Long, StatusMapDTO> statusMap = new HashMap<>();
+        for (Status sta : statuses) {
+            StatusMapDTO statusMapDTO = modelMapper.map(sta, new TypeToken<StatusMapDTO>() {}.getType());
+            statusMap.put(statusMapDTO.getId(), statusMapDTO);
+        }
+        return statusMap;
     }
 
     @Override

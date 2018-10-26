@@ -8,11 +8,14 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.statemachine.api.dto.StatusDTO;
+import io.choerodon.statemachine.api.dto.StatusInfoDTO;
+import io.choerodon.statemachine.api.dto.StatusMapDTO;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.api.validator.StateValidator;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +91,8 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id查询状态对象")
     @GetMapping(value = "/organizations/{organization_id}/status/{status_id}")
-    public ResponseEntity<StatusDTO> queryStatusById(@PathVariable("organization_id") Long organizationId, @PathVariable("status_id") Long statusId) {
+    public ResponseEntity<StatusInfoDTO> queryStatusById(@PathVariable("organization_id") Long organizationId,
+                                                         @PathVariable("status_id") Long statusId) {
         return new ResponseEntity<>(statusService.queryStatusById(organizationId, statusId), HttpStatus.OK);
     }
 
@@ -97,6 +101,15 @@ public class StatusController extends BaseController {
     @GetMapping(value = "/organizations/{organization_id}/status/query_all")
     public ResponseEntity<List<StatusDTO>> queryAllStatus(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(statusService.queryAllStatus(organizationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询组织下的所有状态,返回map")
+    @GetMapping(value = "/organizations/{organization_id}/status/list_map")
+    public ResponseEntity<Map<Long, StatusMapDTO>> queryAllStatusMap(
+            @ApiParam(value = "组织id", required = true)
+            @PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(statusService.queryAllStatusMap(organizationId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
