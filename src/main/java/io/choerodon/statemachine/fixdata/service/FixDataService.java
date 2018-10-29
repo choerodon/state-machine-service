@@ -25,5 +25,12 @@ public interface FixDataService {
      * @param statusForMoveDataDOList
      * @return
      */
-    Map<Long, List<Status>> createStatus(List<StatusForMoveDataDO> statusForMoveDataDOList);
+    Boolean createStatus(List<StatusForMoveDataDO> statusForMoveDataDOList);
+
+    /**
+     * 获取所有组织的所有状态
+     *
+     * @return
+     */
+    Map<Long, List<Status>> queryAllStatus();
 }
