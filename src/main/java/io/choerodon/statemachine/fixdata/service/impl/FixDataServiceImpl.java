@@ -64,7 +64,7 @@ public class FixDataServiceImpl implements FixDataService {
 
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
-        System.out.println(organizationId+":"+projectCode);
+        System.out.println(organizationId + ":" + projectCode);
         Map<String, Status> statusMap = initStatuses.stream().collect(Collectors.toMap(Status::getName, x -> x));
         List<FixNode> fixNodes = new ArrayList<>();
         //创建start节点
@@ -93,18 +93,18 @@ public class FixDataServiceImpl implements FixDataService {
             if (fixNode.getType().equals(NodeType.START)) {
                 node.setStatusId(0L);
             } else {
-                System.out.println(organizationId+":"+fixNode.getName());
+                System.out.println(organizationId + ":" + fixNode.getName());
                 Status status = statusMap.get(fixNode.getName());
-                if(status!=null){
+                if (status != null) {
                     node.setStatusId(status.getId());
-                }else{
+                } else {
                     Status status1 = new Status();
                     status1.setOrganizationId(organizationId);
                     status1.setName(fixNode.getName());
                     List<Status> statusList = statusMapper.select(status1);
-                    if(!statusList.isEmpty()){
+                    if (!statusList.isEmpty()) {
                         node.setStatusId(statusList.get(0).getId());
-                    }else{
+                    } else {
                         throw new CommonException("error.status.name.notFound");
                     }
                 }
@@ -165,12 +165,11 @@ public class FixDataServiceImpl implements FixDataService {
     }
 
     @Override
-    public Map<Long, List<Status>> createStatus(List<StatusForMoveDataDO> statusForMoveDataDOList) {
-        Map<String,String> codeMap = new HashMap<>(3);
-        codeMap.put(InitStatus.STATUS1.getName(),InitStatus.STATUS1.getCode());
-        codeMap.put(InitStatus.STATUS2.getName(),InitStatus.STATUS2.getCode());
-        codeMap.put(InitStatus.STATUS3.getName(),InitStatus.STATUS3.getCode());
-        Map<Long, List<Status>> result = new HashMap<>();
+    public Boolean createStatus(List<StatusForMoveDataDO> statusForMoveDataDOList) {
+        Map<String, String> codeMap = new HashMap<>(3);
+        codeMap.put(InitStatus.STATUS1.getName(), InitStatus.STATUS1.getCode());
+        codeMap.put(InitStatus.STATUS2.getName(), InitStatus.STATUS2.getCode());
+        codeMap.put(InitStatus.STATUS3.getName(), InitStatus.STATUS3.getCode());
         for (StatusForMoveDataDO statusForMoveDataDO : statusForMoveDataDOList) {
             Status status = new Status();
             status.setOrganizationId(statusForMoveDataDO.getOrganizationId());
@@ -182,25 +181,18 @@ public class FixDataServiceImpl implements FixDataService {
                 status.setType(statusForMoveDataDO.getCategoryCode());
                 //保证幂等性
                 List<Status> statuses = statusMapper.select(status);
-                if (!statuses.isEmpty()) {
-                    status = statuses.get(0);
-                } else {
+                if (statuses.isEmpty()) {
                     statusMapper.insert(status);
                 }
-            }else{
-                status = temp.get(0);
             }
-            if (result.get(status.getOrganizationId()) == null) {
-                List<Status> statusList = new ArrayList<>();
-                statusList.add(status);
-                result.put(status.getOrganizationId(), statusList);
-            } else {
-                List<Status> statusList = result.get(status.getOrganizationId());
-                statusList.add(status);
-                result.put(status.getOrganizationId(), statusList);
-            }
-
         }
-        return result;
+        return true;
+    }
+
+    @Override
+    public Map<Long, List<Status>> queryAllStatus() {
+        List<Status> issueTypes = statusMapper.selectAll();
+        Map<Long, List<Status>> orgMaps = issueTypes.stream().collect(Collectors.groupingBy(Status::getOrganizationId));
+        return orgMaps;
     }
 }
