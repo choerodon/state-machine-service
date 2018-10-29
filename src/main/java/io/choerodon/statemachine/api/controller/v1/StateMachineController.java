@@ -139,7 +139,7 @@ public class StateMachineController extends BaseController {
     @ApiOperation(value = "【初始化项目】创建项目时创建该项目的状态机，返回状态机id")
     @GetMapping(value = "/create_with_create_project")
     public ResponseEntity<Long> createStateMachineWithCreateProject(@PathVariable("organization_id") Long organizationId,
-                                                                               @RequestParam("project_code") String projectCode) {
+                                                                    @RequestParam("project_code") String projectCode) {
         return new ResponseEntity<>(initService.initAGStateMachine(organizationId, projectCode), HttpStatus.CREATED);
     }
 }

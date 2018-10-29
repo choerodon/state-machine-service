@@ -52,6 +52,11 @@ public class FixDataServiceImpl implements FixDataService {
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(projectCode + "默认状态机");
         stateMachine.setDescription(projectCode + "默认状态机");
+        //保证幂等性
+        List<StateMachine> stateMachines = stateMachineMapper.select(stateMachine);
+        if (!stateMachines.isEmpty()) {
+            return stateMachines.get(0).getId();
+        }
         stateMachine.setStatus(StateMachineStatus.CREATE);
         if (stateMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException("error.stateMachine.create");
@@ -59,6 +64,7 @@ public class FixDataServiceImpl implements FixDataService {
 
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
+        System.out.println(organizationId+":"+projectCode);
         Map<String, Status> statusMap = initStatuses.stream().collect(Collectors.toMap(Status::getName, x -> x));
         List<FixNode> fixNodes = new ArrayList<>();
         //创建start节点
@@ -87,7 +93,21 @@ public class FixDataServiceImpl implements FixDataService {
             if (fixNode.getType().equals(NodeType.START)) {
                 node.setStatusId(0L);
             } else {
-                node.setStatusId(statusMap.get(fixNode.getName()).getId());
+                System.out.println(organizationId+":"+fixNode.getName());
+                Status status = statusMap.get(fixNode.getName());
+                if(status!=null){
+                    node.setStatusId(status.getId());
+                }else{
+                    Status status1 = new Status();
+                    status1.setOrganizationId(organizationId);
+                    status1.setName(fixNode.getName());
+                    List<Status> statusList = statusMapper.select(status1);
+                    if(!statusList.isEmpty()){
+                        node.setStatusId(statusList.get(0).getId());
+                    }else{
+                        throw new CommonException("error.status.name.notFound");
+                    }
+                }
             }
             node.setPositionX(fixNode.getPositionX());
             node.setPositionY(fixNode.getPositionY());
@@ -146,6 +166,10 @@ public class FixDataServiceImpl implements FixDataService {
 
     @Override
     public Map<Long, List<Status>> createStatus(List<StatusForMoveDataDO> statusForMoveDataDOList) {
+        Map<String,String> codeMap = new HashMap<>(3);
+        codeMap.put(InitStatus.STATUS1.getName(),InitStatus.STATUS1.getCode());
+        codeMap.put(InitStatus.STATUS2.getName(),InitStatus.STATUS2.getCode());
+        codeMap.put(InitStatus.STATUS3.getName(),InitStatus.STATUS3.getCode());
         Map<Long, List<Status>> result = new HashMap<>();
         for (StatusForMoveDataDO statusForMoveDataDO : statusForMoveDataDOList) {
             Status status = new Status();
@@ -154,20 +178,28 @@ public class FixDataServiceImpl implements FixDataService {
             List<Status> temp = statusMapper.select(status);
             if (temp == null || temp.isEmpty()) {
                 status.setDescription(statusForMoveDataDO.getName());
+                status.setCode(codeMap.get(status.getName()));
                 status.setType(statusForMoveDataDO.getCategoryCode());
-                if (statusMapper.insert(status) != 1) {
-                    throw new CommonException("error.status.insert");
-                }
-                if (result.get(status.getOrganizationId()) == null) {
-                    List<Status> statusList = new ArrayList<>();
-                    statusList.add(status);
-                    result.put(status.getOrganizationId(), statusList);
+                //保证幂等性
+                List<Status> statuses = statusMapper.select(status);
+                if (!statuses.isEmpty()) {
+                    status = statuses.get(0);
                 } else {
-                    List<Status> statusList = result.get(status.getOrganizationId());
-                    statusList.add(status);
-                    result.put(status.getOrganizationId(), statusList);
+                    statusMapper.insert(status);
                 }
+            }else{
+                status = temp.get(0);
             }
+            if (result.get(status.getOrganizationId()) == null) {
+                List<Status> statusList = new ArrayList<>();
+                statusList.add(status);
+                result.put(status.getOrganizationId(), statusList);
+            } else {
+                List<Status> statusList = result.get(status.getOrganizationId());
+                statusList.add(status);
+                result.put(status.getOrganizationId(), statusList);
+            }
+
         }
         return result;
     }
