@@ -150,8 +150,8 @@ public class FixDataServiceImpl implements FixDataService {
                 throw new CommonException("error.stateMachineTransform.create");
             }
             //如果是ALL类型的转换，要更新节点的allStatusTransformId
-            if (initTransform.getType().equals(TransformType.ALL)) {
-                StateMachineNodeDraft nodeDraft = nodeMap.get(initTransform.getEndNodeName());
+            if (fixTransform.getType().equals(TransformType.ALL)) {
+                StateMachineNodeDraft nodeDraft = nodeMap.get(fixTransform.getEndNodeName());
                 int update = nodeDraftMapper.updateAllStatusTransformId(organizationId, nodeDraft.getId(), transform.getId());
                 if (update != 1) {
                     throw new CommonException("error.stateMachineNode.allStatusTransformId.update");
