@@ -1,5 +1,10 @@
 package io.choerodon.statemachine.api.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import io.choerodon.asgard.saga.annotation.Saga;
+import io.choerodon.asgard.saga.dto.StartInstanceDTO;
+import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
@@ -7,6 +12,9 @@ import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.event.ProjectCreateAgilePayload;
+import io.choerodon.statemachine.domain.event.StatusPayload;
+import io.choerodon.statemachine.domain.event.ProjectEvent;
 import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
@@ -41,6 +49,9 @@ public class InitServiceImpl implements InitService {
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
 
+    @Autowired
+    private SagaClient sagaClient;
+
     @Override
     public List<Status> initStatus(Long organizationId) {
         List<Status> initStatuses = new ArrayList<>();
@@ -60,7 +71,8 @@ public class InitServiceImpl implements InitService {
     }
 
     @Override
-    public Long initAGStateMachine(Long organizationId, String projectCode) {
+    public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
+        String projectCode = projectEvent.getProjectCode();
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);
@@ -127,8 +139,19 @@ public class InitServiceImpl implements InitService {
             }
         }
         //发布状态机
-        stateMachineService.deploy(organizationId,stateMachine.getId());
+        Long stateMachineId = stateMachine.getId();
+        stateMachineService.deploy(organizationId, stateMachineId);
+        sendSagaToAgile(projectEvent, stateMachineId);
+        return stateMachineId;
+    }
 
-        return stateMachine.getId();
+    @Override
+    @Saga(code = "project-create-state-machine", description = "创建项目发送消息至agile", inputSchemaClass = ProjectCreateAgilePayload.class)
+    public void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId) {
+        List<StatusPayload> statusPayloads = stateMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+        ProjectCreateAgilePayload projectCreateAgilePayload = new ProjectCreateAgilePayload();
+        projectCreateAgilePayload.setProjectEvent(projectEvent);
+        projectCreateAgilePayload.setStatusPayloads(statusPayloads);
+        sagaClient.startSaga("project-create-state-machine", new StartInstanceDTO(JSON.toJSONString(projectCreateAgilePayload), "", ""));
     }
 }

@@ -34,4 +34,11 @@
         WHERE id = #{stateMachineId}
     </update>
 
+    <select id="getStatusBySmId" resultType="io.choerodon.statemachine.domain.event.StatusPayload">
+        select s.id as status_id, s.name as status_name, s.type, #{projectId} as project_id
+        from state_machine_node smn
+        left join status s on smn.status_id = s.id
+        where smn.state_machine_id = #{stateMachineId} and smn.status_id != 0
+    </select>
+
 </mapper>

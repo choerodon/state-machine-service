@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.api.service;
 
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.event.ProjectEvent;
 
 import java.util.List;
 
@@ -15,12 +16,8 @@ public interface InitService {
      */
     List<Status> initStatus(Long organizationId);
 
-    /**
-     * 创建敏捷项目时初始化项目的状态机，并发布
-     * @param organizationId
-     * @param projectCode
-     * @return
-     */
-    Long initAGStateMachine(Long organizationId, String projectCode);
+    Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent);
+
+    void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId);
 }
 
