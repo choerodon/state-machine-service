@@ -2,6 +2,7 @@ package io.choerodon.statemachine.infra.mapper;
 
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.statemachine.domain.StateMachine;
+import io.choerodon.statemachine.domain.event.StatusPayload;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface StateMachineMapper extends BaseMapper<StateMachine> {
     List<StateMachine> fulltextSearch(@Param("stateMachine") StateMachine stateMachine, @Param("param") String param);
 
     StateMachine queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
+
+    List<StatusPayload> getStatusBySmId(@Param("projectId") Long projectId, @Param("stateMachineId") Long stateMachineId);
 }
