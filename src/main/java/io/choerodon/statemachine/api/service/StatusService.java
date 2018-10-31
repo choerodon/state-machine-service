@@ -83,4 +83,12 @@ public interface StatusService {
 
     Map<Long, Status> batchStatusGet(List<Long> ids);
 
+    /**
+     * 敏捷添加状态
+     * @param organizationId
+     * @param statusDTO
+     * @return
+     */
+    StatusDTO createStatusForAgile(Long organizationId, Long stateMachineId, StatusDTO statusDTO);
+
 }

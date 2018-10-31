@@ -59,4 +59,13 @@ public interface StateMachineNodeService extends BaseService<StateMachineNodeDra
      */
     List<StateMachineNodeDTO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft);
 
+    /**
+     * 敏捷创建节点
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @param statusId
+     */
+    void createNodeForAgile(Long organizationId, Long stateMachineId, Long statusId);
+
 }

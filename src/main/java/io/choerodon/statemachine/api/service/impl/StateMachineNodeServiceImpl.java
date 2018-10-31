@@ -6,6 +6,7 @@ import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
+import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.app.assembler.StatusAssembler;
@@ -47,6 +48,8 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     private StatusAssembler statusAssembler;
     @Autowired
     private StatusMapper statusMapper;
+    @Autowired
+    private StateMachineTransformService transformService;
 
     @Override
     public List<StateMachineNodeDTO> create(Long organizationId, StateMachineNodeDTO nodeDTO) {
@@ -158,5 +161,35 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             nodeDTOS = stateMachineNodeAssembler.toList(nodes);
         }
         return nodeDTOS;
+    }
+
+    @Override
+    public void createNodeForAgile(Long organizationId, Long stateMachineId, Long statusId) {
+        //校验是否已经存在在状态机中
+        StateMachineNodeDraft select = new StateMachineNodeDraft();
+        select.setStatusId(statusId);
+        select.setStateMachineId(stateMachineId);
+        if(!nodeDraftMapper.select(select).isEmpty()){
+            throw new CommonException("error.createNodeForAgile.existNode");
+        }
+        //获取状态机中positionY最大的节点
+        StateMachineNodeDraft maxNode = nodeDraftMapper.selectMaxPositionY(stateMachineId);
+        //创建节点
+        StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft();
+        nodeDraft.setStatusId(statusId);
+        nodeDraft.setOrganizationId(organizationId);
+        nodeDraft.setStateMachineId(stateMachineId);
+        nodeDraft.setType(NodeType.CUSTOM);
+        nodeDraft.setPositionX(maxNode.getPositionX());
+        nodeDraft.setPositionY(maxNode.getPositionY()+100);
+        nodeDraft.setHeight(maxNode.getHeight());
+        nodeDraft.setWidth(maxNode.getWidth());
+        int isInsert = nodeDraftMapper.insert(nodeDraft);
+        if (isInsert != 1) {
+            throw new CommonException("error.stateMachineNode.create");
+        }
+        stateMachineService.updateStateMachineStatus(organizationId, stateMachineId);
+        //创建转换
+        transformService.createAllStatusTransform(organizationId, stateMachineId, nodeDraft.getId());
     }
 }

@@ -92,4 +92,15 @@
         AND id = #{id}
     </update>
 
+    <select id="selectMaxPositionY" resultType="io.choerodon.statemachine.domain.StateMachineNodeDraft">
+        SELECT *
+        FROM state_machine_node_draft
+        WHERE position_y = (
+            SELECT max(position_y)
+            FROM state_machine_node_draft
+            WHERE state_machine_id = #{stateMachineId}
+        )
+        LIMIT 1
+    </select>
+
 </mapper>
