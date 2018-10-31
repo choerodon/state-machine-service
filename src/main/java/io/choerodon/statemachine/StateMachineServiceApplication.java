@@ -10,7 +10,7 @@ import io.choerodon.resource.annoation.EnableChoerodonResourceServer;
 @SpringBootApplication
 @EnableFeignClients("io.choerodon")
 @EnableEurekaClient
-//@EnableChoerodonResourceServer
+@EnableChoerodonResourceServer
 public class StateMachineServiceApplication {
     public static void main(String[] args){
         SpringApplication.run(StateMachineServiceApplication.class, args);

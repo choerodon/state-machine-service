@@ -23,5 +23,5 @@ public interface IssueFeignClient {
      */
     @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine/query_project_ids", method = RequestMethod.GET)
     ResponseEntity<List<Long>> queryProjectIds(@PathVariable("organization_id") Long organizationId,
-                                               @RequestParam Long stateMachineId);
+                                               @RequestParam("state_machine_id") Long stateMachineId);
 }
