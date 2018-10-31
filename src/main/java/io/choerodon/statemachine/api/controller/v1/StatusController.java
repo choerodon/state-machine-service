@@ -15,7 +15,6 @@ import io.choerodon.statemachine.api.validator.StateValidator;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +126,17 @@ public class StatusController extends BaseController {
     public ResponseEntity<Map<Long, Status>> batchStatusGet(@ApiParam(value = "状态ids", required = true)
                                                             @RequestBody List<Long> ids) {
         return Optional.ofNullable(statusService.batchStatusGet(ids))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.status.get"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "【敏捷】新增状态")
+    @PostMapping(value = "/organizations/{organization_id}/status/create_status_for_agile")
+    public ResponseEntity<StatusDTO> createStatusForAgile(@PathVariable("organization_id") Long organizationId,
+                                                          @RequestParam("state_machine_id") Long stateMachineId,
+                                                          @RequestBody StatusDTO statusDTO) {
+        return Optional.ofNullable(statusService.createStatusForAgile(organizationId, stateMachineId, statusDTO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.status.get"));
     }

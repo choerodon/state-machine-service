@@ -20,6 +20,13 @@ public interface StateMachineNodeDraftMapper extends BaseMapper<StateMachineNode
     StateMachineNodeDraft queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 
     /**
+     * 获取最大的postionY
+     * @param stateMachineId
+     * @return
+     */
+    StateMachineNodeDraft selectMaxPositionY(@Param("stateMachineId") Long stateMachineId);
+
+    /**
      * 单独写更新，版本号不变，否则前端处理复杂
      */
     int updateAllStatusTransformId(@Param("organizationId") Long organizationId, @Param("id") Long id, @Param("allStatusTransformId") Long allStatusTransformId);

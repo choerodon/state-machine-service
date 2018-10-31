@@ -68,7 +68,7 @@ public class InstanceController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "获取状态机的初始状态【暂时没有用】")
+    @ApiOperation(value = "获取状态机的初始状态")
     @GetMapping(value = "/query_init_status_id")
     public ResponseEntity<Long> queryInitStatusId(@PathVariable("organization_id") Long organizationId,
                                                      @RequestParam("state_machine_id") Long stateMachineId) {
