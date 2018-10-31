@@ -3,14 +3,11 @@ package io.choerodon.statemachine.api.eventhandler;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 import io.choerodon.statemachine.api.service.InitService;
-import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.event.OrganizationEventPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 import static io.choerodon.statemachine.infra.utils.SagaTopic.Organization.*;
 

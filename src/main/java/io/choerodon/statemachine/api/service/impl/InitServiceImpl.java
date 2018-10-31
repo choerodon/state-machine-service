@@ -1,7 +1,6 @@
 package io.choerodon.statemachine.api.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
@@ -13,8 +12,8 @@ import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.event.ProjectCreateAgilePayload;
-import io.choerodon.statemachine.domain.event.StatusPayload;
 import io.choerodon.statemachine.domain.event.ProjectEvent;
+import io.choerodon.statemachine.domain.event.StatusPayload;
 import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
@@ -89,7 +88,7 @@ public class InitServiceImpl implements InitService {
 
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
-        Map<String, Status> statusMap = initStatuses.stream().filter(x->x.getCode()!=null).collect(Collectors.toMap(Status::getCode, x -> x));
+        Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x));
         for (InitNode initNode : InitNode.values()) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
             node.setStateMachineId(stateMachine.getId());
@@ -140,7 +139,7 @@ public class InitServiceImpl implements InitService {
         }
         //发布状态机
         Long stateMachineId = stateMachine.getId();
-        stateMachineService.deploy(organizationId, stateMachineId);
+        stateMachineService.deploy(organizationId, stateMachineId, false);
         sendSagaToAgile(projectEvent, stateMachineId);
         return stateMachineId;
     }

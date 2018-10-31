@@ -159,7 +159,7 @@ public class FixDataServiceImpl implements FixDataService {
             }
         }
         //发布状态机
-        stateMachineService.deploy(organizationId, stateMachine.getId());
+        stateMachineService.deploy(organizationId, stateMachine.getId(), false);
 
         return stateMachine.getId();
     }

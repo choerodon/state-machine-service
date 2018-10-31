@@ -23,10 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -40,22 +37,16 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Autowired
     private StateMachineMapper stateMachineMapper;
-
     @Autowired
     private StateMachineNodeMapper nodeDeployMapper;
-
     @Autowired
     private StateMachineNodeDraftMapper nodeDraftMapper;
-
     @Autowired
     private StateMachineNodeService nodeService;
-
     @Autowired
     private StateMachineTransformMapper transformDeployMapper;
-
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
-
     @Autowired
     private StateMachineConfigMapper configDeployMapper;
     @Autowired
@@ -68,12 +59,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     private StateMachineConfigAssembler stateMachineConfigAssembler;
     @Autowired
     private StateMachineAssembler stateMachineAssembler;
-
     @Autowired
     private StatusService statusService;
-
     @Autowired
     private MachineFactory machineFactory;
+    @Autowired
+    private SagaServiceImpl sagaService;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -212,7 +203,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public StateMachineDTO deploy(Long organizationId, Long stateMachineId) {
+    public StateMachineDTO deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (null == stateMachine) {
             throw new CommonException("error.stateMachine.null");
@@ -273,7 +264,35 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         //清理内存中的旧状态机构建器与实例
         machineFactory.deployStateMachine(stateMachineId);
 
+        //是否同步状态到其他服务
+        if (isStartSaga) {
+            deployHandle(organizationId, stateMachineId);
+        }
         return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
+    }
+
+    /**
+     * 处理发布状态机时，状态的变化，发saga
+     *
+     * @param organizationId
+     * @param stateMachineId
+     */
+    private void deployHandle(Long organizationId, Long stateMachineId) {
+        //获取新节点
+        List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        Map<Long, Status> deployMap = nodeDeploys.stream().collect(Collectors.toMap(StateMachineNode::getId, StateMachineNode::getStatus));
+        List<Long> newIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
+        //获取旧节点
+        List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachineId);
+        List<Long> oldIds = nodeDrafts.stream().map(StateMachineNodeDraft::getId).collect(Collectors.toList());
+        //新增的节点
+        List<Long> addIds = new ArrayList<>(newIds);
+        addIds.removeAll(oldIds);
+        List<Status> statuses = new ArrayList<>(addIds.size());
+        addIds.forEach(addId -> {
+            statuses.add(deployMap.get(addId));
+        });
+        sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, statuses);
     }
 
     @Override

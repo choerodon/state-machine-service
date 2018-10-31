@@ -191,7 +191,7 @@ public class StatusServiceImpl implements StatusService {
         //将状态加入状态机中
         nodeService.createNodeForAgile(organizationId, stateMachineId, statusDTO.getId());
         //发布状态机
-        stateMachineService.deploy(organizationId, stateMachineId);
+        stateMachineService.deploy(organizationId, stateMachineId, false);
         return statusDTO;
     }
 }
