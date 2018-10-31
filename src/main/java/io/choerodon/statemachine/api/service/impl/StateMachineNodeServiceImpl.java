@@ -113,7 +113,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     }
 
     /**
-     * 新增状态
+     * 状态机下新增状态
      *
      * @param organizationId 组织id
      * @param nodeDTO        节点
@@ -169,27 +169,26 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         StateMachineNodeDraft select = new StateMachineNodeDraft();
         select.setStatusId(statusId);
         select.setStateMachineId(stateMachineId);
-        if(!nodeDraftMapper.select(select).isEmpty()){
-            throw new CommonException("error.createNodeForAgile.existNode");
+        if(nodeDraftMapper.select(select).isEmpty()){
+            //获取状态机中positionY最大的节点
+            StateMachineNodeDraft maxNode = nodeDraftMapper.selectMaxPositionY(stateMachineId);
+            //创建节点
+            StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft();
+            nodeDraft.setStatusId(statusId);
+            nodeDraft.setOrganizationId(organizationId);
+            nodeDraft.setStateMachineId(stateMachineId);
+            nodeDraft.setType(NodeType.CUSTOM);
+            nodeDraft.setPositionX(maxNode.getPositionX());
+            nodeDraft.setPositionY(maxNode.getPositionY()+100);
+            nodeDraft.setHeight(maxNode.getHeight());
+            nodeDraft.setWidth(maxNode.getWidth());
+            int isInsert = nodeDraftMapper.insert(nodeDraft);
+            if (isInsert != 1) {
+                throw new CommonException("error.stateMachineNode.create");
+            }
+            stateMachineService.updateStateMachineStatus(organizationId, stateMachineId);
+            //创建转换
+            transformService.createAllStatusTransform(organizationId, stateMachineId, nodeDraft.getId());
         }
-        //获取状态机中positionY最大的节点
-        StateMachineNodeDraft maxNode = nodeDraftMapper.selectMaxPositionY(stateMachineId);
-        //创建节点
-        StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft();
-        nodeDraft.setStatusId(statusId);
-        nodeDraft.setOrganizationId(organizationId);
-        nodeDraft.setStateMachineId(stateMachineId);
-        nodeDraft.setType(NodeType.CUSTOM);
-        nodeDraft.setPositionX(maxNode.getPositionX());
-        nodeDraft.setPositionY(maxNode.getPositionY()+100);
-        nodeDraft.setHeight(maxNode.getHeight());
-        nodeDraft.setWidth(maxNode.getWidth());
-        int isInsert = nodeDraftMapper.insert(nodeDraft);
-        if (isInsert != 1) {
-            throw new CommonException("error.stateMachineNode.create");
-        }
-        stateMachineService.updateStateMachineStatus(organizationId, stateMachineId);
-        //创建转换
-        transformService.createAllStatusTransform(organizationId, stateMachineId, nodeDraft.getId());
     }
 }
