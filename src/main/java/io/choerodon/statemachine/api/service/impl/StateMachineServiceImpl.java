@@ -292,7 +292,10 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         addIds.forEach(addId -> {
             statuses.add(deployMap.get(addId));
         });
-        sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, statuses);
+        if(!addIds.isEmpty()){
+            //发送saga
+            sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, statuses);
+        }
     }
 
     @Override

@@ -21,12 +21,13 @@ import java.util.List;
  */
 @Component
 public class SagaServiceImpl {
+    private static final String DEPLOY_STATEMACHINE_ADD_STATUS = "deploy-statemachine-add-status";
     @Autowired
     private SagaClient sagaClient;
     @Autowired
     private IssueFeignClient issueFeignClient;
 
-    @Saga(code = "deploy_statemachine_add_status", description = "发布状态机中增加状态", inputSchemaClass = ProjectCreateAgilePayload.class)
+    @Saga(code = DEPLOY_STATEMACHINE_ADD_STATUS, description = "发布状态机中增加状态", inputSchemaClass = ProjectCreateAgilePayload.class)
     public void deployStateMachineAddStatus(Long organizationId, Long stateMachineId, List<Status> statuses) {
         List<StatusPayload> statusPayloads = new ArrayList<>(statuses.size());
         statuses.forEach(status -> {
@@ -41,6 +42,6 @@ public class SagaServiceImpl {
         DeployStatusPayload deployStatusPayload = new DeployStatusPayload();
         deployStatusPayload.setProjectIds(projectIds);
         deployStatusPayload.setStatusPayloads(statusPayloads);
-        sagaClient.startSaga("deploy_statemachine_add_status", new StartInstanceDTO(JSON.toJSONString(deployStatusPayload), "", ""));
+        sagaClient.startSaga(DEPLOY_STATEMACHINE_ADD_STATUS, new StartInstanceDTO(JSON.toJSONString(deployStatusPayload), "", ""));
     }
 }
