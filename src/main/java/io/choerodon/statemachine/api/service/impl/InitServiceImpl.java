@@ -114,7 +114,7 @@ public class InitServiceImpl implements InitService {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
             transform.setStateMachineId(stateMachine.getId());
             transform.setName(initTransform.getName());
-            transform.setDescription("'全部'转换");
+            transform.setDescription("【全部】转换");
             if (initTransform.getType().equals(TransformType.ALL)) {
                 transform.setStartNodeId(0L);
             } else {

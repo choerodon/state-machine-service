@@ -46,6 +46,7 @@ public class FixDataServiceImpl implements FixDataService {
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);
+        List<String> statusStrs = new ArrayList<>(statuses);
 
         //初始化状态机
         StateMachine stateMachine = new StateMachine();
@@ -87,6 +88,16 @@ public class FixDataServiceImpl implements FixDataService {
             FixNode custom = new FixNode(statusName, 0L, positionY, 100L, 50L, NodeType.CUSTOM);
             fixNodes.add(custom);
         }
+        //创建初始转换
+        List<FixTransform> fixTransforms = new ArrayList<>();
+        FixTransform initTransform = new FixTransform("初始化", "开始圆点", "初始化", initStatus, TransformType.INIT);
+        fixTransforms.add(initTransform);
+        for (String statusName : statusStrs) {
+            FixTransform custom = new FixTransform("全部转换到" + statusName, null, "【全部】转换", statusName, TransformType.ALL);
+            fixTransforms.add(custom);
+        }
+
+        //开始创建
         for (FixNode fixNode : fixNodes) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
             node.setStateMachineId(stateMachine.getId());
@@ -121,21 +132,13 @@ public class FixDataServiceImpl implements FixDataService {
             }
             nodeMap.put(fixNode.getName(), node);
         }
-        //创建初始转换
-        List<FixTransform> fixTransforms = new ArrayList<>();
-        FixTransform initTransform = new FixTransform("初始化", "开始圆点", initStatus, TransformType.INIT);
-        fixTransforms.add(initTransform);
-        for (String statusName : statuses) {
-            FixTransform custom = new FixTransform("全部转换到" + statusName, null, statusName, TransformType.ALL);
-            fixTransforms.add(custom);
-        }
 
         //初始化转换
         for (FixTransform fixTransform : fixTransforms) {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
             transform.setStateMachineId(stateMachine.getId());
             transform.setName(fixTransform.getName());
-            transform.setDescription("'全部'转换");
+            transform.setDescription(fixTransform.getDescription());
             if (fixTransform.getType().equals(TransformType.ALL)) {
                 transform.setStartNodeId(0L);
             } else {
