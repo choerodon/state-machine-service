@@ -57,7 +57,7 @@
             SELECT
             smn.status_id
             FROM state_machine_node smn
-            WHERE smn.state_machine_id id IN
+            WHERE smn.state_machine_id IN
             <foreach item="item" index="index" collection="stateMachineIds" open="(" separator="," close=")">
                 #{item}
             </foreach>
