@@ -133,6 +133,10 @@ public class MachineFactory {
         Long initTransformId = transformService.getInitTransform(organizationId, stateMachineId);
         instance.sendEvent(initTransformId.toString());
 
+        //缓存实例
+        String instanceCode = serviceCode + ":" + stateMachineId + ":" + instanceId;
+        stateMachineMap.put(instanceCode, instance);
+
         return instance.getExtendedState().getVariables().get(EXECUTE_RESULT) == null ? new ExecuteResult(false, null, "触发事件失败") : (ExecuteResult) instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
     }
 

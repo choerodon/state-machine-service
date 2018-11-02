@@ -11,7 +11,6 @@ import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
@@ -22,6 +21,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -193,5 +193,15 @@ public class StatusServiceImpl implements StatusService {
         //发布状态机
         stateMachineService.deploy(organizationId, stateMachineId, false);
         return statusDTO;
+    }
+
+    @Override
+    public List<StatusDTO> queryByStateMachineIds(Long organizationId, List<Long> stateMachineIds) {
+        if (!stateMachineIds.isEmpty()) {
+            List<Status> statuses = statusMapper.queryByStateMachineIds(organizationId, stateMachineIds);
+            return modelMapper.map(statuses, new TypeToken<List<StatusDTO>>() {
+            }.getType());
+        }
+        return Collections.emptyList();
     }
 }

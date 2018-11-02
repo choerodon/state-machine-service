@@ -96,6 +96,14 @@ public class StatusController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询状态机下的所有状态")
+    @PostMapping(value = "/organizations/{organization_id}/status/query_by_state_machine_id")
+    public ResponseEntity<List<StatusDTO>> queryByStateMachineIds(@PathVariable("organization_id") Long organizationId,
+                                                                  @RequestBody @Valid List<Long> stateMachineIds) {
+        return new ResponseEntity<>(statusService.queryByStateMachineIds(organizationId, stateMachineIds), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询组织下的所有状态")
     @GetMapping(value = "/organizations/{organization_id}/status/query_all")
     public ResponseEntity<List<StatusDTO>> queryAllStatus(@PathVariable("organization_id") Long organizationId) {
