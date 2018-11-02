@@ -91,4 +91,13 @@ public interface StatusService {
      */
     StatusDTO createStatusForAgile(Long organizationId, Long stateMachineId, StatusDTO statusDTO);
 
+    /**
+     * 查询状态机下的所有状态
+     *
+     * @param organizationId
+     * @param stateMachineIds
+     * @return
+     */
+    List<StatusDTO> queryByStateMachineIds(Long organizationId,List<Long> stateMachineIds);
+
 }

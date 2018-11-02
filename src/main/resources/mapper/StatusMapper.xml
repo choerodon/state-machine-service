@@ -49,4 +49,18 @@
         </foreach>
     </insert>
 
+    <select id="queryByStateMachineIds" resultType="io.choerodon.statemachine.domain.Status">
+        SELECT *
+        FROM status
+        WHERE organization_id = #{organizationId}
+        AND id IN(
+            SELECT
+            smn.status_id
+            FROM state_machine_node smn
+            WHERE smn.state_machine_id id IN
+            <foreach item="item" index="index" collection="stateMachineIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        )
+    </select>
 </mapper>
