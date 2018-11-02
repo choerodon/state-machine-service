@@ -6,6 +6,7 @@ import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.event.RegisterInstancePayload;
 import io.choerodon.statemachine.fixdata.dto.FixNode;
 import io.choerodon.statemachine.fixdata.dto.FixTransform;
 import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
@@ -16,12 +17,17 @@ import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -161,8 +167,15 @@ public class FixDataServiceImpl implements FixDataService {
                 }
             }
         }
-        //发布状态机
-        stateMachineService.deploy(organizationId, stateMachine.getId(), false);
+        //异步发布状态机
+        Observable.just(stateMachine.getId())
+                .map(t -> {
+                    stateMachineService.deploy(organizationId, stateMachine.getId(), false);
+                    return t;
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe((Long id) -> {
+                });
 
         return stateMachine.getId();
     }
