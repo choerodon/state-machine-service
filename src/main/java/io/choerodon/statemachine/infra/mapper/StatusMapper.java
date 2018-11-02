@@ -23,4 +23,6 @@ public interface StatusMapper extends BaseMapper<Status> {
     Status queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 
     List<Status> batchStatusGet(@Param("ids") List<Long> ids);
+
+    void batchInsert(@Param("statusList") List<Status> statusList);
 }

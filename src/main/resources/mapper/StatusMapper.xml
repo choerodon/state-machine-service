@@ -40,4 +40,12 @@
         order by id
     </select>
 
+    <insert id="batchInsert">
+        insert into status
+        (name, code, description, type, organization_id)
+        <foreach collection="statusList" item="sta" separator=",">
+            (#{sta.name}, #{sta.code}, #{sta.description}, #{sta.type}, #{sta.organizationId})
+        </foreach>
+    </insert>
+
 </mapper>

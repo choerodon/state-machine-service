@@ -173,22 +173,37 @@ public class FixDataServiceImpl implements FixDataService {
         codeMap.put(InitStatus.STATUS1.getName(), InitStatus.STATUS1.getCode());
         codeMap.put(InitStatus.STATUS2.getName(), InitStatus.STATUS2.getCode());
         codeMap.put(InitStatus.STATUS3.getName(), InitStatus.STATUS3.getCode());
+        Map<Long, List<String>> statusCheckMap = new HashMap<>();
+        List<Status> statusList = new ArrayList<>();
         for (StatusForMoveDataDO statusForMoveDataDO : statusForMoveDataDOList) {
-            Status status = new Status();
-            status.setOrganizationId(statusForMoveDataDO.getOrganizationId());
-            status.setName(statusForMoveDataDO.getName());
-            List<Status> temp = statusMapper.select(status);
-            if (temp == null || temp.isEmpty()) {
+            if (statusCheckMap.get(statusForMoveDataDO.getOrganizationId()) != null) {
+                List<String> strings = statusCheckMap.get(statusForMoveDataDO.getOrganizationId());
+                if (strings.contains(statusForMoveDataDO.getName())) {
+                    continue;
+                }
+                Status status = new Status();
+                status.setOrganizationId(statusForMoveDataDO.getOrganizationId());
+                status.setName(statusForMoveDataDO.getName());
                 status.setDescription(statusForMoveDataDO.getName());
                 status.setCode(codeMap.get(status.getName()));
                 status.setType(statusForMoveDataDO.getCategoryCode());
-                //保证幂等性
-                List<Status> statuses = statusMapper.select(status);
-                if (statuses.isEmpty()) {
-                    statusMapper.insert(status);
-                }
+                statusList.add(status);
+                strings.add(statusForMoveDataDO.getName());
+                statusCheckMap.put(statusForMoveDataDO.getOrganizationId(), strings);
+            } else {
+                Status status = new Status();
+                status.setOrganizationId(statusForMoveDataDO.getOrganizationId());
+                status.setName(statusForMoveDataDO.getName());
+                status.setDescription(statusForMoveDataDO.getName());
+                status.setCode(codeMap.get(status.getName()));
+                status.setType(statusForMoveDataDO.getCategoryCode());
+                statusList.add(status);
+                List<String> strings = new ArrayList<>();
+                strings.add(statusForMoveDataDO.getName());
+                statusCheckMap.put(statusForMoveDataDO.getOrganizationId(), strings);
             }
         }
+        statusMapper.batchInsert(statusList);
         return true;
     }
 
