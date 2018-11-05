@@ -2,7 +2,6 @@ package io.choerodon.statemachine.fixdata.controller;
 
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
 import io.choerodon.statemachine.fixdata.service.FixDataService;
@@ -33,18 +32,18 @@ public class FixDataController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修复创建项目默认状态机")
-    @PostMapping(value = "/create_state_machine")
-    public ResponseEntity<Long> createStateMachine(@RequestParam("organization_id") Long organizationId,
-                                                   @RequestParam("project_code") String projectCode,
-                                                   @RequestBody List<String> statuses) {
-        return new ResponseEntity<>(fixDataService.createStateMachine(organizationId, projectCode, statuses), HttpStatus.OK);
+    @PostMapping(value = "/create_state_machine_AG_TE")
+    public ResponseEntity<Map<String, Long>> createAGStateMachineAndTEStateMachine(@RequestParam("organization_id") Long organizationId,
+                                                                                   @RequestParam("project_code") String projectCode,
+                                                                                   @RequestBody List<String> statuses) {
+        return new ResponseEntity<>(fixDataService.createAGStateMachineAndTEStateMachine(organizationId, projectCode, statuses), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修复创建状态")
     @PostMapping(value = "/create_status")
     public ResponseEntity<Boolean> createStatus(@ApiParam(value = "敏捷状态数据", required = true)
-                                                                @RequestBody List<StatusForMoveDataDO> statusForMoveDataDOList) {
+                                                @RequestBody List<StatusForMoveDataDO> statusForMoveDataDOList) {
         return new ResponseEntity<>(fixDataService.createStatus(statusForMoveDataDOList), HttpStatus.OK);
     }
 

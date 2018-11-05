@@ -12,11 +12,28 @@ import java.util.List;
 public interface InitService {
     /**
      * 初始化状态
+     *
      * @param organizationId
      */
     List<Status> initStatus(Long organizationId);
 
+    /**
+     * 初始化敏捷状态机
+     *
+     * @param organizationId
+     * @param projectEvent
+     * @return
+     */
     Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent);
+
+    /**
+     * 初始化测试状态机
+     *
+     * @param organizationId
+     * @param projectEvent
+     * @return
+     */
+    Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent);
 
     void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId);
 }

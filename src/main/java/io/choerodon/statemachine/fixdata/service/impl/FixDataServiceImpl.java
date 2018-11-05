@@ -6,7 +6,6 @@ import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.domain.event.RegisterInstancePayload;
 import io.choerodon.statemachine.fixdata.dto.FixNode;
 import io.choerodon.statemachine.fixdata.dto.FixTransform;
 import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
@@ -16,10 +15,10 @@ import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
@@ -36,6 +35,8 @@ import java.util.stream.Collectors;
  */
 @Component
 public class FixDataServiceImpl implements FixDataService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FixDataServiceImpl.class);
     @Autowired
     private StatusMapper statusMapper;
     @Autowired
@@ -48,32 +49,37 @@ public class FixDataServiceImpl implements FixDataService {
     private StateMachineService stateMachineService;
 
     @Override
-    public Long createStateMachine(Long organizationId, String projectCode, List<String> statuses) {
+    public Map<String, Long> createAGStateMachineAndTEStateMachine(Long organizationId, String projectCode, List<String> statuses) {
+
+        Map<String, Long> stateMachineIdMap = new HashMap<>(2);
+
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);
-        List<String> statusStrs = new ArrayList<>(statuses);
 
-        //初始化状态机
-        StateMachine stateMachine = new StateMachine();
-        stateMachine.setOrganizationId(organizationId);
-        stateMachine.setName(projectCode + "默认状态机");
-        stateMachine.setDescription(projectCode + "默认状态机");
-        //保证幂等性
-        List<StateMachine> stateMachines = stateMachineMapper.select(stateMachine);
-        if (!stateMachines.isEmpty()) {
-            return stateMachines.get(0).getId();
-        }
-        stateMachine.setStatus(StateMachineStatus.CREATE);
-        if (stateMachineMapper.insert(stateMachine) != 1) {
-            throw new CommonException("error.stateMachine.create");
-        }
-
-        //初始化节点
-        Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
-        System.out.println(organizationId + ":" + projectCode);
         Map<String, Status> statusMap = initStatuses.stream().collect(Collectors.toMap(Status::getName, x -> x));
+
+        //准备修复节点和转换的数据
         List<FixNode> fixNodes = new ArrayList<>();
+        List<FixTransform> fixTransforms = new ArrayList<>();
+        prepareFixNodeAndTransform(fixNodes, fixTransforms, statuses);
+
+        //创建敏捷状态机
+        stateMachineIdMap.put(SchemeApplyType.AGILE, createStateMachine(organizationId, projectCode + "默认状态机【敏捷】", fixNodes, fixTransforms, statusMap));
+        //创建测试状态机
+        stateMachineIdMap.put(SchemeApplyType.TEST, createStateMachine(organizationId, projectCode + "默认状态机【测试】", fixNodes, fixTransforms, statusMap));
+        logger.info("成功修复组织{}，项目code:{}, 敏捷状态机id:{},测试状态机id:{}", organizationId, projectCode, stateMachineIdMap.get(SchemeApplyType.AGILE), stateMachineIdMap.get(SchemeApplyType.TEST));
+        return stateMachineIdMap;
+    }
+
+    /**
+     * 准备修复节点和转换的数据
+     *
+     * @param fixNodes
+     * @param fixTransforms
+     * @param statuses
+     */
+    private void prepareFixNodeAndTransform(List<FixNode> fixNodes, List<FixTransform> fixTransforms, List<String> statuses) {
         //创建start节点
         FixNode start = new FixNode("开始圆点", InitNode.START.getPositionX(), InitNode.START.getPositionY(), InitNode.START.getWidth(), InitNode.START.getHeight(), NodeType.START);
         //创建init节点
@@ -83,34 +89,98 @@ public class FixDataServiceImpl implements FixDataService {
         } else {
             initStatus = statuses.get(0);
         }
-        statuses.remove(initStatus);
         FixNode init = new FixNode(initStatus, 0L, 120L, 100L, 50L, NodeType.INIT);
 
         fixNodes.add(start);
         fixNodes.add(init);
         Long positionY = 120L;
         for (String statusName : statuses) {
+            //跳过init节点
+            if (initStatus.equals(statusName)) {
+                continue;
+            }
             positionY += 100L;
             FixNode custom = new FixNode(statusName, 0L, positionY, 100L, 50L, NodeType.CUSTOM);
             fixNodes.add(custom);
         }
+
         //创建初始转换
-        List<FixTransform> fixTransforms = new ArrayList<>();
         FixTransform initTransform = new FixTransform("初始化", "开始圆点", "初始化", initStatus, TransformType.INIT);
         fixTransforms.add(initTransform);
-        for (String statusName : statusStrs) {
+        for (String statusName : statuses) {
             FixTransform custom = new FixTransform("全部转换到" + statusName, null, "【全部】转换", statusName, TransformType.ALL);
             fixTransforms.add(custom);
         }
+    }
 
+    /**
+     * 创建状态机
+     *
+     * @param organizationId
+     * @param name
+     * @param fixNodes
+     * @param fixTransforms
+     * @param statusMap
+     * @return
+     */
+    private Long createStateMachine(Long organizationId, String name, List<FixNode> fixNodes, List<FixTransform> fixTransforms, Map<String, Status> statusMap) {
+        //初始化状态机
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.setOrganizationId(organizationId);
+        stateMachine.setName(name);
+        stateMachine.setDescription(name);
+        //保证幂等性
+        List<StateMachine> stateMachines = stateMachineMapper.select(stateMachine);
+        if (!stateMachines.isEmpty()) {
+            return stateMachines.get(0).getId();
+        }
+        stateMachine.setStatus(StateMachineStatus.CREATE);
+        if (stateMachineMapper.insert(stateMachine) != 1) {
+            throw new CommonException("error.stateMachine.create");
+        }
+        Long stateMachineId = stateMachine.getId();
+
+        //创建状态机节点和状态机转换
+        createStateMachineDetail(organizationId, stateMachineId, fixNodes, fixTransforms, statusMap);
+
+        //异步发布状态机
+        Observable.just(stateMachineId)
+                .map(t -> {
+                    stateMachineService.deploy(organizationId, stateMachine.getId(), false);
+                    return t;
+                })
+                .retryWhen(x -> x.zipWith(Observable.range(1, 10),
+                        (t, retryCount) -> {
+                            if (retryCount >= 10) {
+                                logger.warn("error.stateMachine.deploy.error,stateMachineId:{}", stateMachineId);
+                            }
+                            return retryCount;
+                        }).flatMap(y -> Observable.timer(2, TimeUnit.SECONDS)))
+                .subscribeOn(Schedulers.io())
+                .subscribe((Long id) -> {
+                });
+
+        return stateMachineId;
+    }
+
+    /**
+     * 创建状态机节点和状态机转换
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @param fixNodes
+     * @param fixTransforms
+     * @param statusMap
+     */
+    private void createStateMachineDetail(Long organizationId, Long stateMachineId, List<FixNode> fixNodes, List<FixTransform> fixTransforms, Map<String, Status> statusMap) {
+        Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>(fixNodes.size());
         //开始创建
         for (FixNode fixNode : fixNodes) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
-            node.setStateMachineId(stateMachine.getId());
+            node.setStateMachineId(stateMachineId);
             if (fixNode.getType().equals(NodeType.START)) {
                 node.setStatusId(0L);
             } else {
-                System.out.println(organizationId + ":" + fixNode.getName());
                 Status status = statusMap.get(fixNode.getName());
                 if (status != null) {
                     node.setStatusId(status.getId());
@@ -142,7 +212,7 @@ public class FixDataServiceImpl implements FixDataService {
         //初始化转换
         for (FixTransform fixTransform : fixTransforms) {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
-            transform.setStateMachineId(stateMachine.getId());
+            transform.setStateMachineId(stateMachineId);
             transform.setName(fixTransform.getName());
             transform.setDescription(fixTransform.getDescription());
             if (fixTransform.getType().equals(TransformType.ALL)) {
@@ -167,17 +237,6 @@ public class FixDataServiceImpl implements FixDataService {
                 }
             }
         }
-        //异步发布状态机
-        Observable.just(stateMachine.getId())
-                .map(t -> {
-                    stateMachineService.deploy(organizationId, stateMachine.getId(), false);
-                    return t;
-                })
-                .subscribeOn(Schedulers.io())
-                .subscribe((Long id) -> {
-                });
-
-        return stateMachine.getId();
     }
 
     @Override
