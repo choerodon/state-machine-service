@@ -87,9 +87,6 @@ feign:
     config:
       default:
         loggerLevel: debug
-logging:
-  level:
-    io.choerodon.statemachine: debug
 #请求处理的超时时间
 ribbon.ReadTimeout: 30000
 #请求连接的超时时间

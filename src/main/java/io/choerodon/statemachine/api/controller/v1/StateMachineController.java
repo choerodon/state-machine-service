@@ -11,6 +11,7 @@ import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.validator.StateMachineValidator;
 import io.choerodon.statemachine.domain.event.ProjectEvent;
+import io.choerodon.statemachine.infra.enums.SchemeApplyType;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -140,8 +141,15 @@ public class StateMachineController extends BaseController {
     @ApiOperation(value = "【初始化项目】创建项目时创建该项目的状态机，返回状态机id")
     @PostMapping(value = "/create_with_create_project")
     public ResponseEntity<Long> createStateMachineWithCreateProject(@PathVariable("organization_id") Long organizationId,
+                                                                    @RequestParam("applyType") String applyType,
                                                                     @RequestBody ProjectEvent projectEvent) {
-        return new ResponseEntity<>(initService.initAGStateMachine(organizationId, projectEvent), HttpStatus.CREATED);
+        Long stateMachineId = null;
+        if(applyType.equals(SchemeApplyType.AGILE)){
+            stateMachineId = initService.initAGStateMachine(organizationId, projectEvent);
+        }else if(applyType.equals(SchemeApplyType.TEST)){
+            stateMachineId = initService.initTEStateMachine(organizationId, projectEvent);
+        }
+        return new ResponseEntity<>(stateMachineId, HttpStatus.CREATED);
     }
 
 }

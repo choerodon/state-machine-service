@@ -12,13 +12,13 @@ import java.util.Map;
  */
 public interface FixDataService {
     /**
-     * 创建项目的默认状态机
+     * 创建项目的默认敏捷状态机和测试状态机
      * @param organizationId
      * @param projectCode
      * @param statuses
      * @return
      */
-    Long createStateMachine(Long organizationId, String projectCode, List<String> statuses);
+    Map<String, Long> createAGStateMachineAndTEStateMachine(Long organizationId, String projectCode, List<String> statuses);
 
     /**
      * 修复创建组织的状态

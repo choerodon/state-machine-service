@@ -47,7 +47,6 @@ public class InitServiceImpl implements InitService {
     private StateMachineMapper stateMachineMapper;
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
-
     @Autowired
     private SagaClient sagaClient;
 
@@ -72,26 +71,60 @@ public class InitServiceImpl implements InitService {
     @Override
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
-        Status select = new Status();
-        select.setOrganizationId(organizationId);
-        List<Status> initStatuses = statusMapper.select(select);
-
         //初始化状态机
         StateMachine stateMachine = new StateMachine();
         stateMachine.setOrganizationId(organizationId);
-        stateMachine.setName(projectCode + "默认状态机");
-        stateMachine.setDescription(projectCode + "默认状态机");
+        stateMachine.setName(projectCode + "默认状态机【敏捷】");
+        stateMachine.setDescription(projectCode + "默认状态机【敏捷】");
         stateMachine.setStatus(StateMachineStatus.CREATE);
         if (stateMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException("error.stateMachine.create");
         }
+        //创建状态机节点和转换
+        createStateMachineDetail(organizationId, stateMachine.getId());
+        //发布状态机
+        Long stateMachineId = stateMachine.getId();
+        stateMachineService.deploy(organizationId, stateMachineId, false);
+        sendSagaToAgile(projectEvent, stateMachineId);
+        return stateMachineId;
+    }
+
+    @Override
+    public Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent) {
+        String projectCode = projectEvent.getProjectCode();
+        //初始化状态机
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.setOrganizationId(organizationId);
+        stateMachine.setName(projectCode + "默认状态机【测试】");
+        stateMachine.setDescription(projectCode + "默认状态机【测试】");
+        stateMachine.setStatus(StateMachineStatus.CREATE);
+        if (stateMachineMapper.insert(stateMachine) != 1) {
+            throw new CommonException("error.stateMachine.create");
+        }
+        //创建状态机节点和转换
+        createStateMachineDetail(organizationId, stateMachine.getId());
+        //发布状态机
+        Long stateMachineId = stateMachine.getId();
+        stateMachineService.deploy(organizationId, stateMachineId, false);
+        return stateMachineId;
+    }
+
+    /**
+     * 创建状态机节点和转换
+     * @param organizationId
+     * @param stateMachineId
+     */
+    private void createStateMachineDetail(Long organizationId, Long stateMachineId) {
+        Status select = new Status();
+        select.setOrganizationId(organizationId);
+        List<Status> initStatuses = statusMapper.select(select);
 
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
         Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x));
         for (InitNode initNode : InitNode.values()) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
-            node.setStateMachineId(stateMachine.getId());
+            node.setStateMachineId(stateMachineId);
             if (initNode.getType().equals(NodeType.START)) {
                 node.setStatusId(0L);
             } else {
@@ -112,7 +145,7 @@ public class InitServiceImpl implements InitService {
         //初始化转换
         for (InitTransform initTransform : InitTransform.values()) {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
-            transform.setStateMachineId(stateMachine.getId());
+            transform.setStateMachineId(stateMachineId);
             transform.setName(initTransform.getName());
             transform.setDescription("【全部】转换");
             if (initTransform.getType().equals(TransformType.ALL)) {
@@ -137,11 +170,6 @@ public class InitServiceImpl implements InitService {
                 }
             }
         }
-        //发布状态机
-        Long stateMachineId = stateMachine.getId();
-        stateMachineService.deploy(organizationId, stateMachineId, false);
-        sendSagaToAgile(projectEvent, stateMachineId);
-        return stateMachineId;
     }
 
     @Override
