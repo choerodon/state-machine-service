@@ -74,7 +74,7 @@ public interface InstanceService {
      * @param context        状态机上下文，传递参数
      * @return
      */
-    Boolean postpositionAction(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context);
+    Boolean postAction(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context);
 
     /**
      * 条件
@@ -106,5 +106,5 @@ public interface InstanceService {
      * @param transformId 转换id
      * @return
      */
-    List<StateMachineConfigDTO> postposition(Long organizationId, Long transformId);
+    List<StateMachineConfigDTO> action(Long organizationId, Long transformId);
 }

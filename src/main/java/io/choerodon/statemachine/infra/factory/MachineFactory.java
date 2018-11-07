@@ -195,7 +195,7 @@ public class MachineFactory {
     private Action<String, String> initialAction(Long organizationId, String serviceCode) {
         return context -> {
             logger.info("stateMachine instance execute initialAction:{}", context.getEvent());
-//                instanceService.postposition()
+//                instanceService.postAction()
         };
     }
 
@@ -210,7 +210,7 @@ public class MachineFactory {
             Long transformId = Long.parseLong(context.getEvent());
             Long instanceId = (Long) context.getExtendedState().getVariables().get(INSTANCE_ID);
             logger.info("stateMachine instance execute transform action,instanceId:{},transformId:{}", instanceId, transformId);
-            Boolean result = instanceService.postpositionAction(organizationId, serviceCode, transformId, instanceId, context);
+            Boolean result = instanceService.postAction(organizationId, serviceCode, transformId, instanceId, context);
             if (!result) {
                 throw new CommonException("error.stateMachine.action");
             }

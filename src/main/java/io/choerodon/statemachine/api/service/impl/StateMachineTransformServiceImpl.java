@@ -126,7 +126,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         dto.setConditions(configService.queryByTransformId(organizationId, transformId, ConfigType.CONDITION, true));
         dto.setValidators(configService.queryByTransformId(organizationId, transformId, ConfigType.VALIDATOR, true));
         dto.setTriggers(configService.queryByTransformId(organizationId, transformId, ConfigType.TRIGGER, true));
-        dto.setPostpositions(configService.queryByTransformId(organizationId, transformId, ConfigType.POSTPOSITION, true));
+        dto.setPostpositions(configService.queryByTransformId(organizationId, transformId, ConfigType.ACTION, true));
         //获取开始节点，若为初始转换，则没有开始节点
         if (TransformType.CUSTOM.equals(transform.getType())) {
             StateMachineNodeDraft startNode = nodeDraftMapper.getNodeById(dto.getStartNodeId());

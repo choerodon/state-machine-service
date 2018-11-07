@@ -352,7 +352,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 transformDTO.setConditions(Optional.ofNullable(map.get(ConfigType.CONDITION)).orElse(Collections.emptyList()));
                 transformDTO.setValidators(Optional.ofNullable(map.get(ConfigType.VALIDATOR)).orElse(Collections.emptyList()));
                 transformDTO.setTriggers(Optional.ofNullable(map.get(ConfigType.TRIGGER)).orElse(Collections.emptyList()));
-                transformDTO.setPostpositions(Optional.ofNullable(map.get(ConfigType.POSTPOSITION)).orElse(Collections.emptyList()));
+                transformDTO.setPostpositions(Optional.ofNullable(map.get(ConfigType.ACTION)).orElse(Collections.emptyList()));
             }
         }
         return stateMachineDTO;
