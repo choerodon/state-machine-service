@@ -23,5 +23,5 @@ public class ConfigType {
     /**
      * 后置处理
      */
-    public static final String POSTPOSITION = "config_postposition";
+    public static final String ACTION = "config_action";
 }

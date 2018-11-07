@@ -52,9 +52,6 @@ public class InstanceServiceImpl implements InstanceService {
     private CustomFeignClientAdaptor customFeignClientAdaptor;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
-
-    private static final String METHOD_FILTER_TRANSF = "filter_transform";
-    private static final String METHOD_EXECUTE_CONFIG = "execute_config";
     private static final String EXCEPTION = "Exception:{}";
 
     @Override
@@ -101,7 +98,7 @@ public class InstanceServiceImpl implements InstanceService {
         transformInfos.forEach(transformInfo -> transformInfo.setConditions(condition(transformInfo.getOrganizationId(), transformInfo.getId())));
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
         try {
-            ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getURI(serviceCode, METHOD_FILTER_TRANSF, instanceId, null, null, null), transformInfos);
+            ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getFilterTransformURI(serviceCode, instanceId), transformInfos);
             transformInfos = listEntity.getBody();
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
@@ -118,9 +115,9 @@ public class InstanceServiceImpl implements InstanceService {
         ExecuteResult executeResult;
         //调用对应服务，执行条件和验证，返回是否成功
         try {
-            executeResult = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, null, transform.getConditionStrategy(), ConfigType.CONDITION), conditionConfigs).getBody();
+            executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigConditionURI(serviceCode, instanceId, null, transform.getConditionStrategy()), conditionConfigs).getBody();
             if (executeResult.getSuccess()) {
-                executeResult = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, null, null, ConfigType.VALIDATOR), validatorConfigs).getBody();
+                executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigValidatorURI(serviceCode, instanceId, null), validatorConfigs).getBody();
             }
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
@@ -133,17 +130,18 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public Boolean postpositionAction(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context) {
-        List<StateMachineConfigDTO> configs = postposition(organizationId, transformId);
+    public Boolean postAction(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context) {
+        List<StateMachineConfigDTO> configs = action(organizationId, transformId);
+        StateMachineTransform transform = transformMapper.queryById(organizationId, transformId);
         //节点转状态
         Long targetStatusId = nodeDeployMapper.getNodeDeployById(Long.parseLong(context.getTarget().getId())).getStatusId();
         if (targetStatusId == null) {
-            throw new CommonException("error.postpositionAction.targetStatusId.notNull");
+            throw new CommonException("error.postAction.targetStatusId.notNull");
         }
         ExecuteResult executeResult;
         //调用对应服务，执行动作，返回是否成功
         try {
-            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getURI(serviceCode, METHOD_EXECUTE_CONFIG, instanceId, targetStatusId, null, ConfigType.POSTPOSITION), configs);
+            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getExecuteConfigPostActionURI(serviceCode, instanceId, targetStatusId, transform.getType()), configs);
             //返回为空则调用对应服务，对应服务方法报错
             if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
@@ -178,37 +176,110 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public List<StateMachineConfigDTO> postposition(Long organizationId, Long transformId) {
-        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.POSTPOSITION, false);
+    public List<StateMachineConfigDTO> action(Long organizationId, Long transformId) {
+        List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.ACTION, false);
         return configs == null ? Collections.emptyList() : configs;
     }
 
     /**
-     * 获取feign的api url
+     * 获取过滤转换的URI
      *
-     * @param serviceCode       serviceCode
-     * @param method            method
-     * @param instanceId        instanceId
-     * @param targetStateId     targetStateId
-     * @param conditionStrategy conditionStrategy
-     * @param type              type
-     * @return URI
+     * @param serviceCode
+     * @param instanceId
+     * @return
      */
-    private URI getURI(String serviceCode, String method, Long instanceId, Long targetStateId, String conditionStrategy, String type) {
+    private URI getFilterTransformURI(String serviceCode, Long instanceId) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/").append(method).append("?1=1");
+        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/filter_transform").append("?1=1");
         if (instanceId != null) {
             stringBuilder.append("&instance_id=").append(instanceId);
         }
-        if (targetStateId != null) {
-            stringBuilder.append("&target_status_id=").append(targetStateId);
+        LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
+        try {
+            uri = new URI(stringBuilder.toString());
+        } catch (URISyntaxException e) {
+            LOGGER.error(EXCEPTION, e);
         }
-        if (type != null) {
-            stringBuilder.append("&type=").append(type);
+        return uri;
+    }
+
+    /**
+     * 获取执行条件的URI
+     *
+     * @param serviceCode
+     * @param instanceId
+     * @param conditionStrategy
+     * @return
+     */
+    private URI getExecuteConfigConditionURI(String serviceCode, Long instanceId, Long targetStatusId, String conditionStrategy) {
+        URI uri = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_condition").append("?1=1");
+        if (instanceId != null) {
+            stringBuilder.append("&instance_id=").append(instanceId);
+        }
+        if (targetStatusId != null) {
+            stringBuilder.append("&target_status_id=").append(targetStatusId);
         }
         if (conditionStrategy != null) {
             stringBuilder.append("&condition_strategy=").append(conditionStrategy);
+        }
+        LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
+        try {
+            uri = new URI(stringBuilder.toString());
+        } catch (URISyntaxException e) {
+            LOGGER.error(EXCEPTION, e);
+        }
+        return uri;
+    }
+
+    /**
+     * 获取执行验证的URI
+     *
+     * @param serviceCode
+     * @param instanceId
+     * @return
+     */
+    private URI getExecuteConfigValidatorURI(String serviceCode, Long instanceId, Long targetStatusId) {
+        URI uri = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_validator").append("?1=1");
+        if (instanceId != null) {
+            stringBuilder.append("&instance_id=").append(instanceId);
+        }
+        if (targetStatusId != null) {
+            stringBuilder.append("&target_status_id=").append(targetStatusId);
+        }
+        LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
+        try {
+            uri = new URI(stringBuilder.toString());
+        } catch (URISyntaxException e) {
+            LOGGER.error(EXCEPTION, e);
+        }
+        return uri;
+    }
+
+    /**
+     * 获取执行后置动作的URI
+     *
+     * @param serviceCode
+     * @param instanceId
+     * @param targetStatusId
+     * @return
+     */
+    private URI getExecuteConfigPostActionURI(String serviceCode, Long instanceId, Long targetStatusId, String transformType) {
+        URI uri = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_action").append("?1=1");
+        if (instanceId != null) {
+            stringBuilder.append("&instance_id=").append(instanceId);
+        }
+        if (targetStatusId != null) {
+            stringBuilder.append("&target_status_id=").append(targetStatusId);
+        }
+        if (transformType != null) {
+            stringBuilder.append("&transform_type=").append(transformType);
         }
         LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
         try {
