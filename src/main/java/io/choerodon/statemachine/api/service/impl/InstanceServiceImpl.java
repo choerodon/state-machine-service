@@ -2,6 +2,7 @@ package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
+import io.choerodon.statemachine.api.dto.InputDTO;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
@@ -55,10 +56,10 @@ public class InstanceServiceImpl implements InstanceService {
     private static final String EXCEPTION = "Exception:{}";
 
     @Override
-    public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId) {
+    public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, InputDTO inputDTO) {
         ExecuteResult executeResult;
         try {
-            executeResult = machineFactory.startInstance(organizationId, serviceCode, stateMachineId, instanceId);
+            executeResult = machineFactory.startInstance(organizationId, serviceCode, stateMachineId, inputDTO);
         } catch (Exception e) {
             e.printStackTrace();
             executeResult = new ExecuteResult(false, null, "创建状态机实例失败");
@@ -80,10 +81,10 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentStatusId, Long transformId) {
+    public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
         ExecuteResult executeResult;
         try {
-            executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transformId);
+            executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
         } catch (Exception e) {
             e.printStackTrace();
             executeResult = new ExecuteResult(false, null, "执行转换失败");
@@ -108,16 +109,18 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public Boolean validatorGuard(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context) {
+    public Boolean validatorGuard(Long organizationId, String serviceCode, Long transformId, InputDTO inputDTO, StateContext<String, String> context) {
         StateMachineTransform transform = transformMapper.queryById(organizationId, transformId);
         List<StateMachineConfigDTO> conditionConfigs = condition(organizationId, transformId);
         List<StateMachineConfigDTO> validatorConfigs = validator(organizationId, transformId);
         ExecuteResult executeResult;
         //调用对应服务，执行条件和验证，返回是否成功
         try {
-            executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigConditionURI(serviceCode, instanceId, null, transform.getConditionStrategy()), conditionConfigs).getBody();
+            inputDTO.setConfigs(conditionConfigs);
+            executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigConditionURI(serviceCode, null, transform.getConditionStrategy()), inputDTO).getBody();
             if (executeResult.getSuccess()) {
-                executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigValidatorURI(serviceCode, instanceId, null), validatorConfigs).getBody();
+                inputDTO.setConfigs(validatorConfigs);
+                executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigValidatorURI(serviceCode, null), inputDTO).getBody();
             }
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
@@ -130,8 +133,9 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public Boolean postAction(Long organizationId, String serviceCode, Long transformId, Long instanceId, StateContext<String, String> context) {
+    public Boolean postAction(Long organizationId, String serviceCode, Long transformId, InputDTO inputDTO, StateContext<String, String> context) {
         List<StateMachineConfigDTO> configs = action(organizationId, transformId);
+        inputDTO.setConfigs(configs);
         StateMachineTransform transform = transformMapper.queryById(organizationId, transformId);
         //节点转状态
         Long targetStatusId = nodeDeployMapper.getNodeDeployById(Long.parseLong(context.getTarget().getId())).getStatusId();
@@ -141,7 +145,7 @@ public class InstanceServiceImpl implements InstanceService {
         ExecuteResult executeResult;
         //调用对应服务，执行动作，返回是否成功
         try {
-            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getExecuteConfigPostActionURI(serviceCode, instanceId, targetStatusId, transform.getType()), configs);
+            ResponseEntity<ExecuteResult> executeResultEntity = customFeignClientAdaptor.executeConfig(getExecuteConfigPostActionURI(serviceCode, targetStatusId, transform.getType()), inputDTO);
             //返回为空则调用对应服务，对应服务方法报错
             if (executeResultEntity.getBody().getSuccess() != null) {
                 executeResult = executeResultEntity.getBody();
@@ -208,17 +212,14 @@ public class InstanceServiceImpl implements InstanceService {
      * 获取执行条件的URI
      *
      * @param serviceCode
-     * @param instanceId
+     * @param targetStatusId
      * @param conditionStrategy
      * @return
      */
-    private URI getExecuteConfigConditionURI(String serviceCode, Long instanceId, Long targetStatusId, String conditionStrategy) {
+    private URI getExecuteConfigConditionURI(String serviceCode, Long targetStatusId, String conditionStrategy) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_condition").append("?1=1");
-        if (instanceId != null) {
-            stringBuilder.append("&instance_id=").append(instanceId);
-        }
         if (targetStatusId != null) {
             stringBuilder.append("&target_status_id=").append(targetStatusId);
         }
@@ -238,16 +239,12 @@ public class InstanceServiceImpl implements InstanceService {
      * 获取执行验证的URI
      *
      * @param serviceCode
-     * @param instanceId
      * @return
      */
-    private URI getExecuteConfigValidatorURI(String serviceCode, Long instanceId, Long targetStatusId) {
+    private URI getExecuteConfigValidatorURI(String serviceCode, Long targetStatusId) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_validator").append("?1=1");
-        if (instanceId != null) {
-            stringBuilder.append("&instance_id=").append(instanceId);
-        }
         if (targetStatusId != null) {
             stringBuilder.append("&target_status_id=").append(targetStatusId);
         }
@@ -264,17 +261,13 @@ public class InstanceServiceImpl implements InstanceService {
      * 获取执行后置动作的URI
      *
      * @param serviceCode
-     * @param instanceId
      * @param targetStatusId
      * @return
      */
-    private URI getExecuteConfigPostActionURI(String serviceCode, Long instanceId, Long targetStatusId, String transformType) {
+    private URI getExecuteConfigPostActionURI(String serviceCode, Long targetStatusId, String transformType) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_action").append("?1=1");
-        if (instanceId != null) {
-            stringBuilder.append("&instance_id=").append(instanceId);
-        }
         if (targetStatusId != null) {
             stringBuilder.append("&target_status_id=").append(targetStatusId);
         }

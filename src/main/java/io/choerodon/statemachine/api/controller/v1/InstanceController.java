@@ -3,7 +3,7 @@ package io.choerodon.statemachine.api.controller.v1;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
-import io.choerodon.statemachine.api.dto.StatusDTO;
+import io.choerodon.statemachine.api.dto.InputDTO;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.domain.Status;
@@ -11,7 +11,6 @@ import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,25 +33,25 @@ public class InstanceController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建状态机实例")
-    @GetMapping(value = "/start_instance")
+    @PostMapping(value = "/start_instance")
     public ResponseEntity<ExecuteResult> startInstance(@PathVariable("organization_id") Long organizationId,
                                                        @RequestParam("service_code") String serviceCode,
                                                        @RequestParam("state_machine_id") Long stateMachineId,
-                                                       @RequestParam("instance_id") Long instanceId) {
-        ExecuteResult result = instanceService.startInstance(organizationId, serviceCode, stateMachineId, instanceId);
+                                                       @RequestBody InputDTO inputDTO) {
+        ExecuteResult result = instanceService.startInstance(organizationId, serviceCode, stateMachineId, inputDTO);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "执行状态转换，并返回转换后的状态")
-    @GetMapping(value = "/execute_transform")
+    @PostMapping(value = "/execute_transform")
     public ResponseEntity<ExecuteResult> executeTransform(@PathVariable("organization_id") Long organizationId,
                                                           @RequestParam("service_code") String serviceCode,
                                                           @RequestParam("state_machine_id") Long stateMachineId,
-                                                          @RequestParam("instance_id") Long instanceId,
                                                           @RequestParam("current_status_id") Long currentStatusId,
-                                                          @RequestParam("transform_id") Long transformId) {
-        ExecuteResult result = instanceService.executeTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStatusId, transformId);
+                                                          @RequestParam("transform_id") Long transformId,
+                                                          @RequestBody InputDTO inputDTO) {
+        ExecuteResult result = instanceService.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
