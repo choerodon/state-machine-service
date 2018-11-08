@@ -2,7 +2,7 @@ package io.choerodon.statemachine.infra.feign;
 
 import feign.RequestLine;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
-import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
+import io.choerodon.statemachine.api.dto.InputDTO;
 import io.choerodon.statemachine.infra.config.FeignConfiguration;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.feign.fallback.CustomFeignClientAdaptorFallBack;
@@ -34,9 +34,9 @@ public interface CustomFeignClientAdaptor {
     /**
      * 调用对应服务，执行条件，验证，后置处理
      * @param baseUri
-     * @param configs
+     * @param inputDTO
      * @return
      */
     @RequestLine("POST")
-    ResponseEntity<ExecuteResult> executeConfig(URI baseUri, List<StateMachineConfigDTO> configs);
+    ResponseEntity<ExecuteResult> executeConfig(URI baseUri, InputDTO inputDTO);
 }
