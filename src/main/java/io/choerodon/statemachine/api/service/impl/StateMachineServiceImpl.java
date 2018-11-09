@@ -216,6 +216,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deploy");
         }
+        //是否同步状态到其他服务:前置处理
+        Map<String, List<Status>> changeMap = null;
+        if (isStartSaga) {
+            changeMap = new HashMap<>(3);
+            deployHandleChange(changeMap, stateMachineId);
+        }
+
         //删除上一版本的节点
         StateMachineNode nodeDeploy = new StateMachineNode();
         nodeDeploy.setStateMachineId(stateMachineId);
@@ -264,37 +271,47 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         //清理内存中的旧状态机构建器与实例
         machineFactory.deployStateMachine(stateMachineId);
 
-        //是否同步状态到其他服务
+        //是否同步状态到其他服务:发saga
         if (isStartSaga) {
-            deployHandle(organizationId, stateMachineId);
+            deploySendSaga(organizationId, stateMachineId, changeMap);
         }
         return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
     }
 
     /**
-     * 处理发布状态机时，状态的变化，发saga
+     * 处理发布状态机时，节点状态的变化
      *
-     * @param organizationId
      * @param stateMachineId
      */
-    private void deployHandle(Long organizationId, Long stateMachineId) {
-        //获取新节点
-        List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
-        Map<Long, Status> deployMap = nodeDeploys.stream().collect(Collectors.toMap(StateMachineNode::getId, StateMachineNode::getStatus));
-        List<Long> newIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
+    private Map<String, List<Status>> deployHandleChange(Map<String, List<Status>> changeMap, Long stateMachineId) {
         //获取旧节点
+        List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        List<Long> oldIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
+        //获取新节点
         List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachineId);
-        List<Long> oldIds = nodeDrafts.stream().map(StateMachineNodeDraft::getId).collect(Collectors.toList());
+        Map<Long, Status> draftMap = nodeDrafts.stream().filter(x->x.getStatus()!=null).collect(Collectors.toMap(StateMachineNodeDraft::getId, StateMachineNodeDraft::getStatus));
+        List<Long> newIds = nodeDrafts.stream().map(StateMachineNodeDraft::getId).collect(Collectors.toList());
         //新增的节点
         List<Long> addIds = new ArrayList<>(newIds);
         addIds.removeAll(oldIds);
         List<Status> statuses = new ArrayList<>(addIds.size());
         addIds.forEach(addId -> {
-            statuses.add(deployMap.get(addId));
+            statuses.add(draftMap.get(addId));
         });
-        if(!addIds.isEmpty()){
+
+        changeMap.put("addList", statuses);
+        return changeMap;
+    }
+
+    /**
+     * 处理发布状态机时，根据节点状态的变化发saga
+     */
+    private void deploySendSaga(Long organizationId, Long stateMachineId, Map<String, List<Status>> changeMap) {
+        //新增的状态
+        List<Status> addList = changeMap.get("addList");
+        if (!addList.isEmpty()) {
             //发送saga
-            sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, statuses);
+            sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, addList);
         }
     }
 

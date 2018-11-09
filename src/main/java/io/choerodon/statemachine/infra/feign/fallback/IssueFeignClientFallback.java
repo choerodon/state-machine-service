@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author shinan.chen
@@ -14,8 +15,8 @@ import java.util.List;
 @Component
 public class IssueFeignClientFallback implements IssueFeignClient {
     @Override
-    public ResponseEntity<List<Long>> queryProjectIds(Long organizationId, Long stateMachineId) {
-        throw new CommonException("error.issueFeignClient.queryProjectIds");
+    public ResponseEntity<Map<String, List<Long>>> queryProjectIdsMap(Long organizationId, Long stateMachineId) {
+        throw new CommonException("error.issueFeignClient.queryProjectIdsMap");
     }
 }
 

@@ -1,21 +1,22 @@
 package io.choerodon.statemachine.domain.event;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author shinan.chen
  * @date 2018/10/31
  */
 public class DeployStatusPayload {
-    private List<Long> projectIds;
+    private Map<String, List<Long>> projectIdsMap;
     private List<StatusPayload> statusPayloads;
 
-    public List<Long> getProjectIds() {
-        return projectIds;
+    public Map<String, List<Long>> getProjectIdsMap() {
+        return projectIdsMap;
     }
 
-    public void setProjectIds(List<Long> projectIds) {
-        this.projectIds = projectIds;
+    public void setProjectIdsMap(Map<String, List<Long>> projectIdsMap) {
+        this.projectIdsMap = projectIdsMap;
     }
 
     public List<StatusPayload> getStatusPayloads() {
