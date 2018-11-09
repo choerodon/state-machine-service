@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author shinan.chen
@@ -21,7 +22,7 @@ public interface IssueFeignClient {
     /**
      * 查询状态机关联的项目id列表
      */
-    @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine/query_project_ids", method = RequestMethod.GET)
-    ResponseEntity<List<Long>> queryProjectIds(@PathVariable("organization_id") Long organizationId,
-                                               @RequestParam("state_machine_id") Long stateMachineId);
+    @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine/query_project_ids_map", method = RequestMethod.GET)
+    ResponseEntity<Map<String, List<Long>>> queryProjectIdsMap(@PathVariable("organization_id") Long organizationId,
+                                                               @RequestParam("state_machine_id") Long stateMachineId);
 }
