@@ -9,7 +9,7 @@ import io.choerodon.statemachine.domain.StateMachine;
 import java.util.List;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 public interface StateMachineService extends BaseService<StateMachine> {
 
@@ -65,7 +65,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      *
      * @param organizationId
      * @param stateMachineId
-     * @param isDraft  是否为草稿
+     * @param isDraft        是否为草稿
      * @return
      */
     StateMachineDTO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId, Boolean isDraft);
@@ -93,6 +93,14 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @return
      */
     StateMachineDTO queryStateMachineById(Long organizationId, Long stateMachineId);
+
+    /**
+     * 获取组织默认状态机
+     *
+     * @param organizationId
+     * @return
+     */
+    StateMachineDTO queryDefaultStateMachine(Long organizationId);
 
     /**
      * 校验问题状态机名字是否未被使用

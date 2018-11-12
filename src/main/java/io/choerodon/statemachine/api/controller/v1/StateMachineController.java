@@ -114,6 +114,13 @@ public class StateMachineController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "获取组织默认状态机")
+    @GetMapping(value = "/default")
+    public ResponseEntity<StateMachineDTO> queryDefaultStateMachine(@PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(stateMachineService.queryDefaultStateMachine(organizationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除草稿")
     @DeleteMapping(value = "/delete_draft/{state_machine_id}")
     public ResponseEntity<StateMachineDTO> deleteDraft(@PathVariable("organization_id") Long organizationId,

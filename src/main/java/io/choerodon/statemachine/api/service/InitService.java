@@ -18,6 +18,14 @@ public interface InitService {
     List<Status> initStatus(Long organizationId);
 
     /**
+     * 初始化默认状态机
+     *
+     * @param organizationId
+     * @return
+     */
+    Long initDefaultStateMachine(Long organizationId);
+
+    /**
      * 初始化敏捷状态机
      *
      * @param organizationId

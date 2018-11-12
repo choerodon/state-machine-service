@@ -69,6 +69,30 @@ public class InitServiceImpl implements InitService {
     }
 
     @Override
+    public Long initDefaultStateMachine(Long organizationId) {
+        //初始化默认状态机
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.setOrganizationId(organizationId);
+        stateMachine.setName("默认状态机");
+        stateMachine.setDescription("默认状态机");
+        stateMachine.setStatus(StateMachineStatus.CREATE);
+        stateMachine.setDefault(true);
+        List<StateMachine> selects = stateMachineMapper.select(stateMachine);
+        Long stateMachineId;
+        if(selects.isEmpty()){
+            if (stateMachineMapper.insert(stateMachine) != 1) {
+                throw new CommonException("error.stateMachine.create");
+            }
+            //创建状态机节点和转换
+            createStateMachineDetail(organizationId, stateMachine.getId());
+            stateMachineId = stateMachine.getId();
+        }else{
+            stateMachineId = selects.get(0).getId();
+        }
+        return stateMachineId;
+    }
+
+    @Override
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
@@ -77,6 +101,7 @@ public class InitServiceImpl implements InitService {
         stateMachine.setName(projectCode + "默认状态机【敏捷】");
         stateMachine.setDescription(projectCode + "默认状态机【敏捷】");
         stateMachine.setStatus(StateMachineStatus.CREATE);
+        stateMachine.setDefault(false);
         if (stateMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException("error.stateMachine.create");
         }
@@ -98,6 +123,7 @@ public class InitServiceImpl implements InitService {
         stateMachine.setName(projectCode + "默认状态机【测试】");
         stateMachine.setDescription(projectCode + "默认状态机【测试】");
         stateMachine.setStatus(StateMachineStatus.CREATE);
+        stateMachine.setDefault(false);
         if (stateMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException("error.stateMachine.create");
         }

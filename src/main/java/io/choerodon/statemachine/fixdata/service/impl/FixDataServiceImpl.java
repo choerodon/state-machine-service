@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.fixdata.service.impl;
 
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
@@ -47,6 +48,8 @@ public class FixDataServiceImpl implements FixDataService {
     private StateMachineTransformDraftMapper transformDraftMapper;
     @Autowired
     private StateMachineService stateMachineService;
+    @Autowired
+    private InitService initService;
 
     @Override
     public Map<String, Long> createAGStateMachineAndTEStateMachine(Long organizationId, String projectCode, List<String> statuses) {
@@ -63,7 +66,6 @@ public class FixDataServiceImpl implements FixDataService {
         List<FixNode> fixNodes = new ArrayList<>();
         List<FixTransform> fixTransforms = new ArrayList<>();
         prepareFixNodeAndTransform(fixNodes, fixTransforms, statuses);
-
         //创建敏捷状态机
         stateMachineIdMap.put(SchemeApplyType.AGILE, createStateMachine(organizationId, projectCode + "默认状态机【敏捷】", fixNodes, fixTransforms, statusMap));
         //创建测试状态机
@@ -129,12 +131,8 @@ public class FixDataServiceImpl implements FixDataService {
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(name);
         stateMachine.setDescription(name);
-        //保证幂等性
-        List<StateMachine> stateMachines = stateMachineMapper.select(stateMachine);
-        if (!stateMachines.isEmpty()) {
-            return stateMachines.get(0).getId();
-        }
         stateMachine.setStatus(StateMachineStatus.CREATE);
+        stateMachine.setDefault(false);
         if (stateMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException("error.stateMachine.create");
         }
@@ -174,7 +172,7 @@ public class FixDataServiceImpl implements FixDataService {
      */
     private void createStateMachineDetail(Long organizationId, Long stateMachineId, List<FixNode> fixNodes, List<FixTransform> fixTransforms, Map<String, Status> statusMap) {
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>(fixNodes.size());
-        //开始创建
+        //开始创建节点
         for (FixNode fixNode : fixNodes) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
             node.setStateMachineId(stateMachineId);
@@ -185,15 +183,7 @@ public class FixDataServiceImpl implements FixDataService {
                 if (status != null) {
                     node.setStatusId(status.getId());
                 } else {
-                    Status status1 = new Status();
-                    status1.setOrganizationId(organizationId);
-                    status1.setName(fixNode.getName());
-                    List<Status> statusList = statusMapper.select(status1);
-                    if (!statusList.isEmpty()) {
-                        node.setStatusId(statusList.get(0).getId());
-                    } else {
-                        throw new CommonException("error.status.name.notFound");
-                    }
+                    throw new CommonException("error.status.name.notFound");
                 }
             }
             node.setPositionX(fixNode.getPositionX());
@@ -274,6 +264,26 @@ public class FixDataServiceImpl implements FixDataService {
                 strings.add(statusForMoveDataDO.getName());
                 statusCheckMap.put(statusForMoveDataDO.getOrganizationId(), strings);
             }
+        }
+        //补充，每个项目都要有初始的三个状态
+        Map<Long, List<Status>> orgMap = statusList.stream().collect(Collectors.groupingBy(Status::getOrganizationId));
+        for(Map.Entry<Long, List<Status>> listEntry:orgMap.entrySet()){
+            Long organizationId = listEntry.getKey();
+            List<Status> statuses = listEntry.getValue();
+            List<String> names = statuses.stream().map(Status::getName).collect(Collectors.toList());
+            for(InitStatus initStatus:InitStatus.values()){
+                if(!names.contains(initStatus.getName())){
+                    String name = initStatus.getName();
+                    Status status = new Status();
+                    status.setOrganizationId(organizationId);
+                    status.setName(name);
+                    status.setDescription(name);
+                    status.setCode(initStatus.getCode());
+                    status.setType(initStatus.getType());
+                    statusList.add(status);
+                }
+            }
+
         }
         statusMapper.batchInsert(statusList);
         return true;

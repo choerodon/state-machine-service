@@ -2,6 +2,7 @@ package io.choerodon.statemachine.fixdata.controller;
 
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
 import io.choerodon.statemachine.fixdata.service.FixDataService;
@@ -29,6 +30,8 @@ public class FixDataController extends BaseController {
 
     @Autowired
     private FixDataService fixDataService;
+    @Autowired
+    private InitService initService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修复创建项目默认状态机")
@@ -37,6 +40,13 @@ public class FixDataController extends BaseController {
                                                                                    @RequestParam("project_code") String projectCode,
                                                                                    @RequestBody List<String> statuses) {
         return new ResponseEntity<>(fixDataService.createAGStateMachineAndTEStateMachine(organizationId, projectCode, statuses), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "创建组织默认状态机")
+    @GetMapping(value = "/create_default_state_machine")
+    public void createDefaultStateMachine(@RequestParam("organization_id") Long organizationId) {
+        initService.initDefaultStateMachine(organizationId);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
