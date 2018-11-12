@@ -13,6 +13,9 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine.groovy') {
             column(name: 'status', type: 'VARCHAR(30)', remarks: '状态机的状态') {
                 constraints(nullable: false)
             }
+            column(name: 'is_default', type: 'TINYINT UNSIGNED', remarks: '是否组织默认状态机', defaultValue: '0'){
+                constraints(nullable: false)
+            }
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }

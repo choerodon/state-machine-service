@@ -24,6 +24,7 @@ public class StateMachine extends AuditDomain {
     private String description;
     private String status;
     private Long organizationId;
+    private Boolean isDefault;
 
     @Transient
     private List<StateMachineNode> nodes;
@@ -84,5 +85,13 @@ public class StateMachine extends AuditDomain {
 
     public void setTransforms(List<StateMachineTransform> transforms) {
         this.transforms = transforms;
+    }
+
+    public Boolean getDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(Boolean aDefault) {
+        isDefault = aDefault;
     }
 }

@@ -12,6 +12,7 @@ public class StateMachineDTO {
     private String description;
     private String status;
     private Long organizationId;
+    private Boolean isDefault;
     private Long objectVersionNumber;
 
     private List<StateMachineNodeDTO> nodeDTOs;
@@ -88,5 +89,13 @@ public class StateMachineDTO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Boolean getDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(Boolean aDefault) {
+        isDefault = aDefault;
     }
 }

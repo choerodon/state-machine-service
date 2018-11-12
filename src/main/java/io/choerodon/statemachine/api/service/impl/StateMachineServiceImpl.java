@@ -91,6 +91,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         stateMachineDTO.setId(null);
         stateMachineDTO.setStatus(StateMachineStatus.CREATE);
         stateMachineDTO.setOrganizationId(organizationId);
+        stateMachineDTO.setDefault(false);
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
         int isInsert = stateMachineMapper.insertSelective(stateMachine);
         if (isInsert != 1) {
@@ -163,6 +164,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.delete.noFound");
+        }
+        if(stateMachine.getDefault()){
+            throw new CommonException("error.stateMachine.defaultForbiddenDelete");
         }
         int isDelete = stateMachineMapper.deleteByPrimaryKey(stateMachineId);
         if (isDelete != 1) {
@@ -477,6 +481,15 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     @Override
     public StateMachineDTO queryStateMachineById(Long organizationId, Long stateMachineId) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
+        return stateMachine != null ? modelMapper.map(stateMachine, StateMachineDTO.class) : null;
+    }
+
+    @Override
+    public StateMachineDTO queryDefaultStateMachine(Long organizationId) {
+        StateMachine defaultStateMachine = new StateMachine();
+        defaultStateMachine.setOrganizationId(organizationId);
+        defaultStateMachine.setDefault(true);
+        StateMachine stateMachine = stateMachineMapper.selectOne(defaultStateMachine);
         return stateMachine != null ? modelMapper.map(stateMachine, StateMachineDTO.class) : null;
     }
 
