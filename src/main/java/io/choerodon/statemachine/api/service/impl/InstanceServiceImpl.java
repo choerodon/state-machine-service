@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -183,6 +184,12 @@ public class InstanceServiceImpl implements InstanceService {
     public List<StateMachineConfigDTO> action(Long organizationId, Long transformId) {
         List<StateMachineConfigDTO> configs = configService.queryByTransformId(organizationId, transformId, ConfigType.ACTION, false);
         return configs == null ? Collections.emptyList() : configs;
+    }
+
+    @Override
+    public Map<Long, Long> queryInitStatusIds(Long organizationId, List<Long> stateMachineIds) {
+        return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
+                .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
     }
 
     /**

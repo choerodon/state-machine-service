@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author shinan.chen
@@ -70,8 +71,16 @@ public class InstanceController extends BaseController {
     @ApiOperation(value = "获取状态机的初始状态")
     @GetMapping(value = "/query_init_status_id")
     public ResponseEntity<Long> queryInitStatusId(@PathVariable("organization_id") Long organizationId,
-                                                     @RequestParam("state_machine_id") Long stateMachineId) {
+                                                  @RequestParam("state_machine_id") Long stateMachineId) {
         return new ResponseEntity<>(instanceService.queryInitStatusId(organizationId, stateMachineId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "获取状态机对应的初始状态Map")
+    @GetMapping(value = "/query_init_status_ids")
+    public ResponseEntity<Map<Long, Long>> queryInitStatusIds(@PathVariable("organization_id") Long organizationId,
+                                                              @RequestParam("state_machine_id") List<Long> stateMachineIds) {
+        return new ResponseEntity<>(instanceService.queryInitStatusIds(organizationId, stateMachineIds), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

@@ -21,4 +21,6 @@ public interface StateMachineNodeMapper extends BaseMapper<StateMachineNode> {
     Long checkStateDelete(@Param("organizationId") Long organizationId, @Param("statusId") Long statusId);
 
     StateMachineNode queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
+
+    List<StateMachineNode> queryByStateMachineIds(@Param("stateMachineIds") List<Long> stateMachineIds, @Param("organizationId") Long organizationId);
 }

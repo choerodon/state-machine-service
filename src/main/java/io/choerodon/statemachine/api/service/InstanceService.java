@@ -7,6 +7,7 @@ import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import org.springframework.statemachine.StateContext;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author shinan.chen
@@ -25,6 +26,7 @@ public interface InstanceService {
 
     /**
      * 查询状态机的初始状态id
+     *
      * @param organizationId
      * @param stateMachineId
      * @return
@@ -34,10 +36,10 @@ public interface InstanceService {
     /**
      * 执行状态转换，并返回转换后的状态
      *
-     * @param stateMachineId 状态机Id
-     * @param transformId       转换Id
+     * @param stateMachineId  状态机Id
+     * @param transformId     转换Id
      * @param currentStatusId 当前状态Id
-     * @param serviceCode    请求服务code
+     * @param serviceCode     请求服务code
      * @return
      */
     ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO);
@@ -106,4 +108,13 @@ public interface InstanceService {
      * @return
      */
     List<StateMachineConfigDTO> action(Long organizationId, Long transformId);
+
+    /**
+     * 获取状态机列表对应的状态机初始状态map
+     *
+     * @param organizationId  organizationId
+     * @param stateMachineIds stateMachineIds
+     * @return Map
+     */
+    Map<Long, Long> queryInitStatusIds(Long organizationId, List<Long> stateMachineIds);
 }
