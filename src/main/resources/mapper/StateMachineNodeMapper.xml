@@ -92,6 +92,17 @@
         WHERE SMN.state_machine_id = #{stateMachineId}
     </select>
 
+    <select id="queryByStateMachineIds" resultType="io.choerodon.statemachine.domain.StateMachineNode">
+        SELECT
+        *
+        FROM state_machine_node smn
+        where smn.organization_id = #{organizationId} and smn.type = 'node_init' and smn.state_machine_id in
+        <foreach collection="stateMachineIds" item="id" open="(" separator=","
+                 close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <select id="checkStateDelete" resultType="java.lang.Long">
         SELECT
         count( SMN.id )
