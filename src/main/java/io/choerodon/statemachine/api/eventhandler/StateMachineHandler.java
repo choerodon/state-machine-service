@@ -60,8 +60,11 @@ public class StateMachineHandler {
     public String handleOrganizationRegisterEvent(String payload) {
         OrganizationEventPayload organizationEventPayload = JSONObject.parseObject(payload, OrganizationEventPayload.class);
         loggerInfo(organizationEventPayload);
+        Long organizationId = organizationEventPayload.getId();
         //初始化状态
-        initService.initStatus(organizationEventPayload.getId());
+        initService.initStatus(organizationId);
+        //初始化默认状态机
+        initService.initDefaultStateMachine(organizationId);
         return payload;
     }
 
