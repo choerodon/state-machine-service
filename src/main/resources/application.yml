@@ -13,28 +13,21 @@ spring:
     url: jdbc:mysql://localhost:3306/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: choerodon
     password: 123456
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
-    consumer:
-      group-id: statemachine-service-consumer
-      auto-offset-reset: latest
-    listener:
-      ack-mode: record
-      poll-timeout: 3000
   cloud:
-    bus:
-      enabled: true
     stream:
       kafka:
         binder:
           brokers: 127.0.0.1:9092
           zkNodes: 127.0.0.1:2181
-event:
-  store:
-    service:
-      name: event-store-service
+      default-binder: kafka
+    config:
+      failFast: true
+      retry:
+        maxAttempts: 6
+        multiplier: 1.5
+        maxInterval: 2000
+      uri: localhost:8010
+      enabled: false
 choerodon:
   ldap:
     userNameType: 0
