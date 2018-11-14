@@ -36,10 +36,6 @@ spec:
           readinessProbe:
             exec:
               command: ["/bin/sh","-c","curl -s localhost:{{ .Values.deployment.managementPort }}/health --fail && nc -z localhost {{ .Values.service.port }}"]
-            httpGet:
-              path: /health
-              port: {{ .Values.deployment.managementPort }}
-              scheme: HTTP
             failureThreshold: 3
             initialDelaySeconds: 60
             periodSeconds: 10
