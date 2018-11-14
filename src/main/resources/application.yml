@@ -1,6 +1,6 @@
 # application.yml
 spring:
-  sleuth:
+  sleuth: # 调用链
     integration:
       enabled: false
     scheduled:
@@ -13,17 +13,7 @@ spring:
     url: jdbc:mysql://localhost:3306/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: choerodon
     password: 123456
-  kafka:
-    bootstrap-servers: localhost:9092 #用于服务发现时处理状态机客户端code
-    producer:
-      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
-    consumer:
-      group-id: statemachine-service-consumer
-      auto-offset-reset: latest
-    listener:
-      ack-mode: record
-      poll-timeout: 3000
-  cloud:
+  cloud: # 拉取配置的kafka
     stream:
       kafka:
         binder:
@@ -49,6 +39,12 @@ choerodon:
       thread-num: 5  # 消费线程数
       max-poll-size: 200 # 每次拉取的最大消息数量
       poll-interval-ms: 1000 # 拉取消息的间隔(毫秒)，默认1000毫秒
+  eureka:
+    event:
+      max-cache-size: 300 # 存储的最大失败数量
+      retry-time: 5 # 自动重试次数
+      retry-interval: 3 # 自动重试间隔(秒)
+      skip-services: register-server, api-gateway, gateway-helper, oauth-server, config-server, state-machine-service # 跳过的服务
 eureka:
   instance:
     preferIpAddress: true
@@ -70,13 +66,9 @@ hystrix:
   stream:
     queue:
       enabled: false
-#ribbon:
-#  ReadTimeout: 5000
-#  ConnectTimeout: 5000
-file-service:
-  ribbon:
-    ReadTimeout: 15000
-    ConnectTimeout: 15000
+ribbon:
+  ReadTimeout: 30000
+  ConnectTimeout: 30000
 mybatis:
   mapperLocations: classpath*:/mapper/*.xml
   configuration: # 数据库下划线转驼峰配置
@@ -86,21 +78,3 @@ feign:
     config:
       default:
         loggerLevel: debug
-#请求处理的超时时间
-ribbon.ReadTimeout: 30000
-#请求连接的超时时间
-ribbon.ConnectTimeout: 30000
-
-#feign.hystrix.enabled: true
-#hystrix 熔断机制
-#hystrix:
-#  shareSecurityContext: true
-#  command:
-#    default:
-#      circuitBreaker:
-#        sleepWindowInMilliseconds: 100000
-#        forceClosed: true
-#      execution:
-#        isolation:
-#          thread:
-#            timeoutInMilliseconds: 600000

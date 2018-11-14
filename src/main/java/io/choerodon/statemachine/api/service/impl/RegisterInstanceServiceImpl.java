@@ -1,5 +1,6 @@
 package io.choerodon.statemachine.api.service.impl;
 
+import io.choerodon.eureka.event.EurekaEventPayload;
 import io.choerodon.statemachine.api.dto.PropertyData;
 import io.choerodon.statemachine.api.service.ConfigCodeService;
 import io.choerodon.statemachine.domain.event.RegisterInstancePayload;
@@ -20,12 +21,12 @@ public class RegisterInstanceServiceImpl implements RegisterInstanceService {
     private ConfigCodeService configCodeService;
 
     @Override
-    public void instanceDownConsumer(final RegisterInstancePayload payload) {
+    public void instanceDownConsumer(final EurekaEventPayload payload) {
         // do something
     }
 
     @Override
-    public void instanceUpConsumer(final RegisterInstancePayload payload) {
+    public void instanceUpConsumer(final EurekaEventPayload payload) {
         PropertyData propertyData = fetchPropertyData(payload.getInstanceAddress());
         if (propertyData == null) {
             throw new RemoteAccessException("error.instanceUpConsumer.fetchPropertyData");
