@@ -18,18 +18,12 @@ import static io.choerodon.statemachine.infra.utils.SagaTopic.Organization.*;
  * Email: fuqianghuang01@gmail.com
  */
 @Component
-public class StateMachineHandler {
+public class StateMachineEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineEventHandler.class);
 
     @Autowired
     private InitService initService;
-
-    private void loggerInfo(Object o) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.info("data: {}", o);
-        }
-    }
 
     /**
      * 创建组织事件
@@ -39,8 +33,8 @@ public class StateMachineHandler {
             sagaCode = ORG_CREATE,
             seq = 1)
     public String handleOrganizationCreateEvent(String data) {
+        LOGGER.info("消费创建组织消息{}", data);
         OrganizationEventPayload organizationEventPayload = JSONObject.parseObject(data, OrganizationEventPayload.class);
-        loggerInfo(organizationEventPayload);
         Long organizationId = organizationEventPayload.getId();
         //初始化状态
         initService.initStatus(organizationId);
@@ -57,6 +51,7 @@ public class StateMachineHandler {
             sagaCode = ORG_REGISTER,
             seq = 1)
     public String handleOrganizationRegisterEvent(String data) {
+        LOGGER.info("消费注册组织消息{}", data);
         OrganizationRegisterPayload payload = JSONObject.parseObject(data, OrganizationRegisterPayload.class);
         Long organizationId = payload.getOrganizationId();
         //初始化状态
