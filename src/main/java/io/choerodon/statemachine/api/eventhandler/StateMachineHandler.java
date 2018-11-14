@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.domain.event.OrganizationEventPayload;
+import io.choerodon.statemachine.domain.event.OrganizationRegisterPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +38,15 @@ public class StateMachineHandler {
             description = "创建组织事件",
             sagaCode = ORG_CREATE,
             seq = 1)
-    public String handleOrganizationCreateEvent(String payload) {
-        OrganizationEventPayload organizationEventPayload = JSONObject.parseObject(payload, OrganizationEventPayload.class);
+    public String handleOrganizationCreateEvent(String data) {
+        OrganizationEventPayload organizationEventPayload = JSONObject.parseObject(data, OrganizationEventPayload.class);
         loggerInfo(organizationEventPayload);
         Long organizationId = organizationEventPayload.getId();
         //初始化状态
         initService.initStatus(organizationId);
         //初始化默认状态机
         initService.initDefaultStateMachine(organizationId);
-        return payload;
+        return data;
     }
 
     /**
@@ -55,15 +56,14 @@ public class StateMachineHandler {
             description = "注册组织事件",
             sagaCode = ORG_REGISTER,
             seq = 1)
-    public String handleOrganizationRegisterEvent(String payload) {
-        OrganizationEventPayload organizationEventPayload = JSONObject.parseObject(payload, OrganizationEventPayload.class);
-        loggerInfo(organizationEventPayload);
-        Long organizationId = organizationEventPayload.getId();
+    public String handleOrganizationRegisterEvent(String data) {
+        OrganizationRegisterPayload payload = JSONObject.parseObject(data, OrganizationRegisterPayload.class);
+        Long organizationId = payload.getOrganizationId();
         //初始化状态
         initService.initStatus(organizationId);
         //初始化默认状态机
         initService.initDefaultStateMachine(organizationId);
-        return payload;
+        return data;
     }
 
 }
