@@ -36,7 +36,6 @@ public class StateMachineHandler {
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
             sagaCode = ORG_CREATE,
-            maxRetryCount = 0,
             seq = 1)
     public String handleOrganizationCreateEvent(String payload) {
         OrganizationEventPayload organizationEventPayload = JSONObject.parseObject(payload, OrganizationEventPayload.class);
@@ -55,7 +54,6 @@ public class StateMachineHandler {
     @SagaTask(code = TASK_ORG_REGISTER,
             description = "注册组织事件",
             sagaCode = ORG_REGISTER,
-            maxRetryCount = 0,
             seq = 1)
     public String handleOrganizationRegisterEvent(String payload) {
         OrganizationEventPayload organizationEventPayload = JSONObject.parseObject(payload, OrganizationEventPayload.class);

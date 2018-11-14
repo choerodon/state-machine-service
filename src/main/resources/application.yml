@@ -40,16 +40,12 @@ choerodon:
     userNameType: 0
   devops:
     message: true
-  event:
+  saga:
     consumer:
-      enabled: true # 是否开启，不设置默认开启
-      queue-type: kafka # 消息队列类型,目前仅支持kafka
-      enable-duplicate-remove: true # 是否开启去重功能
-      failed-strategy: nothing # 消息失败策略
-      retry:
-        enabled: true # 是否开启重试功能
-      kafka:
-        bootstrap-servers: localhost:9092
+      enabled: true # 是否启用消费端
+      thread-num: 5  # 消费线程数
+      max-poll-size: 200 # 每次拉取的最大消息数量
+      poll-interval-ms: 1000 # 拉取消息的间隔(毫秒)，默认1000毫秒
 eureka:
   instance:
     preferIpAddress: true
