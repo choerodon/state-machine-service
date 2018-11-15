@@ -45,6 +45,7 @@ choerodon:
       retry-time: 5 # 自动重试次数
       retry-interval: 3 # 自动重试间隔(秒)
       skip-services: register-server, api-gateway, gateway-helper, oauth-server, config-server, state-machine-service # 跳过的服务
+      target-services: agile-service # 发现的服务
 eureka:
   instance:
     preferIpAddress: true
