@@ -13,7 +13,7 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 @EnableChoerodonResourceServer
 public class StateMachineServiceApplication {
     public static void main(String[] args) {
-        //此处执行初始化
+        //此处执行Eureka服务发现的初始化
         EurekaEventHandler.getInstance().init();
         SpringApplication.run(StateMachineServiceApplication.class, args);
     }

@@ -30,7 +30,7 @@ public class RegisterInstanceServiceImpl implements RegisterInstanceService {
 
     @Override
     public void instanceDownConsumer(final EurekaEventPayload payload) {
-        // do something
+        logger.info("服务下线："+payload.getAppName());
     }
 
     @Override
