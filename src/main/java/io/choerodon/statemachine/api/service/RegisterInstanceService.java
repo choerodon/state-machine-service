@@ -1,11 +1,11 @@
 package io.choerodon.statemachine.api.service;
 
-import io.choerodon.statemachine.domain.event.RegisterInstancePayload;
+import io.choerodon.eureka.event.EurekaEventPayload;
 
 public interface RegisterInstanceService {
 
-    void instanceDownConsumer(final RegisterInstancePayload payload);
+    void instanceDownConsumer(final EurekaEventPayload payload);
 
-    void instanceUpConsumer(final RegisterInstancePayload payload);
+    void instanceUpConsumer(final EurekaEventPayload payload);
 
 }

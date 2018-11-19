@@ -1,37 +1,49 @@
 package io.choerodon.statemachine.api.service.impl;
 
+import io.choerodon.eureka.event.EurekaEventPayload;
 import io.choerodon.statemachine.api.dto.PropertyData;
 import io.choerodon.statemachine.api.service.ConfigCodeService;
-import io.choerodon.statemachine.domain.event.RegisterInstancePayload;
 import io.choerodon.statemachine.api.service.RegisterInstanceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+
 @Service
 public class RegisterInstanceServiceImpl implements RegisterInstanceService {
 
+    private static final Logger logger = LoggerFactory.getLogger(RegisterInstanceServiceImpl.class);
     private RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     private ConfigCodeService configCodeService;
+    @Value("${choerodon.eureka.event.target-services}")
+    private String[] targetServices;
 
     @Override
-    public void instanceDownConsumer(final RegisterInstancePayload payload) {
-        // do something
+    public void instanceDownConsumer(final EurekaEventPayload payload) {
+        logger.info("服务下线："+payload.getAppName());
     }
 
     @Override
-    public void instanceUpConsumer(final RegisterInstancePayload payload) {
-        PropertyData propertyData = fetchPropertyData(payload.getInstanceAddress());
-        if (propertyData == null) {
-            throw new RemoteAccessException("error.instanceUpConsumer.fetchPropertyData");
-        } else {
-            //处理获取到的新启动服务的数据
-            configCodeService.handlePropertyData(propertyData);
+    public void instanceUpConsumer(final EurekaEventPayload payload) {
+        logger.info("服务上线："+payload.getAppName());
+        if(Arrays.stream(targetServices).anyMatch(x->x.equals(payload.getAppName()))){
+            PropertyData propertyData = fetchPropertyData(payload.getInstanceAddress());
+            if (propertyData == null) {
+                throw new RemoteAccessException("error.instanceUpConsumer.fetchPropertyData");
+            } else {
+                //处理获取到的新启动服务的数据
+                configCodeService.handlePropertyData(propertyData);
+            }
         }
     }
 

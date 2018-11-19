@@ -154,7 +154,7 @@ public class MachineFactory {
         Long instanceId = inputDTO.getInstanceId();
         //校验transformId是否合法
         List<TransformInfo> transformInfos = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
-        if(transformInfos.stream().noneMatch(x->x.getId().equals(transformId))){
+        if (transformInfos.stream().noneMatch(x -> x.getId().equals(transformId))) {
             throw new CommonException("error.executeTransform.transformId.illegal");
         }
         //状态转节点
@@ -261,5 +261,14 @@ public class MachineFactory {
                 stateMachineMap.remove(entry.getKey());
             }
         }
+    }
+
+    /**
+     * 清理内存中的实例
+     */
+    public void cleanInstances() {
+        logger.info("【定时任务】清理内存中状态机构建器{}个，状态机实例{}个", builderMaps.size(), stateMachineMap.size());
+        builderMaps.clear();
+        stateMachineMap.clear();
     }
 }
