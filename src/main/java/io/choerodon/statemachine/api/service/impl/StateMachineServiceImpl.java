@@ -165,7 +165,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.delete.noFound");
         }
-        if(stateMachine.getDefault()){
+        if (stateMachine.getDefault()) {
             throw new CommonException("error.stateMachine.defaultForbiddenDelete");
         }
         int isDelete = stateMachineMapper.deleteByPrimaryKey(stateMachineId);
@@ -293,7 +293,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<Long> oldIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
         //获取新节点
         List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachineId);
-        Map<Long, Status> draftMap = nodeDrafts.stream().filter(x->x.getStatus()!=null).collect(Collectors.toMap(StateMachineNodeDraft::getId, StateMachineNodeDraft::getStatus));
+        Map<Long, Status> draftMap = nodeDrafts.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNodeDraft::getId, StateMachineNodeDraft::getStatus));
         List<Long> newIds = nodeDrafts.stream().map(StateMachineNodeDraft::getId).collect(Collectors.toList());
         //新增的节点
         List<Long> addIds = new ArrayList<>(newIds);
@@ -526,6 +526,18 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (stateMachine != null) {
             //若传了id，则为更新校验（更新校验不校验本身），不传为创建校验
             return stateMachine.getId().equals(stateMachineId);
+        }
+        return true;
+    }
+
+    @Override
+    public Boolean activeStateMachines(Long organizationId, List<Long> stateMachineIds) {
+        List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId,stateMachineIds);
+        for (StateMachine stateMachine : stateMachines) {
+            //若是新建状态机，则发布变成活跃
+            if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
+                deploy(organizationId, stateMachine.getId(), false);
+            }
         }
         return true;
     }

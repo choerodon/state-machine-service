@@ -127,4 +127,13 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId stateMachineId
      */
     void updateStateMachineStatus(Long organizationId, Long stateMachineId);
+
+    /**
+     * 批量活跃状态机
+     *
+     * @param organizationId
+     * @param stateMachineIds
+     * @return
+     */
+    Boolean activeStateMachines(Long organizationId, List<Long> stateMachineIds);
 }

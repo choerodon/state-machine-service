@@ -151,12 +151,20 @@ public class StateMachineController extends BaseController {
                                                                     @RequestParam("applyType") String applyType,
                                                                     @RequestBody ProjectEvent projectEvent) {
         Long stateMachineId = null;
-        if(applyType.equals(SchemeApplyType.AGILE)){
+        if (applyType.equals(SchemeApplyType.AGILE)) {
             stateMachineId = initService.initAGStateMachine(organizationId, projectEvent);
-        }else if(applyType.equals(SchemeApplyType.TEST)){
+        } else if (applyType.equals(SchemeApplyType.TEST)) {
             stateMachineId = initService.initTEStateMachine(organizationId, projectEvent);
         }
         return new ResponseEntity<>(stateMachineId, HttpStatus.CREATED);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "【issue服务】批量活跃状态机")
+    @PostMapping(value = "/active_state_machines")
+    public ResponseEntity<Boolean> activeStateMachines(@PathVariable("organization_id") Long organizationId,
+                                                   @RequestBody List<Long> stateMachineIds) {
+        return new ResponseEntity<>(stateMachineService.activeStateMachines(organizationId, stateMachineIds), HttpStatus.CREATED);
     }
 
 }

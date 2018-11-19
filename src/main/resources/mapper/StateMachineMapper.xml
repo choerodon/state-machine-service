@@ -23,7 +23,7 @@
         </if>
         <if test="param != null">
             AND ( name LIKE concat('%',#{param},'%')
-              OR description LIKE concat('%',#{param},'%')
+            OR description LIKE concat('%',#{param},'%')
             )
         </if>
     </select>
@@ -39,6 +39,20 @@
         from state_machine_node smn
         left join status s on smn.status_id = s.id
         where smn.state_machine_id = #{stateMachineId} and smn.status_id != 0
+    </select>
+
+    <select id="queryByIds" resultType="io.choerodon.statemachine.domain.StateMachine">
+        SELECT * FROM state_machine sm
+        WHERE 1=1
+        <if test="organizationId != null">
+            AND sm.organization_id = #{organizationId}
+        </if>
+        <if test="stateMachineIds != null and stateMachineIds.size()>0">
+            AND sm.id IN
+            <foreach item="item" index="index" collection="stateMachineIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
     </select>
 
 </mapper>
