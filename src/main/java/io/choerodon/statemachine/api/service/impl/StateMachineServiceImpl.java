@@ -532,7 +532,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public Boolean activeStateMachines(Long organizationId, List<Long> stateMachineIds) {
-        List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId,stateMachineIds);
+        List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
         for (StateMachine stateMachine : stateMachines) {
             //若是新建状态机，则发布变成活跃
             if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
@@ -540,5 +540,27 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             }
         }
         return true;
+    }
+
+    @Override
+    public List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId) {
+        //查询出所有状态机
+        StateMachine select = new StateMachine();
+        select.setOrganizationId(organizationId);
+        List<StateMachine> stateMachines = stateMachineMapper.select(select);
+        List<StateMachineWithStatusDTO> stateMachineWithStatusDTOS = modelMapper.map(stateMachines, new TypeToken<List<StateMachineDTO>>() {
+        }.getType());
+        //查询出所有状态
+        List<StatusDTO> statusDTOS = statusService.queryAllStatus(organizationId);
+        Map<Long, StatusDTO> statusMap = statusDTOS.stream().collect(Collectors.toMap(StatusDTO::getId, x -> x));
+        stateMachineWithStatusDTOS.forEach(stateMachine -> {
+            List<StatusDTO> status = new ArrayList<>();
+            List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachine.getId());
+            nodeDeploys.forEach(nodeDeploy -> {
+                status.add(statusMap.get(nodeDeploy.getStatusId()));
+            });
+            stateMachine.setStatusDTOS(status);
+        });
+        return stateMachineWithStatusDTOS;
     }
 }

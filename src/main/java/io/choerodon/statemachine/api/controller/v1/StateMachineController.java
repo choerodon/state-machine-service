@@ -7,6 +7,7 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
+import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.validator.StateMachineValidator;
@@ -165,6 +166,13 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<Boolean> activeStateMachines(@PathVariable("organization_id") Long organizationId,
                                                    @RequestBody List<Long> stateMachineIds) {
         return new ResponseEntity<>(stateMachineService.activeStateMachines(organizationId, stateMachineIds), HttpStatus.CREATED);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "【issue服务】获取组织下所有状态机，包含状态")
+    @GetMapping(value = "/query_all_with_status")
+    public ResponseEntity<List<StateMachineWithStatusDTO>> queryAllWithStatus(@PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(stateMachineService.queryAllWithStatus(organizationId), HttpStatus.OK);
     }
 
 }
