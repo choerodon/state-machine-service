@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.api.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
@@ -11,6 +12,7 @@ import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.event.OrganizationEventPayload;
 import io.choerodon.statemachine.domain.event.ProjectCreateAgilePayload;
 import io.choerodon.statemachine.domain.event.ProjectEvent;
 import io.choerodon.statemachine.domain.event.StatusPayload;
@@ -19,6 +21,8 @@ import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +54,9 @@ public class InitServiceImpl implements InitService {
     @Autowired
     private SagaClient sagaClient;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitServiceImpl.class);
+
+
     @Override
     public List<Status> initStatus(Long organizationId) {
         List<Status> initStatuses = new ArrayList<>();
@@ -79,14 +86,14 @@ public class InitServiceImpl implements InitService {
         stateMachine.setDefault(true);
         List<StateMachine> selects = stateMachineMapper.select(stateMachine);
         Long stateMachineId;
-        if(selects.isEmpty()){
+        if (selects.isEmpty()) {
             if (stateMachineMapper.insert(stateMachine) != 1) {
                 throw new CommonException("error.stateMachine.create");
             }
             //创建状态机节点和转换
             createStateMachineDetail(organizationId, stateMachine.getId());
             stateMachineId = stateMachine.getId();
-        }else{
+        } else {
             stateMachineId = selects.get(0).getId();
         }
         return stateMachineId;
@@ -137,6 +144,7 @@ public class InitServiceImpl implements InitService {
 
     /**
      * 创建状态机节点和转换
+     *
      * @param organizationId
      * @param stateMachineId
      */
@@ -144,7 +152,8 @@ public class InitServiceImpl implements InitService {
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);
-
+        //老的组织没有相关数据要重新创建
+        initStatuses = initOrganization(organizationId, initStatuses);
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
         Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x));
@@ -198,6 +207,20 @@ public class InitServiceImpl implements InitService {
         }
     }
 
+    private List<Status> initOrganization(Long organizationId, List<Status> initStatuses) {
+        if (initStatuses == null || initStatuses.isEmpty()) {
+            //初始化状态
+            initStatus(organizationId);
+            //初始化默认状态机
+            initDefaultStateMachine(organizationId);
+            Status select = new Status();
+            select.setOrganizationId(organizationId);
+            return statusMapper.select(select);
+        } else {
+            return initStatuses;
+        }
+    }
+
     @Override
     @Saga(code = "project-create-state-machine", description = "创建项目发送消息至agile", inputSchemaClass = ProjectCreateAgilePayload.class)
     public void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId) {
@@ -207,4 +230,6 @@ public class InitServiceImpl implements InitService {
         projectCreateAgilePayload.setStatusPayloads(statusPayloads);
         sagaClient.startSaga("project-create-state-machine", new StartInstanceDTO(JSON.toJSONString(projectCreateAgilePayload), "", ""));
     }
+
+
 }
