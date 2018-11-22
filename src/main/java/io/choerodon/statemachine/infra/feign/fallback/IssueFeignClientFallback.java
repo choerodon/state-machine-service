@@ -18,6 +18,11 @@ public class IssueFeignClientFallback implements IssueFeignClient {
     public ResponseEntity<Map<String, List<Long>>> queryProjectIdsMap(Long organizationId, Long stateMachineId) {
         throw new CommonException("error.issueFeignClient.queryProjectIdsMap");
     }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> checkDeleteNode(Long organizationId, Long stateMachineId, Long statusId) {
+        throw new CommonException("error.issueFeignClient.checkDeleteNode");
+    }
 }
 
 

@@ -225,6 +225,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (isStartSaga) {
             changeMap = new HashMap<>(3);
             deployHandleChange(changeMap, stateMachineId);
+            //校验删除的节点状态是否有使用的issue
+            deployCheckDelete(changeMap, stateMachineId);
         }
 
         //删除上一版本的节点
@@ -287,9 +289,10 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
      *
      * @param stateMachineId
      */
-    private Map<String, List<Status>> deployHandleChange(Map<String, List<Status>> changeMap, Long stateMachineId) {
+    private void deployHandleChange(Map<String, List<Status>> changeMap, Long stateMachineId) {
         //获取旧节点
         List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        Map<Long, Status> deployMap = nodeDeploys.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNode::getId, StateMachineNode::getStatus));
         List<Long> oldIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
         //获取新节点
         List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachineId);
@@ -298,12 +301,53 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         //新增的节点
         List<Long> addIds = new ArrayList<>(newIds);
         addIds.removeAll(oldIds);
-        List<Status> statuses = new ArrayList<>(addIds.size());
+        List<Status> addStatuses = new ArrayList<>(addIds.size());
         addIds.forEach(addId -> {
-            statuses.add(draftMap.get(addId));
+            addStatuses.add(draftMap.get(addId));
+        });
+        //删除的节点
+        List<Long> deleteIds = new ArrayList<>(oldIds);
+        deleteIds.removeAll(newIds);
+        List<Status> deleteStatuses = new ArrayList<>(deleteIds.size());
+        deleteIds.forEach(deleteId->{
+            deleteStatuses.add(deployMap.get(deleteId));
         });
 
-        changeMap.put("addList", statuses);
+        changeMap.put("addList", addStatuses);
+        changeMap.put("deleteList", deleteStatuses);
+    }
+
+    /**
+     * 处理发布状态机时，
+     *
+     * @param stateMachineId
+     */
+    private Map<String, List<Status>> deployCheckDelete(Map<String, List<Status>> changeMap, Long stateMachineId) {
+        //获取旧节点
+        List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        Map<Long, Status> deployMap = nodeDeploys.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNode::getId, StateMachineNode::getStatus));
+        List<Long> oldIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
+        //获取新节点
+        List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachineId);
+        Map<Long, Status> draftMap = nodeDrafts.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNodeDraft::getId, StateMachineNodeDraft::getStatus));
+        List<Long> newIds = nodeDrafts.stream().map(StateMachineNodeDraft::getId).collect(Collectors.toList());
+        //新增的节点
+        List<Long> addIds = new ArrayList<>(newIds);
+        addIds.removeAll(oldIds);
+        List<Status> addStatuses = new ArrayList<>(addIds.size());
+        addIds.forEach(addId -> {
+            addStatuses.add(draftMap.get(addId));
+        });
+        //删除的节点
+        List<Long> deleteIds = new ArrayList<>(oldIds);
+        deleteIds.removeAll(newIds);
+        List<Status> deleteStatuses = new ArrayList<>(deleteIds.size());
+        deleteIds.forEach(deleteId->{
+            deleteStatuses.add(deployMap.get(deleteId));
+        });
+
+        changeMap.put("addList", addStatuses);
+        changeMap.put("deleteList", deleteStatuses);
         return changeMap;
     }
 
@@ -316,6 +360,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (!addList.isEmpty()) {
             //发送saga
             sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, addList);
+        }
+        //删除的状态
+        List<Status> deleteList = changeMap.get("deleteList");
+        if(!deleteList.isEmpty()){
+            //
         }
     }
 
