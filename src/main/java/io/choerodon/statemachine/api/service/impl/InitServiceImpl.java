@@ -79,14 +79,14 @@ public class InitServiceImpl implements InitService {
         stateMachine.setDefault(true);
         List<StateMachine> selects = stateMachineMapper.select(stateMachine);
         Long stateMachineId;
-        if(selects.isEmpty()){
+        if (selects.isEmpty()) {
             if (stateMachineMapper.insert(stateMachine) != 1) {
                 throw new CommonException("error.stateMachine.create");
             }
             //创建状态机节点和转换
             createStateMachineDetail(organizationId, stateMachine.getId());
             stateMachineId = stateMachine.getId();
-        }else{
+        } else {
             stateMachineId = selects.get(0).getId();
         }
         return stateMachineId;
@@ -137,6 +137,7 @@ public class InitServiceImpl implements InitService {
 
     /**
      * 创建状态机节点和转换
+     *
      * @param organizationId
      * @param stateMachineId
      */
@@ -144,7 +145,8 @@ public class InitServiceImpl implements InitService {
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);
-
+        //老的组织没有相关数据要重新创建
+        initStatuses = initOrganization(organizationId, initStatuses);
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
         Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x));
@@ -195,6 +197,20 @@ public class InitServiceImpl implements InitService {
                     throw new CommonException("error.stateMachineNode.allStatusTransformId.update");
                 }
             }
+        }
+    }
+
+    private List<Status> initOrganization(Long organizationId, List<Status> initStatuses) {
+        if (initStatuses == null || initStatuses.isEmpty()) {
+            //初始化状态
+            initStatus(organizationId);
+            //初始化默认状态机
+            initDefaultStateMachine(organizationId);
+            Status select = new Status();
+            select.setOrganizationId(organizationId);
+            return statusMapper.select(select);
+        } else {
+            return initStatuses;
         }
     }
 
