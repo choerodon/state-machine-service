@@ -21,6 +21,8 @@ public interface StateMachineMapper extends BaseMapper<StateMachine> {
      */
     List<StateMachine> fulltextSearch(@Param("stateMachine") StateMachine stateMachine, @Param("param") String param);
 
+    List<StateMachine> queryByIds(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds);
+
     StateMachine queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 
     List<StatusPayload> getStatusBySmId(@Param("projectId") Long projectId, @Param("stateMachineId") Long stateMachineId);

@@ -10,20 +10,18 @@ import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.app.assembler.StatusAssembler;
-import io.choerodon.statemachine.domain.StateMachineNode;
-import io.choerodon.statemachine.domain.StateMachineNodeDraft;
-import io.choerodon.statemachine.domain.StateMachineTransformDraft;
-import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.NodeType;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper;
-import io.choerodon.statemachine.infra.mapper.StatusMapper;
+import io.choerodon.statemachine.infra.enums.StateMachineStatus;
+import io.choerodon.statemachine.infra.feign.IssueFeignClient;
+import io.choerodon.statemachine.infra.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -50,6 +48,10 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     private StatusMapper statusMapper;
     @Autowired
     private StateMachineTransformService transformService;
+    @Autowired
+    private StateMachineMapper stateMachineMapper;
+    @Autowired
+    private IssueFeignClient issueFeignClient;
 
     @Override
     public List<StateMachineNodeDTO> create(Long organizationId, StateMachineNodeDTO nodeDTO) {
@@ -89,6 +91,18 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         transformMapper.deleteByNodeId(nodeId);
         stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
         return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
+    }
+
+    public Map<String, Object> checkDelete(Long organizationId, Long stateMachineId, Long statusId){
+        Map<String, Object> result = new HashMap<>(2);
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
+        //只有草稿状态才进行删除校验
+        if(stateMachine.getStatus().equals(StateMachineStatus.DRAFT)){
+            result = issueFeignClient.checkDeleteNode(organizationId, stateMachineId, statusId).getBody();
+        }else{
+            result.put("canDelete", false);
+        }
+        return result;
     }
 
     @Override

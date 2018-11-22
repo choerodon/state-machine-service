@@ -4,6 +4,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
+import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO;
 import io.choerodon.statemachine.domain.StateMachine;
 
 import java.util.List;
@@ -127,4 +128,21 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId stateMachineId
      */
     void updateStateMachineStatus(Long organizationId, Long stateMachineId);
+
+    /**
+     * 批量活跃状态机
+     *
+     * @param organizationId
+     * @param stateMachineIds
+     * @return
+     */
+    Boolean activeStateMachines(Long organizationId, List<Long> stateMachineIds);
+
+    /**
+     * 获取所有状态机，附带状态
+     *
+     * @param organizationId 组织id
+     * @return 状态机列表
+     */
+    List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId);
 }

@@ -165,7 +165,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.delete.noFound");
         }
-        if(stateMachine.getDefault()){
+        if (stateMachine.getDefault()) {
             throw new CommonException("error.stateMachine.defaultForbiddenDelete");
         }
         int isDelete = stateMachineMapper.deleteByPrimaryKey(stateMachineId);
@@ -225,6 +225,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (isStartSaga) {
             changeMap = new HashMap<>(3);
             deployHandleChange(changeMap, stateMachineId);
+            //校验删除的节点状态是否有使用的issue
+            deployCheckDelete(changeMap, stateMachineId);
         }
 
         //删除上一版本的节点
@@ -287,23 +289,65 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
      *
      * @param stateMachineId
      */
-    private Map<String, List<Status>> deployHandleChange(Map<String, List<Status>> changeMap, Long stateMachineId) {
+    private void deployHandleChange(Map<String, List<Status>> changeMap, Long stateMachineId) {
         //获取旧节点
         List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        Map<Long, Status> deployMap = nodeDeploys.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNode::getId, StateMachineNode::getStatus));
         List<Long> oldIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
         //获取新节点
         List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachineId);
-        Map<Long, Status> draftMap = nodeDrafts.stream().filter(x->x.getStatus()!=null).collect(Collectors.toMap(StateMachineNodeDraft::getId, StateMachineNodeDraft::getStatus));
+        Map<Long, Status> draftMap = nodeDrafts.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNodeDraft::getId, StateMachineNodeDraft::getStatus));
         List<Long> newIds = nodeDrafts.stream().map(StateMachineNodeDraft::getId).collect(Collectors.toList());
         //新增的节点
         List<Long> addIds = new ArrayList<>(newIds);
         addIds.removeAll(oldIds);
-        List<Status> statuses = new ArrayList<>(addIds.size());
+        List<Status> addStatuses = new ArrayList<>(addIds.size());
         addIds.forEach(addId -> {
-            statuses.add(draftMap.get(addId));
+            addStatuses.add(draftMap.get(addId));
+        });
+        //删除的节点
+        List<Long> deleteIds = new ArrayList<>(oldIds);
+        deleteIds.removeAll(newIds);
+        List<Status> deleteStatuses = new ArrayList<>(deleteIds.size());
+        deleteIds.forEach(deleteId->{
+            deleteStatuses.add(deployMap.get(deleteId));
         });
 
-        changeMap.put("addList", statuses);
+        changeMap.put("addList", addStatuses);
+        changeMap.put("deleteList", deleteStatuses);
+    }
+
+    /**
+     * 处理发布状态机时，
+     *
+     * @param stateMachineId
+     */
+    private Map<String, List<Status>> deployCheckDelete(Map<String, List<Status>> changeMap, Long stateMachineId) {
+        //获取旧节点
+        List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        Map<Long, Status> deployMap = nodeDeploys.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNode::getId, StateMachineNode::getStatus));
+        List<Long> oldIds = nodeDeploys.stream().map(StateMachineNode::getId).collect(Collectors.toList());
+        //获取新节点
+        List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachineId);
+        Map<Long, Status> draftMap = nodeDrafts.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNodeDraft::getId, StateMachineNodeDraft::getStatus));
+        List<Long> newIds = nodeDrafts.stream().map(StateMachineNodeDraft::getId).collect(Collectors.toList());
+        //新增的节点
+        List<Long> addIds = new ArrayList<>(newIds);
+        addIds.removeAll(oldIds);
+        List<Status> addStatuses = new ArrayList<>(addIds.size());
+        addIds.forEach(addId -> {
+            addStatuses.add(draftMap.get(addId));
+        });
+        //删除的节点
+        List<Long> deleteIds = new ArrayList<>(oldIds);
+        deleteIds.removeAll(newIds);
+        List<Status> deleteStatuses = new ArrayList<>(deleteIds.size());
+        deleteIds.forEach(deleteId->{
+            deleteStatuses.add(deployMap.get(deleteId));
+        });
+
+        changeMap.put("addList", addStatuses);
+        changeMap.put("deleteList", deleteStatuses);
         return changeMap;
     }
 
@@ -316,6 +360,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         if (!addList.isEmpty()) {
             //发送saga
             sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, addList);
+        }
+        //删除的状态
+        List<Status> deleteList = changeMap.get("deleteList");
+        if(!deleteList.isEmpty()){
+            //
         }
     }
 
@@ -528,5 +577,39 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             return stateMachine.getId().equals(stateMachineId);
         }
         return true;
+    }
+
+    @Override
+    public Boolean activeStateMachines(Long organizationId, List<Long> stateMachineIds) {
+        List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
+        for (StateMachine stateMachine : stateMachines) {
+            //若是新建状态机，则发布变成活跃
+            if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
+                deploy(organizationId, stateMachine.getId(), false);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId) {
+        //查询出所有状态机
+        StateMachine select = new StateMachine();
+        select.setOrganizationId(organizationId);
+        List<StateMachine> stateMachines = stateMachineMapper.select(select);
+        List<StateMachineWithStatusDTO> stateMachineWithStatusDTOS = modelMapper.map(stateMachines, new TypeToken<List<StateMachineWithStatusDTO>>() {
+        }.getType());
+        //查询出所有状态
+        List<StatusDTO> statusDTOS = statusService.queryAllStatus(organizationId);
+        Map<Long, StatusDTO> statusMap = statusDTOS.stream().collect(Collectors.toMap(StatusDTO::getId, x -> x));
+        stateMachineWithStatusDTOS.forEach(stateMachine -> {
+            List<StatusDTO> status = new ArrayList<>();
+            List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachine.getId());
+            nodeDeploys.forEach(nodeDeploy -> {
+                status.add(statusMap.get(nodeDeploy.getStatusId()));
+            });
+            stateMachine.setStatusDTOS(status);
+        });
+        return stateMachineWithStatusDTOS;
     }
 }
