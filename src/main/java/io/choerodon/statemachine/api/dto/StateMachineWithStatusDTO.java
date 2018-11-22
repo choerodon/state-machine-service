@@ -16,6 +16,9 @@ public class StateMachineWithStatusDTO {
 
     private List<StatusDTO> statusDTOS;
 
+    public StateMachineWithStatusDTO() {
+    }
+
     public StateMachineWithStatusDTO(Long id, String name, String description, String status, Long organizationId) {
         this.id = id;
         this.name = name;

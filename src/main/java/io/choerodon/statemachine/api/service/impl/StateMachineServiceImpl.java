@@ -597,7 +597,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         StateMachine select = new StateMachine();
         select.setOrganizationId(organizationId);
         List<StateMachine> stateMachines = stateMachineMapper.select(select);
-        List<StateMachineWithStatusDTO> stateMachineWithStatusDTOS = modelMapper.map(stateMachines, new TypeToken<List<StateMachineDTO>>() {
+        List<StateMachineWithStatusDTO> stateMachineWithStatusDTOS = modelMapper.map(stateMachines, new TypeToken<List<StateMachineWithStatusDTO>>() {
         }.getType());
         //查询出所有状态
         List<StatusDTO> statusDTOS = statusService.queryAllStatus(organizationId);
