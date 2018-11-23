@@ -13,9 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine_nodes")
@@ -53,6 +54,14 @@ public class StateMachineNodeController extends BaseController {
     public ResponseEntity<List<StateMachineNodeDTO>> deleteNode(@PathVariable("organization_id") Long organizationId,
                                                                 @PathVariable("node_id") Long nodeId) {
         return new ResponseEntity<>(nodeService.delete(organizationId, nodeId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "校验是否能删除节点（草稿）")
+    @GetMapping(value = "/check_delete/{node_id}")
+    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId,
+                                                           @PathVariable("node_id") Long nodeId) {
+        return new ResponseEntity<>(nodeService.checkDelete(organizationId, nodeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

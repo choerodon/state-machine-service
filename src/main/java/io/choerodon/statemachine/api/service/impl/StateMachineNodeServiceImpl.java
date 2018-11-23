@@ -84,22 +84,31 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     @Override
     public List<StateMachineNodeDTO> delete(Long organizationId, Long nodeId) {
         StateMachineNodeDraft node = nodeDraftMapper.queryById(organizationId, nodeId);
-        int isDelete = nodeDraftMapper.deleteByPrimaryKey(nodeId);
-        if (isDelete != 1) {
-            throw new CommonException("error.stateMachineNode.delete");
+        //校验节点的状态是否关联状态机
+        if ((Boolean) checkDelete(organizationId, nodeId).get("canDelete")) {
+            int isDelete = nodeDraftMapper.deleteByPrimaryKey(nodeId);
+            if (isDelete != 1) {
+                throw new CommonException("error.stateMachineNode.delete");
+            }
+            transformMapper.deleteByNodeId(nodeId);
+            stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
+        } else {
+            throw new CommonException("error.stateMachineNode.statusHasIssues");
         }
-        transformMapper.deleteByNodeId(nodeId);
-        stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
         return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
     }
 
-    public Map<String, Object> checkDelete(Long organizationId, Long stateMachineId, Long statusId){
+    @Override
+    public Map<String, Object> checkDelete(Long organizationId, Long nodeId) {
         Map<String, Object> result = new HashMap<>(2);
+        StateMachineNodeDraft node = nodeDraftMapper.queryById(organizationId, nodeId);
+        Long stateMachineId = node.getStateMachineId();
+        Long statusId = node.getStatusId();
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         //只有草稿状态才进行删除校验
-        if(stateMachine.getStatus().equals(StateMachineStatus.DRAFT)){
+        if (stateMachine.getStatus().equals(StateMachineStatus.DRAFT)) {
             result = issueFeignClient.checkDeleteNode(organizationId, stateMachineId, statusId).getBody();
-        }else{
+        } else {
             result.put("canDelete", false);
         }
         return result;
@@ -183,7 +192,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         StateMachineNodeDraft select = new StateMachineNodeDraft();
         select.setStatusId(statusId);
         select.setStateMachineId(stateMachineId);
-        if(nodeDraftMapper.select(select).isEmpty()){
+        if (nodeDraftMapper.select(select).isEmpty()) {
             //获取状态机中positionY最大的节点
             StateMachineNodeDraft maxNode = nodeDraftMapper.selectMaxPositionY(stateMachineId);
             //创建节点
@@ -193,7 +202,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             nodeDraft.setStateMachineId(stateMachineId);
             nodeDraft.setType(NodeType.CUSTOM);
             nodeDraft.setPositionX(maxNode.getPositionX());
-            nodeDraft.setPositionY(maxNode.getPositionY()+100);
+            nodeDraft.setPositionY(maxNode.getPositionY() + 100);
             nodeDraft.setHeight(maxNode.getHeight());
             nodeDraft.setWidth(maxNode.getWidth());
             int isInsert = nodeDraftMapper.insert(nodeDraft);

@@ -5,6 +5,7 @@ import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author peng.jiang,dinghuang123@gmail.com
@@ -34,6 +35,15 @@ public interface StateMachineNodeService extends BaseService<StateMachineNodeDra
      * @return
      */
     List<StateMachineNodeDTO> delete(Long organizationId, Long nodeId);
+
+    /**
+     * 校验是否能删除状态节点
+     *
+     * @param organizationId
+     * @param nodeId
+     * @return
+     */
+    Map<String, Object> checkDelete(Long organizationId, Long nodeId);
 
     /**
      * 获取状态机初始节点id
