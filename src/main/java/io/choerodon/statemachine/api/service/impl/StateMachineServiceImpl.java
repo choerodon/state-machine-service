@@ -21,6 +21,8 @@ import io.choerodon.statemachine.infra.mapper.*;
 import jdk.nashorn.internal.runtime.regexp.joni.ast.StateNode;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +37,8 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> implements StateMachineService {
 
+    private static final Logger logger = LoggerFactory.getLogger(StateMachineServiceImpl.class);
     private final String STATE_MACHINE_CREATE = "state_machine_create";
-
     @Autowired
     private StateMachineMapper stateMachineMapper;
     @Autowired
@@ -311,7 +313,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<Long> deleteIds = new ArrayList<>(oldIds);
         deleteIds.removeAll(newIds);
         List<Status> deleteStatuses = new ArrayList<>(deleteIds.size());
-        deleteIds.forEach(deleteId->{
+        deleteIds.forEach(deleteId -> {
             deleteStatuses.add(deployMap.get(deleteId));
         });
 
@@ -344,7 +346,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<Long> deleteIds = new ArrayList<>(oldIds);
         deleteIds.removeAll(newIds);
         List<Status> deleteStatuses = new ArrayList<>(deleteIds.size());
-        deleteIds.forEach(deleteId->{
+        deleteIds.forEach(deleteId -> {
             deleteStatuses.add(deployMap.get(deleteId));
         });
 
@@ -365,7 +367,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         }
         //删除的状态
         List<Status> deleteList = changeMap.get("deleteList");
-        if(!deleteList.isEmpty()){
+        if (!deleteList.isEmpty()) {
             //
         }
     }
@@ -608,7 +610,14 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             List<StatusDTO> status = new ArrayList<>();
             List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachine.getId());
             nodeDeploys.forEach(nodeDeploy -> {
-                status.add(statusMap.get(nodeDeploy.getStatusId()));
+                if (!nodeDeploy.getType().equals(NodeType.START)) {
+                    StatusDTO statusDTO = statusMap.get(nodeDeploy.getStatusId());
+                    if (statusDTO != null) {
+                        status.add(statusDTO);
+                    } else {
+                        logger.warn("warn nodeDeployId:{} notFound", nodeDeploy.getId());
+                    }
+                }
             });
             stateMachine.setStatusDTOS(status);
         });
