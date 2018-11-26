@@ -11,6 +11,7 @@ import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.app.assembler.StatusAssembler;
 import io.choerodon.statemachine.domain.*;
+import io.choerodon.statemachine.infra.annotation.ChangeStateMachineStatus;
 import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
 import io.choerodon.statemachine.infra.feign.IssueFeignClient;
@@ -54,7 +55,9 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     private IssueFeignClient issueFeignClient;
 
     @Override
-    public List<StateMachineNodeDTO> create(Long organizationId, StateMachineNodeDTO nodeDTO) {
+    @ChangeStateMachineStatus
+    public List<StateMachineNodeDTO> create(Long organizationId, Long stateMachineId, StateMachineNodeDTO nodeDTO) {
+        nodeDTO.setStateMachineId(stateMachineId);
         nodeDTO.setOrganizationId(organizationId);
         createStatus(organizationId, nodeDTO);
         StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
@@ -63,12 +66,13 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineNode.create");
         }
-        stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
         return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
     }
 
     @Override
-    public List<StateMachineNodeDTO> update(Long organizationId, Long nodeId, StateMachineNodeDTO nodeDTO) {
+    @ChangeStateMachineStatus
+    public List<StateMachineNodeDTO> update(Long organizationId, Long stateMachineId, Long nodeId, StateMachineNodeDTO nodeDTO) {
+        nodeDTO.setStateMachineId(stateMachineId);
         nodeDTO.setOrganizationId(organizationId);
         createStatus(organizationId, nodeDTO);
         StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
@@ -77,39 +81,36 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachineNode.update");
         }
-        stateMachineService.updateStateMachineStatus(node.getOrganizationId(), node.getStateMachineId());
         return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
     }
 
     @Override
-    public List<StateMachineNodeDTO> delete(Long organizationId, Long nodeId) {
-        StateMachineNodeDraft node = nodeDraftMapper.queryById(organizationId, nodeId);
+    @ChangeStateMachineStatus
+    public List<StateMachineNodeDTO> delete(Long organizationId, Long stateMachineId, Long nodeId) {
         //校验节点的状态是否关联状态机
-        if ((Boolean) checkDelete(organizationId, nodeId).get("canDelete")) {
+        if ((Boolean) checkDelete(organizationId, stateMachineId, nodeId).get("canDelete")) {
             int isDelete = nodeDraftMapper.deleteByPrimaryKey(nodeId);
             if (isDelete != 1) {
                 throw new CommonException("error.stateMachineNode.delete");
             }
             transformMapper.deleteByNodeId(nodeId);
-            stateMachineService.updateStateMachineStatus(organizationId, node.getStateMachineId());
         } else {
             throw new CommonException("error.stateMachineNode.statusHasIssues");
         }
-        return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
+        return queryByStateMachineId(organizationId, stateMachineId, true);
     }
 
     @Override
-    public Map<String, Object> checkDelete(Long organizationId, Long nodeId) {
+    public Map<String, Object> checkDelete(Long organizationId, Long stateMachineId, Long nodeId) {
         Map<String, Object> result = new HashMap<>(2);
         StateMachineNodeDraft node = nodeDraftMapper.queryById(organizationId, nodeId);
-        Long stateMachineId = node.getStateMachineId();
         Long statusId = node.getStatusId();
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         //只有草稿状态才进行删除校验
-        if (stateMachine.getStatus().equals(StateMachineStatus.DRAFT)) {
-            result = issueFeignClient.checkDeleteNode(organizationId, stateMachineId, statusId).getBody();
+        if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
+            result.put("canDelete", true);
         } else {
-            result.put("canDelete", false);
+            result = issueFeignClient.checkDeleteNode(organizationId, stateMachineId, statusId).getBody();
         }
         return result;
     }
@@ -209,7 +210,6 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             if (isInsert != 1) {
                 throw new CommonException("error.stateMachineNode.create");
             }
-            stateMachineService.updateStateMachineStatus(organizationId, stateMachineId);
             //创建转换
             transformService.createAllStatusTransform(organizationId, stateMachineId, nodeDraft.getId());
         }

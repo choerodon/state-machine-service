@@ -8,7 +8,7 @@ import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import java.util.List;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 public interface StateMachineTransformService extends BaseService<StateMachineTransformDraft> {
 
@@ -19,26 +19,26 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @param transformDTO
      * @return
      */
-    StateMachineTransformDTO create(Long organizationId, StateMachineTransformDTO transformDTO);
+    StateMachineTransformDTO create(Long organizationId, Long stateMachineId, StateMachineTransformDTO transformDTO);
 
     /**
      * 更新转换
      *
      * @param organizationId 组织id
-     * @param transformId       转换id
-     * @param transformDTO      转换对象
+     * @param transformId    转换id
+     * @param transformDTO   转换对象
      * @return 更新转换
      */
-    StateMachineTransformDTO update(Long organizationId, Long transformId, StateMachineTransformDTO transformDTO);
+    StateMachineTransformDTO update(Long organizationId, Long stateMachineId, Long transformId, StateMachineTransformDTO transformDTO);
 
     /**
      * 删除转换
      *
      * @param organizationId 组织id
-     * @param transformId       节点id
+     * @param transformId    节点id
      * @return
      */
-    Boolean delete(Long organizationId, Long transformId);
+    Boolean delete(Long organizationId, Long stateMachineId, Long transformId);
 
     /**
      * 获取初始转换
@@ -52,11 +52,11 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * 校验转换名字是否未被使用
      *
      * @param stateMachineId 状态机id
-     * @param transformId       转换id
+     * @param transformId    转换id
      * @param name           名称
      * @return
      */
-    Boolean checkName(Long organizationId,Long stateMachineId, Long transformId, String name);
+    Boolean checkName(Long organizationId, Long stateMachineId, Long transformId, String name);
 
     /**
      * 根据id获取转换
@@ -69,6 +69,7 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
 
     /**
      * 获取当前状态拥有的转换列表，包括【全部】类型的转换
+     *
      * @param organizationId
      * @param stateMachineId
      * @param statusId
@@ -87,6 +88,7 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
 
     /**
      * 删除【全部转换到此状态】转换
+     *
      * @param organizationId
      * @param transformId
      * @return
@@ -95,6 +97,7 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
 
     /**
      * 更新转换的条件策略
+     *
      * @param organizationId
      * @param transformId
      * @param conditionStrategy

@@ -30,9 +30,10 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "创建转换（草稿）")
     @PostMapping
     public ResponseEntity<StateMachineTransformDTO> create(@PathVariable("organization_id") Long organizationId,
+                                                           @RequestParam(value = "state_machine_id") Long stateMachineId,
                                                            @RequestBody StateMachineTransformDTO transformDTO) {
         transformValidator.createValidate(transformDTO);
-        return new ResponseEntity<>(transformService.create(organizationId, transformDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(transformService.create(organizationId, stateMachineId, transformDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -40,17 +41,19 @@ public class StateMachineTransformController extends BaseController {
     @PutMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformDTO> update(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("transform_id") Long transformId,
+                                                           @RequestParam(value = "state_machine_id") Long stateMachineId,
                                                            @RequestBody StateMachineTransformDTO transformDTO) {
         transformValidator.updateValidate(transformDTO);
-        return new ResponseEntity<>(transformService.update(organizationId, transformId, transformDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(transformService.update(organizationId, stateMachineId, transformId, transformDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除转换（草稿）")
     @DeleteMapping(value = "/{transform_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
+                                          @RequestParam(value = "state_machine_id") Long stateMachineId,
                                           @PathVariable("transform_id") Long transformId) {
-        return new ResponseEntity<>(transformService.delete(organizationId, transformId), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(transformService.delete(organizationId, stateMachineId, transformId), HttpStatus.NO_CONTENT);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

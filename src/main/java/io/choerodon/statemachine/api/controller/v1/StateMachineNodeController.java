@@ -33,9 +33,10 @@ public class StateMachineNodeController extends BaseController {
     @ApiOperation(value = "创建节点（草稿）")
     @PostMapping
     public ResponseEntity<List<StateMachineNodeDTO>> create(@PathVariable("organization_id") Long organizationId,
+                                                            @RequestParam("stateMachineId") Long stateMachineId,
                                                             @RequestBody StateMachineNodeDTO nodeDTO) {
         nodeValidator.createValidate(nodeDTO);
-        return new ResponseEntity<>(nodeService.create(organizationId, nodeDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(nodeService.create(organizationId, stateMachineId, nodeDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -43,25 +44,28 @@ public class StateMachineNodeController extends BaseController {
     @PutMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeDTO>> update(@PathVariable("organization_id") Long organizationId,
                                                             @PathVariable("node_id") Long nodeId,
+                                                            @RequestParam("stateMachineId") Long stateMachineId,
                                                             @RequestBody StateMachineNodeDTO nodeDTO) {
         nodeValidator.updateValidate(nodeDTO);
-        return new ResponseEntity<>(nodeService.update(organizationId, nodeId, nodeDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(nodeService.update(organizationId, stateMachineId, nodeId, nodeDTO), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除节点（草稿）")
     @DeleteMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeDTO>> deleteNode(@PathVariable("organization_id") Long organizationId,
-                                                                @PathVariable("node_id") Long nodeId) {
-        return new ResponseEntity<>(nodeService.delete(organizationId, nodeId), HttpStatus.OK);
+                                                                @PathVariable("node_id") Long nodeId,
+                                                                @RequestParam("stateMachineId") Long stateMachineId) {
+        return new ResponseEntity<>(nodeService.delete(organizationId, stateMachineId, nodeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验是否能删除节点（草稿）")
     @GetMapping(value = "/check_delete/{node_id}")
     public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId,
-                                                           @PathVariable("node_id") Long nodeId) {
-        return new ResponseEntity<>(nodeService.checkDelete(organizationId, nodeId), HttpStatus.OK);
+                                                           @PathVariable("node_id") Long nodeId,
+                                                           @RequestParam("stateMachineId") Long stateMachineId) {
+        return new ResponseEntity<>(nodeService.checkDelete(organizationId, stateMachineId, nodeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
