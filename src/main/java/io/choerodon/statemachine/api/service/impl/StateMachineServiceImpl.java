@@ -15,6 +15,7 @@ import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.*;
+import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
 import jdk.nashorn.internal.runtime.regexp.joni.ast.StateNode;
@@ -623,7 +624,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         stateNode.setStatusId(statusId);
         StateMachineNode res = nodeDeployMapper.selectOne(stateNode);
         if (res == null) {
-            throw new CommonException("error.status.exist");
+            throw new RemoveStatusException("error.status.exist");
         }
         nodeDeployMapper.delete(stateNode);
     }
