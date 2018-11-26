@@ -59,7 +59,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param stateMachineId 状态机id
      * @return 发布状态机对象
      */
-    StateMachineDTO deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga);
+    Boolean deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga);
 
     /**
      * 获取状态机及配置（草稿、活跃）
