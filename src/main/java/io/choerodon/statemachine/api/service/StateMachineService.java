@@ -145,4 +145,6 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @return 状态机列表
      */
     List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId);
+
+    void removeStateMachineNode(Long organizationId, Long stateMachineId, Long statusId);
 }
