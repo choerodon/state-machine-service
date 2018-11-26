@@ -17,6 +17,7 @@ import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
+import jdk.nashorn.internal.runtime.regexp.joni.ast.StateNode;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -611,5 +612,19 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             stateMachine.setStatusDTOS(status);
         });
         return stateMachineWithStatusDTOS;
+    }
+
+
+    @Override
+    public void removeStateMachineNode(Long organizationId, Long stateMachineId, Long statusId) {
+        StateMachineNode stateNode = new StateMachineNode();
+        stateNode.setOrganizationId(organizationId);
+        stateNode.setStateMachineId(stateMachineId);
+        stateNode.setStatusId(statusId);
+        StateMachineNode res = nodeDeployMapper.selectOne(stateNode);
+        if (res == null) {
+            throw new CommonException("error.status.exist");
+        }
+        nodeDeployMapper.delete(stateNode);
     }
 }

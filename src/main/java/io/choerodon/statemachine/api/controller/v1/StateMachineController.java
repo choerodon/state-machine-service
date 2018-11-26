@@ -2,11 +2,13 @@ package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
+import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
@@ -16,6 +18,7 @@ import io.choerodon.statemachine.infra.enums.SchemeApplyType;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -173,6 +177,19 @@ public class StateMachineController extends BaseController {
     @GetMapping(value = "/query_all_with_status")
     public ResponseEntity<List<StateMachineWithStatusDTO>> queryAllWithStatus(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(stateMachineService.queryAllWithStatus(organizationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "移除单个节点")
+    @DeleteMapping(value = "/remove_node")
+    public ResponseEntity removeStateMachineNode(@ApiParam(value = "组织id", required = true)
+                                                                            @PathVariable("organization_id") Long organizationId,
+                                                                            @ApiParam(value = "state machine id", required = true)
+                                                                            @RequestParam Long stateMachineId,
+                                                                            @ApiParam(value = "status id", required = true)
+                                                                            @RequestParam Long statusId) {
+        stateMachineService.removeStateMachineNode(organizationId, stateMachineId, statusId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
