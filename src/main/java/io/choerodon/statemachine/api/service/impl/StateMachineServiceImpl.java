@@ -18,7 +18,6 @@ import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
-import jdk.nashorn.internal.runtime.regexp.joni.ast.StateNode;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -586,6 +585,33 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
+    public Boolean notActiveStateMachines(Long organizationId, List<Long> stateMachineIds) {
+        List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
+        for (StateMachine stateMachine : stateMachines) {
+            //更新状态机状态为create
+            Long stateMachineId = stateMachine.getId();
+            stateMachine.setStatus(StateMachineStatus.CREATE);
+            updateOptional(stateMachine, "status");
+            //删除草稿节点
+            StateMachineNode node = new StateMachineNode();
+            node.setStateMachineId(stateMachineId);
+            node.setOrganizationId(organizationId);
+            nodeDeployMapper.delete(node);
+            //删除草稿转换
+            StateMachineTransform transform = new StateMachineTransform();
+            transform.setStateMachineId(stateMachineId);
+            transform.setOrganizationId(organizationId);
+            transformDeployMapper.delete(transform);
+            //删除草稿配置
+            StateMachineConfig config = new StateMachineConfig();
+            config.setStateMachineId(stateMachineId);
+            config.setOrganizationId(organizationId);
+            configDeployMapper.delete(config);
+        }
+        return true;
+    }
+
+    @Override
     public List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId) {
         //查询出所有状态机，新建的查草稿，活跃的查发布
         StateMachine select = new StateMachine();
@@ -623,7 +649,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                     }
                 });
             }
-
             stateMachine.setStatusDTOS(status);
         });
         return stateMachineWithStatusDTOS;
