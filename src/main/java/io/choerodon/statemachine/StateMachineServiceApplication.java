@@ -10,7 +10,7 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients("io.choerodon")
 @EnableEurekaClient
-@EnableChoerodonResourceServer
+//@EnableChoerodonResourceServer
 public class StateMachineServiceApplication {
     public static void main(String[] args) {
         //此处执行Eureka服务发现的初始化
