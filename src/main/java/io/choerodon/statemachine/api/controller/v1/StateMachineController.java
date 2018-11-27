@@ -2,13 +2,11 @@ package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
-import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
@@ -27,7 +25,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -89,7 +86,7 @@ public class StateMachineController extends BaseController {
     @ApiOperation(value = "发布状态机")
     @GetMapping(value = "/deploy/{state_machine_id}")
     public ResponseEntity<Boolean> deploy(@PathVariable("organization_id") Long organizationId,
-                                                  @PathVariable("state_machine_id") Long stateMachineId) {
+                                          @PathVariable("state_machine_id") Long stateMachineId) {
         return new ResponseEntity<>(stateMachineService.deploy(organizationId, stateMachineId, true), HttpStatus.OK);
     }
 
@@ -168,8 +165,17 @@ public class StateMachineController extends BaseController {
     @ApiOperation(value = "【issue服务】批量活跃状态机")
     @PostMapping(value = "/active_state_machines")
     public ResponseEntity<Boolean> activeStateMachines(@PathVariable("organization_id") Long organizationId,
-                                                   @RequestBody List<Long> stateMachineIds) {
+                                                       @RequestBody List<Long> stateMachineIds) {
         return new ResponseEntity<>(stateMachineService.activeStateMachines(organizationId, stateMachineIds), HttpStatus.CREATED);
+    }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "【issue服务】批量使活跃状态机变成未活跃")
+    @PostMapping(value = "/not_active_state_machines")
+    public ResponseEntity<Boolean> notActiveStateMachines(@PathVariable("organization_id") Long organizationId,
+                                                          @RequestBody List<Long> stateMachineIds) {
+        return new ResponseEntity<>(stateMachineService.notActiveStateMachines(organizationId, stateMachineIds), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

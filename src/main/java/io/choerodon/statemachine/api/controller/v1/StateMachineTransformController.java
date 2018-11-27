@@ -30,7 +30,7 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "创建转换（草稿）")
     @PostMapping
     public ResponseEntity<StateMachineTransformDTO> create(@PathVariable("organization_id") Long organizationId,
-                                                           @RequestParam(value = "state_machine_id") Long stateMachineId,
+                                                           @RequestParam Long stateMachineId,
                                                            @RequestBody StateMachineTransformDTO transformDTO) {
         transformValidator.createValidate(transformDTO);
         return new ResponseEntity<>(transformService.create(organizationId, stateMachineId, transformDTO), HttpStatus.CREATED);
@@ -41,7 +41,7 @@ public class StateMachineTransformController extends BaseController {
     @PutMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformDTO> update(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("transform_id") Long transformId,
-                                                           @RequestParam(value = "state_machine_id") Long stateMachineId,
+                                                           @RequestParam Long stateMachineId,
                                                            @RequestBody StateMachineTransformDTO transformDTO) {
         transformValidator.updateValidate(transformDTO);
         return new ResponseEntity<>(transformService.update(organizationId, stateMachineId, transformId, transformDTO), HttpStatus.CREATED);
@@ -51,7 +51,7 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "删除转换（草稿）")
     @DeleteMapping(value = "/{transform_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
-                                          @RequestParam(value = "state_machine_id") Long stateMachineId,
+                                          @RequestParam Long stateMachineId,
                                           @PathVariable("transform_id") Long transformId) {
         return new ResponseEntity<>(transformService.delete(organizationId, stateMachineId, transformId), HttpStatus.NO_CONTENT);
     }
@@ -60,7 +60,7 @@ public class StateMachineTransformController extends BaseController {
     @ApiOperation(value = "校验转换名字是否未被使用")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
-                                             @RequestParam(value = "state_machine_id") Long stateMachineId,
+                                             @RequestParam Long stateMachineId,
                                              @RequestParam(value = "transform_id", required = false) Long transformId,
                                              @RequestParam("name") String name) {
         return new ResponseEntity<>(transformService.checkName(organizationId, stateMachineId, transformId, name), HttpStatus.OK);

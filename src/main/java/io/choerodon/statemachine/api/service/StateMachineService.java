@@ -139,6 +139,15 @@ public interface StateMachineService extends BaseService<StateMachine> {
     Boolean activeStateMachines(Long organizationId, List<Long> stateMachineIds);
 
     /**
+     * 批量使活跃状态机变成未活跃
+     *
+     * @param organizationId
+     * @param stateMachineIds
+     * @return
+     */
+    Boolean notActiveStateMachines(Long organizationId, List<Long> stateMachineIds);
+
+    /**
      * 获取所有状态机，附带状态
      *
      * @param organizationId 组织id
