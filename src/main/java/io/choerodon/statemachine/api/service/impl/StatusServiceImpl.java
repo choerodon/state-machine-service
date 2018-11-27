@@ -4,13 +4,13 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.statemachine.api.dto.StatusDTO;
-import io.choerodon.statemachine.api.dto.StatusInfoDTO;
-import io.choerodon.statemachine.api.dto.StatusMapDTO;
+import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StatusService;
+import io.choerodon.statemachine.domain.StateMachineInfo;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.StatusWithInfo;
 import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
@@ -21,10 +21,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -71,6 +68,38 @@ public class StatusServiceImpl implements StatusService {
         returnPage.setSize(page.getSize());
         returnPage.setTotalElements(page.getTotalElements());
         returnPage.setTotalPages(page.getTotalPages());
+        return returnPage;
+    }
+
+    private void removeDuplicate(List<StatusWithInfo> statuses) {
+        for (StatusWithInfo statusWithInfo : statuses) {
+            List<StateMachineInfo> stateMachineInfoList = statusWithInfo.getStateMachineInfoList();
+            List<StateMachineInfo> res = new ArrayList<>();
+            List<Long> ids = new ArrayList<>();
+            for (StateMachineInfo stateMachineInfo : stateMachineInfoList) {
+                if (!ids.contains(stateMachineInfo.getStateMachineId())) {
+                    res.add(stateMachineInfo);
+                    ids.add(stateMachineInfo.getStateMachineId());
+                }
+            }
+            statusWithInfo.setStateMachineInfoList(res);
+        }
+    }
+
+    @Override
+    public Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO) {
+        Page<StatusWithInfo> statusPage = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryStatusList(organizationId, statusSearchDTO));
+        List<StatusWithInfo> statuses = statusPage.getContent();
+        removeDuplicate(statuses);
+        Page<StatusWithInfoDTO> returnPage = new Page<>();
+        List<StatusWithInfoDTO> statusWithInfoDTOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoDTO>>() {
+        }.getType());
+        returnPage.setContent(statusWithInfoDTOList);
+        returnPage.setNumber(statusPage.getNumber());
+        returnPage.setNumberOfElements(statusPage.getNumberOfElements());
+        returnPage.setSize(statusPage.getSize());
+        returnPage.setTotalElements(statusPage.getTotalElements());
+        returnPage.setTotalPages(statusPage.getTotalPages());
         return returnPage;
     }
 

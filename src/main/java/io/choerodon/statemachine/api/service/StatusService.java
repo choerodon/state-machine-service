@@ -2,10 +2,9 @@ package io.choerodon.statemachine.api.service;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.statemachine.api.dto.StatusDTO;
-import io.choerodon.statemachine.api.dto.StatusInfoDTO;
-import io.choerodon.statemachine.api.dto.StatusMapDTO;
+import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.StatusWithInfo;
 import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
 
 import java.util.List;
@@ -25,6 +24,8 @@ public interface StatusService {
      * @return 状态列表
      */
     Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param);
+
+    Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO);
 
     /**
      * 创建状态

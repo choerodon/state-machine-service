@@ -9,6 +9,54 @@
         and id = #{id}
     </select>
 
+    <resultMap id="statusListMap" type="io.choerodon.statemachine.domain.StatusWithInfo">
+        <id property="id" column="st_id"/>
+        <id property="name" column="st_name"/>
+        <id property="description" column="st_description"/>
+        <id property="type" column="st_type"/>
+        <id property="organizationId" column="st_organization_id"/>
+        <id property="objectVersionNumber" column="st_object_version_number"/>
+        <collection property="stateMachineInfoList" autoMapping="true" ofType="io.choerodon.statemachine.domain.StateMachineInfo">
+            <id property="stateMachineId" column="smddn_state_machine_id"/>
+            <id property="stateMachineName" column="smddn_name"/>
+        </collection>
+    </resultMap>
+
+    <select id="queryStatusList" resultMap="statusListMap">
+        select
+        st.id as st_id,
+        st.name as st_name,
+        st.description as st_description,
+        st.type as st_type,
+        st.organization_id as st_organization_id,
+        st.object_version_number as st_object_version_number,
+        smddn.state_machine_id as smddn_state_machine_id,
+        smddn.name as smddn_name
+        from status st
+        left join (select smn.status_id, smn.state_machine_id, sm.name
+                   from state_machine_node smn, state_machine sm
+                   where smn.state_machine_id = sm.id
+                   union all
+                   select smnd.status_id, smnd.state_machine_id, sm.name
+                   from state_machine_node_draft smnd, state_machine sm
+                   where smnd.state_machine_id = sm.id) smddn on st.id = smddn.status_id
+        where st.organization_id = #{organizationId}
+        <if test="statusSearchDTO.name != null">
+            AND st.name LIKE concat('%',#{statusSearchDTO.name},'%')
+        </if>
+        <if test="statusSearchDTO.type != null">
+            AND st.type LIKE concat('%',#{statusSearchDTO.type},'%')
+        </if>
+        <if test="statusSearchDTO.description != null">
+            AND st.description LIKE concat('%',#{statusSearchDTO.description},'%')
+        </if>
+        <if test="statusSearchDTO.param != null">
+            AND ( st.name LIKE concat('%',#{statusSearchDTO.param},'%')
+            OR st.description LIKE concat('%',#{statusSearchDTO.param},'%')
+            )
+        </if>
+    </select>
+
     <select id="fulltextSearch" resultType="io.choerodon.statemachine.domain.Status">
         SELECT * FROM status
         WHERE 1=1

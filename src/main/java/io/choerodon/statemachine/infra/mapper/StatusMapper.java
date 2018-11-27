@@ -1,7 +1,10 @@
 package io.choerodon.statemachine.infra.mapper;
 
 import io.choerodon.mybatis.common.BaseMapper;
+import io.choerodon.statemachine.api.dto.StatusDTO;
+import io.choerodon.statemachine.api.dto.StatusSearchDTO;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.StatusWithInfo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -19,6 +22,8 @@ public interface StatusMapper extends BaseMapper<Status> {
      * @return 状态列表
      */
     List<Status> fulltextSearch(@Param("status") Status status, @Param("param") String param);
+
+    List<StatusWithInfo> queryStatusList(@Param("organizationId") Long organizationId, @Param("statusSearchDTO") StatusSearchDTO statusSearchDTO);
 
     Status queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 

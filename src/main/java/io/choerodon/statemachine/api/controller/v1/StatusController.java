@@ -3,16 +3,16 @@ package io.choerodon.statemachine.api.controller.v1;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.statemachine.api.dto.StatusDTO;
-import io.choerodon.statemachine.api.dto.StatusInfoDTO;
-import io.choerodon.statemachine.api.dto.StatusMapDTO;
+import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.api.validator.StateValidator;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.StatusWithInfo;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -43,19 +43,34 @@ public class StatusController extends BaseController {
     @Autowired
     private StateValidator stateValidator;
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @ApiOperation(value = "分页查询状态列表")
+//    @CustomPageRequest
+//    @GetMapping("/organizations/{organization_id}/status")
+//    public ResponseEntity<Page<StatusDTO>> pagingQuery(@ApiIgnore
+//                                                       @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+//                                                       @PathVariable("organization_id") Long organizationId,
+//                                                       @RequestParam(required = false) String name,
+//                                                       @RequestParam(required = false) String description,
+//                                                       @RequestParam(required = false) String type,
+//                                                       @RequestParam(required = false) String[] param) {
+//        return new ResponseEntity<>(statusService.pageQuery(pageRequest, new StatusDTO(name, description, type, organizationId),
+//                param != null ? Arrays.stream(param).collect(Collectors.joining(",")) : null), HttpStatus.OK);
+//    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "分页查询状态列表")
     @CustomPageRequest
-    @GetMapping("/organizations/{organization_id}/status")
-    public ResponseEntity<Page<StatusDTO>> pagingQuery(@ApiIgnore
-                                                       @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
-                                                       @PathVariable("organization_id") Long organizationId,
-                                                       @RequestParam(required = false) String name,
-                                                       @RequestParam(required = false) String description,
-                                                       @RequestParam(required = false) String type,
-                                                       @RequestParam(required = false) String[] param) {
-        return new ResponseEntity<>(statusService.pageQuery(pageRequest, new StatusDTO(name, description, type, organizationId),
-                param != null ? Arrays.stream(param).collect(Collectors.joining(",")) : null), HttpStatus.OK);
+    @PostMapping("/organizations/{organization_id}/statuses")
+    public ResponseEntity<Page<StatusWithInfoDTO>> queryStatusList(@ApiIgnore
+                                                                   @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                   @ApiParam(value = "组织id", required = true)
+                                                                   @PathVariable("organization_id") Long organizationId,
+                                                                   @ApiParam(value = "status search dto", required = true)
+                                                                   @RequestBody StatusSearchDTO statusSearchDTO) {
+        return Optional.ofNullable(statusService.queryStatusList(pageRequest, organizationId, statusSearchDTO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.statusList.get"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
