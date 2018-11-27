@@ -213,6 +213,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     @Override
     public Boolean deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
+        String oldStatus = stateMachine.getStatus();
         if (null == stateMachine) {
             throw new CommonException("error.stateMachine.null");
         }
@@ -226,12 +227,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         }
         //是否同步状态到其他服务:前置处理
         Map<String, List<Status>> changeMap = null;
-        if (isStartSaga) {
+        if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
             changeMap = new HashMap<>(3);
             deployHandleChange(changeMap, stateMachineId);
             //校验删除的节点状态是否有使用的issue
             Boolean result = deployCheckDelete(organizationId, changeMap, stateMachineId);
-            if(!result){
+            if (!result) {
                 return false;
             }
         }
@@ -285,7 +286,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         machineFactory.deployStateMachine(stateMachineId);
 
         //是否同步状态到其他服务:发saga
-        if (isStartSaga) {
+        if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
             deploySendSaga(organizationId, stateMachineId, changeMap);
         }
         return true;
@@ -586,7 +587,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId) {
-        //查询出所有状态机
+        //查询出所有状态机，新建的查草稿，活跃的查发布
         StateMachine select = new StateMachine();
         select.setOrganizationId(organizationId);
         List<StateMachine> stateMachines = stateMachineMapper.select(select);
@@ -597,17 +598,32 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         Map<Long, StatusDTO> statusMap = statusDTOS.stream().collect(Collectors.toMap(StatusDTO::getId, x -> x));
         stateMachineWithStatusDTOS.forEach(stateMachine -> {
             List<StatusDTO> status = new ArrayList<>();
-            List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachine.getId());
-            nodeDeploys.forEach(nodeDeploy -> {
-                if (!nodeDeploy.getType().equals(NodeType.START)) {
-                    StatusDTO statusDTO = statusMap.get(nodeDeploy.getStatusId());
-                    if (statusDTO != null) {
-                        status.add(statusDTO);
-                    } else {
-                        logger.warn("warn nodeDeployId:{} notFound", nodeDeploy.getId());
+            if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
+                List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachine.getId());
+                nodeDrafts.forEach(nodeDraft -> {
+                    if (!nodeDraft.getType().equals(NodeType.START)) {
+                        StatusDTO statusDTO = statusMap.get(nodeDraft.getStatusId());
+                        if (statusDTO != null) {
+                            status.add(statusDTO);
+                        } else {
+                            logger.warn("warn nodeDraftId:{} notFound", nodeDraft.getId());
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachine.getId());
+                nodeDeploys.forEach(nodeDeploy -> {
+                    if (!nodeDeploy.getType().equals(NodeType.START)) {
+                        StatusDTO statusDTO = statusMap.get(nodeDeploy.getStatusId());
+                        if (statusDTO != null) {
+                            status.add(statusDTO);
+                        } else {
+                            logger.warn("warn nodeDraftId:{} notFound", nodeDeploy.getId());
+                        }
+                    }
+                });
+            }
+
             stateMachine.setStatusDTOS(status);
         });
         return stateMachineWithStatusDTOS;
