@@ -22,6 +22,27 @@
         </collection>
     </resultMap>
 
+    <select id="selectStatusIds" resultType="java.lang.Long">
+        select
+        st.id
+        from status st
+        where st.organization_id = #{organizationId}
+        <if test="statusSearchDTO.name != null">
+            AND st.name LIKE concat('%',#{statusSearchDTO.name},'%')
+        </if>
+        <if test="statusSearchDTO.type != null">
+            AND st.type LIKE concat('%',#{statusSearchDTO.type},'%')
+        </if>
+        <if test="statusSearchDTO.description != null">
+            AND st.description LIKE concat('%',#{statusSearchDTO.description},'%')
+        </if>
+        <if test="statusSearchDTO.param != null">
+            AND ( st.name LIKE concat('%',#{statusSearchDTO.param},'%')
+            OR st.description LIKE concat('%',#{statusSearchDTO.param},'%')
+            )
+        </if>
+    </select>
+
     <select id="queryStatusList" resultMap="statusListMap">
         select
         st.id as st_id,
@@ -41,20 +62,11 @@
                    from state_machine_node_draft smnd, state_machine sm
                    where smnd.state_machine_id = sm.id) smddn on st.id = smddn.status_id
         where st.organization_id = #{organizationId}
-        <if test="statusSearchDTO.name != null">
-            AND st.name LIKE concat('%',#{statusSearchDTO.name},'%')
-        </if>
-        <if test="statusSearchDTO.type != null">
-            AND st.type LIKE concat('%',#{statusSearchDTO.type},'%')
-        </if>
-        <if test="statusSearchDTO.description != null">
-            AND st.description LIKE concat('%',#{statusSearchDTO.description},'%')
-        </if>
-        <if test="statusSearchDTO.param != null">
-            AND ( st.name LIKE concat('%',#{statusSearchDTO.param},'%')
-            OR st.description LIKE concat('%',#{statusSearchDTO.param},'%')
-            )
-        </if>
+        and st.id in
+        <foreach collection="statusIds" item="statusId"
+                 open="(" close=")" separator=",">
+            #{statusId}
+        </foreach>
     </select>
 
     <select id="fulltextSearch" resultType="io.choerodon.statemachine.domain.Status">

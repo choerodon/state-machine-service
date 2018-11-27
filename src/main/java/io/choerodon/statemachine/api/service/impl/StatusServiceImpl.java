@@ -88,18 +88,18 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO) {
-        Page<StatusWithInfo> statusPage = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryStatusList(organizationId, statusSearchDTO));
-        List<StatusWithInfo> statuses = statusPage.getContent();
-        removeDuplicate(statuses);
-        Page<StatusWithInfoDTO> returnPage = new Page<>();
+        Page<Long> statusIdsPage = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.selectStatusIds(organizationId, statusSearchDTO));
+        List<StatusWithInfo> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getContent());
+//        removeDuplicate(statuses);
         List<StatusWithInfoDTO> statusWithInfoDTOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoDTO>>() {
         }.getType());
+        Page<StatusWithInfoDTO> returnPage = new Page<>();
         returnPage.setContent(statusWithInfoDTOList);
-        returnPage.setNumber(statusPage.getNumber());
-        returnPage.setNumberOfElements(statusPage.getNumberOfElements());
-        returnPage.setSize(statusPage.getSize());
-        returnPage.setTotalElements(statusPage.getTotalElements());
-        returnPage.setTotalPages(statusPage.getTotalPages());
+        returnPage.setNumber(statusIdsPage.getNumber());
+        returnPage.setNumberOfElements(statusIdsPage.getNumberOfElements());
+        returnPage.setSize(statusIdsPage.getSize());
+        returnPage.setTotalElements(statusIdsPage.getTotalElements());
+        returnPage.setTotalPages(statusIdsPage.getTotalPages());
         return returnPage;
     }
 
