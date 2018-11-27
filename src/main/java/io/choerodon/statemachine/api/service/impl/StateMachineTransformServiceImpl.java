@@ -5,7 +5,6 @@ import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
-import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
@@ -13,6 +12,7 @@ import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.infra.annotation.ChangeStateMachineStatus;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
 import io.choerodon.statemachine.infra.enums.TransformType;
@@ -51,11 +51,11 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     private StateMachineTransformAssembler stateMachineTransformAssembler;
     @Autowired
     private StateMachineNodeAssembler stateMachineNodeAssembler;
-    @Autowired
-    private StateMachineService stateMachineService;
 
     @Override
-    public StateMachineTransformDTO create(Long organizationId, StateMachineTransformDTO transformDTO) {
+    @ChangeStateMachineStatus
+    public StateMachineTransformDTO create(Long organizationId, Long stateMachineId, StateMachineTransformDTO transformDTO) {
+        transformDTO.setStateMachineId(stateMachineId);
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setType(TransformType.CUSTOM);
         transform.setOrganizationId(organizationId);
@@ -65,13 +65,13 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         if (isInsert != 1) {
             throw new CommonException("error.stateMachineTransform.create");
         }
-        //更新状态机状态
-        stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
         return queryById(organizationId, transform.getId());
     }
 
     @Override
-    public StateMachineTransformDTO update(Long organizationId, Long transformId, StateMachineTransformDTO transformDTO) {
+    @ChangeStateMachineStatus
+    public StateMachineTransformDTO update(Long organizationId, Long stateMachineId, Long transformId, StateMachineTransformDTO transformDTO) {
+        transformDTO.setStateMachineId(stateMachineId);
         StateMachineTransformDraft origin = transformDraftMapper.queryById(organizationId, transformId);
         if (origin == null) {
             throw new CommonException("error.stateMachineTransform.queryById.notFound");
@@ -84,21 +84,21 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         if (isUpdate != 1) {
             throw new CommonException("error.stateMachineTransform.update");
         }
-
-        transform = transformDraftMapper.queryById(organizationId, transform.getId());
-        stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
-        return queryById(organizationId, transform.getId());
+        return queryById(organizationId, transformId);
 
     }
 
     @Override
-    public Boolean delete(Long organizationId, Long transformId) {
+    @ChangeStateMachineStatus
+    public Boolean delete(Long organizationId, Long stateMachineId, Long transformId) {
         StateMachineTransformDraft transform = transformDraftMapper.queryById(organizationId, transformId);
+        if (!stateMachineId.equals(transform.getStateMachineId())) {
+            throw new CommonException("error.stateMachineTransform.deleteIllegal");
+        }
         int isDelete = transformDraftMapper.deleteByPrimaryKey(transformId);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineTransform.delete");
         }
-        stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
         return true;
     }
 
@@ -168,6 +168,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
+    @ChangeStateMachineStatus
     public StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long stateMachineId, Long endNodeId) {
         if (endNodeId == null) {
             throw new CommonException("error.endNodeId.null");
@@ -210,7 +211,6 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
             throw new CommonException("error.createAllStatusTransform.updateAllStatusTransformId");
         }
         transform = transformDraftMapper.queryById(organizationId, transform.getId());
-        stateMachineService.updateStateMachineStatus(organizationId, transform.getStateMachineId());
         return stateMachineTransformAssembler.toTarget(transform, StateMachineTransformDTO.class);
     }
 
@@ -233,7 +233,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
             throw new CommonException("error.stateMachineNode.null");
         }
         //删除【全部转换到当前】的转换
-        Boolean result = delete(organizationId, node.getAllStatusTransformId());
+        Boolean result = delete(organizationId, transformDraft.getStateMachineId(), node.getAllStatusTransformId());
         //更新node的【全部转换到当前】转换id
         int update = nodeDraftMapper.updateAllStatusTransformId(organizationId, transformDraft.getEndNodeId(), null);
         if (update != 1) {

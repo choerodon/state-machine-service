@@ -88,7 +88,7 @@ public class StateMachineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "发布状态机")
     @GetMapping(value = "/deploy/{state_machine_id}")
-    public ResponseEntity<StateMachineDTO> deploy(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<Boolean> deploy(@PathVariable("organization_id") Long organizationId,
                                                   @PathVariable("state_machine_id") Long stateMachineId) {
         return new ResponseEntity<>(stateMachineService.deploy(organizationId, stateMachineId, true), HttpStatus.OK);
     }
