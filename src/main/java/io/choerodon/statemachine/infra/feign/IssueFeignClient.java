@@ -1,7 +1,8 @@
 package io.choerodon.statemachine.infra.feign;
 
+import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.infra.feign.dto.RemoveStatusWithProject;
 import io.choerodon.statemachine.infra.feign.fallback.IssueFeignClientFallback;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public interface IssueFeignClient {
      */
     @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine/query_project_ids_map", method = RequestMethod.GET)
     ResponseEntity<Map<String, List<Long>>> queryProjectIdsMap(@PathVariable("organization_id") Long organizationId,
-                                                               @RequestParam("state_machine_id") Long stateMachineId);
+                                                               @RequestParam("stateMachineId") Long stateMachineId);
 
     /**
      * 【内部调用】状态机删除节点的校验，是否可以直接删除
@@ -34,6 +35,19 @@ public interface IssueFeignClient {
      */
     @GetMapping(value = "/v1/organizations/{organization_id}/state_machine/check_delete_node")
     ResponseEntity<Map<String, Object>> checkDeleteNode(@PathVariable("organization_id") Long organizationId,
-                                                               @RequestParam("state_machine_id") Long stateMachineId,
-                                                               @RequestParam("status_id") Long statusId);
+                                                        @RequestParam("stateMachineId") Long stateMachineId,
+                                                        @RequestParam("statusId") Long statusId);
+
+    /**
+     * 状态机删除节点的数据处理，判断哪些项目要删除哪些状态
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @param deleteStatuses
+     * @return
+     */
+    @PostMapping(value = "/v1/organizations/{organization_id}/state_machine/handle_remove_status_by_state_machine")
+    ResponseEntity<List<RemoveStatusWithProject>> handleRemoveStatusByStateMachine(@PathVariable("organization_id") Long organizationId,
+                                                                                   @RequestParam("stateMachineId") Long stateMachineId,
+                                                                                   @RequestBody List<Status> deleteStatuses);
 }

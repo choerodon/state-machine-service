@@ -8,6 +8,7 @@ import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.event.DeployStatusPayload;
 import io.choerodon.statemachine.domain.event.StatusPayload;
 import io.choerodon.statemachine.infra.feign.IssueFeignClient;
+import io.choerodon.statemachine.infra.feign.dto.RemoveStatusWithProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,20 +53,11 @@ public class SagaServiceImpl {
 
     @Saga(code = DEPLOY_STATEMACHINE_DELETE_STATUS, description = "发布状态机时删除状态", inputSchemaClass = DeployStatusPayload.class)
     public void deployStateMachineDeleteStatus(Long organizationId, Long stateMachineId, List<Status> statuses) {
-        List<StatusPayload> statusPayloads = new ArrayList<>(statuses.size());
-        statuses.forEach(status -> {
-            StatusPayload statusPayload = new StatusPayload();
-            statusPayload.setStatusId(status.getId());
-            statusPayload.setStatusName(status.getName());
-            statusPayload.setType(status.getType());
-            statusPayloads.add(statusPayload);
-        });
-        Map<String, List<Long>> projectIdsMap = issueFeignClient.queryProjectIdsMap(organizationId, stateMachineId).getBody();
+        List<RemoveStatusWithProject> removeStatusWithProjects = issueFeignClient.handleRemoveStatusByStateMachine(organizationId, stateMachineId, statuses).getBody();
 
         DeployStatusPayload deployStatusPayload = new DeployStatusPayload();
-        deployStatusPayload.setProjectIdsMap(projectIdsMap);
-        deployStatusPayload.setStatusPayloads(statusPayloads);
+        deployStatusPayload.setRemoveStatusWithProjects(removeStatusWithProjects);
         sagaClient.startSaga(DEPLOY_STATEMACHINE_DELETE_STATUS, new StartInstanceDTO(JSON.toJSONString(deployStatusPayload), "", ""));
-        logger.info("startSaga deploy-statemachine-delete-status projectIdsMap: {}", projectIdsMap);
+        logger.info("startSaga deploy-statemachine-delete-status removeStatusWithProjects: {}", removeStatusWithProjects);
     }
 }
