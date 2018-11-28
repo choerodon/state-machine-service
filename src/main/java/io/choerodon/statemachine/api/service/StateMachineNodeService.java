@@ -43,10 +43,10 @@ public interface StateMachineNodeService extends BaseService<StateMachineNodeDra
      * 校验是否能删除状态节点
      *
      * @param organizationId
-     * @param nodeId
+     * @param statusId
      * @return
      */
-    Map<String, Object> checkDelete(Long organizationId, Long stateMachineId, Long nodeId);
+    Map<String, Object> checkDelete(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 获取状态机初始节点id

@@ -333,8 +333,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     private Boolean deployCheckDelete(Long organizationId, Map<String, List<Status>> changeMap, Long stateMachineId) {
         List<Status> deleteStatuses = changeMap.get("deleteList");
         for (Status status : deleteStatuses) {
-            Long nodeId = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, status.getId()).getId();
-            Map<String, Object> result = nodeService.checkDelete(organizationId, stateMachineId, nodeId);
+            Map<String, Object> result = nodeService.checkDelete(organizationId, stateMachineId, status.getId());
             Boolean canDelete = (Boolean) result.get("canDelete");
             if (!canDelete) {
                 return false;

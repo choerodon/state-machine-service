@@ -87,8 +87,9 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     @Override
     @ChangeStateMachineStatus
     public List<StateMachineNodeDTO> delete(Long organizationId, Long stateMachineId, Long nodeId) {
+        StateMachineNodeDraft node = nodeDraftMapper.queryById(organizationId, nodeId);
         //校验节点的状态是否关联状态机
-        if ((Boolean) checkDelete(organizationId, stateMachineId, nodeId).get("canDelete")) {
+        if ((Boolean) checkDelete(organizationId, stateMachineId, node.getStatusId()).get("canDelete")) {
             int isDelete = nodeDraftMapper.deleteByPrimaryKey(nodeId);
             if (isDelete != 1) {
                 throw new CommonException("error.stateMachineNode.delete");
@@ -101,10 +102,8 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     }
 
     @Override
-    public Map<String, Object> checkDelete(Long organizationId, Long stateMachineId, Long nodeId) {
+    public Map<String, Object> checkDelete(Long organizationId, Long stateMachineId, Long statusId) {
         Map<String, Object> result = new HashMap<>(2);
-        StateMachineNodeDraft node = nodeDraftMapper.queryById(organizationId, nodeId);
-        Long statusId = node.getStatusId();
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         //只有草稿状态才进行删除校验
         if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
