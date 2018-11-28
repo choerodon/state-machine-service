@@ -43,11 +43,11 @@ public interface IssueFeignClient {
      *
      * @param organizationId
      * @param stateMachineId
-     * @param deleteStatuses
+     * @param deleteStatusIds
      * @return
      */
     @PostMapping(value = "/v1/organizations/{organization_id}/state_machine/handle_remove_status_by_state_machine")
-    ResponseEntity<List<RemoveStatusWithProject>> handleRemoveStatusByStateMachine(@PathVariable("organization_id") Long organizationId,
+    ResponseEntity<List<RemoveStatusWithProject>> handleRemoveStatusByStateMachineId(@PathVariable("organization_id") Long organizationId,
                                                                                    @RequestParam("stateMachineId") Long stateMachineId,
-                                                                                   @RequestBody List<Status> deleteStatuses);
+                                                                                   @RequestBody List<Long> deleteStatusIds);
 }

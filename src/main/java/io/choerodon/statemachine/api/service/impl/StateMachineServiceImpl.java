@@ -213,6 +213,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     public Boolean deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         String oldStatus = stateMachine.getStatus();
+        if(stateMachineId==null){
+            throw new CommonException("error.stateMachineId.null");
+        }
         if (null == stateMachine) {
             throw new CommonException("error.stateMachine.null");
         }
@@ -587,6 +590,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     public Boolean notActiveStateMachines(Long organizationId, List<Long> stateMachineIds) {
         List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
         for (StateMachine stateMachine : stateMachines) {
+            if(stateMachine.getId()==null){
+                throw new CommonException("error.stateMachineId.null");
+            }
             //更新状态机状态为create
             Long stateMachineId = stateMachine.getId();
             stateMachine.setStatus(StateMachineStatus.CREATE);

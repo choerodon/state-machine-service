@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -53,7 +54,8 @@ public class SagaServiceImpl {
 
     @Saga(code = DEPLOY_STATEMACHINE_DELETE_STATUS, description = "发布状态机时删除状态", inputSchemaClass = DeployStatusPayload.class)
     public void deployStateMachineDeleteStatus(Long organizationId, Long stateMachineId, List<Status> statuses) {
-        List<RemoveStatusWithProject> removeStatusWithProjects = issueFeignClient.handleRemoveStatusByStateMachine(organizationId, stateMachineId, statuses).getBody();
+        List<Long> deleteStatusIds = statuses.stream().map(Status::getId).collect(Collectors.toList());
+        List<RemoveStatusWithProject> removeStatusWithProjects = issueFeignClient.handleRemoveStatusByStateMachineId(organizationId, stateMachineId, deleteStatusIds).getBody();
 
         DeployStatusPayload deployStatusPayload = new DeployStatusPayload();
         deployStatusPayload.setRemoveStatusWithProjects(removeStatusWithProjects);
