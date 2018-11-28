@@ -61,11 +61,11 @@ public class StateMachineNodeController extends BaseController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验是否能删除节点（草稿）")
-    @GetMapping(value = "/check_delete/{node_id}")
+    @GetMapping(value = "/check_delete")
     public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId,
-                                                           @PathVariable("node_id") Long nodeId,
+                                                           @RequestParam("statusId") Long statusId,
                                                            @RequestParam("stateMachineId") Long stateMachineId) {
-        return new ResponseEntity<>(nodeService.checkDelete(organizationId, stateMachineId, nodeId), HttpStatus.OK);
+        return new ResponseEntity<>(nodeService.checkDelete(organizationId, stateMachineId, statusId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
