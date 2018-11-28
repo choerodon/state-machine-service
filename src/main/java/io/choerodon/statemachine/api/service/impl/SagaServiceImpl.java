@@ -49,7 +49,7 @@ public class SagaServiceImpl {
         deployStatusPayload.setProjectIdsMap(projectIdsMap);
         deployStatusPayload.setStatusPayloads(statusPayloads);
         sagaClient.startSaga(DEPLOY_STATEMACHINE_ADD_STATUS, new StartInstanceDTO(JSON.toJSONString(deployStatusPayload), "", ""));
-        logger.info("startSaga deploy-statemachine-add-status projectIdsMap: {}", projectIdsMap);
+        logger.info("startSaga deploy-statemachine-add-status projectIdsMap size: {}", projectIdsMap.size());
     }
 
     @Saga(code = DEPLOY_STATEMACHINE_DELETE_STATUS, description = "发布状态机时删除状态", inputSchemaClass = DeployStatusPayload.class)
@@ -60,6 +60,6 @@ public class SagaServiceImpl {
         DeployStatusPayload deployStatusPayload = new DeployStatusPayload();
         deployStatusPayload.setRemoveStatusWithProjects(removeStatusWithProjects);
         sagaClient.startSaga(DEPLOY_STATEMACHINE_DELETE_STATUS, new StartInstanceDTO(JSON.toJSONString(deployStatusPayload), "", ""));
-        logger.info("startSaga deploy-statemachine-delete-status removeStatusWithProjects: {}", removeStatusWithProjects);
+        logger.info("startSaga deploy-statemachine-delete-status removeStatusWithProjects size: {}", removeStatusWithProjects.size());
     }
 }

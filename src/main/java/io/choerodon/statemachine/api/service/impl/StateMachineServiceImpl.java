@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -213,7 +214,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     public Boolean deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga) {
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         String oldStatus = stateMachine.getStatus();
-        if(stateMachineId==null){
+        if (stateMachineId == null) {
             throw new CommonException("error.stateMachineId.null");
         }
         if (null == stateMachine) {
@@ -576,11 +577,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public Boolean activeStateMachines(Long organizationId, List<Long> stateMachineIds) {
-        List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
-        for (StateMachine stateMachine : stateMachines) {
-            //若是新建状态机，则发布变成活跃
-            if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
-                deploy(organizationId, stateMachine.getId(), false);
+        if (!stateMachineIds.isEmpty()) {
+            List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
+            for (StateMachine stateMachine : stateMachines) {
+                //若是新建状态机，则发布变成活跃
+                if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
+                    deploy(organizationId, stateMachine.getId(), false);
+                }
             }
         }
         return true;
@@ -588,35 +591,38 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public Boolean notActiveStateMachines(Long organizationId, List<Long> stateMachineIds) {
-        List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
-        for (StateMachine stateMachine : stateMachines) {
-            if(stateMachine.getId()==null){
-                throw new CommonException("error.stateMachineId.null");
+        if (!stateMachineIds.isEmpty()) {
+            List<StateMachine> stateMachines = stateMachineMapper.queryByIds(organizationId, stateMachineIds);
+            for (StateMachine stateMachine : stateMachines) {
+                if (stateMachine.getId() == null) {
+                    throw new CommonException("error.stateMachineId.null");
+                }
+                //更新状态机状态为create
+                Long stateMachineId = stateMachine.getId();
+                stateMachine.setStatus(StateMachineStatus.CREATE);
+                updateOptional(stateMachine, "status");
+                //删除发布节点
+                StateMachineNode node = new StateMachineNode();
+                node.setStateMachineId(stateMachineId);
+                node.setOrganizationId(organizationId);
+                nodeDeployMapper.delete(node);
+                //删除发布转换
+                StateMachineTransform transform = new StateMachineTransform();
+                transform.setStateMachineId(stateMachineId);
+                transform.setOrganizationId(organizationId);
+                transformDeployMapper.delete(transform);
+                //删除发布配置
+                StateMachineConfig config = new StateMachineConfig();
+                config.setStateMachineId(stateMachineId);
+                config.setOrganizationId(organizationId);
+                configDeployMapper.delete(config);
             }
-            //更新状态机状态为create
-            Long stateMachineId = stateMachine.getId();
-            stateMachine.setStatus(StateMachineStatus.CREATE);
-            updateOptional(stateMachine, "status");
-            //删除发布节点
-            StateMachineNode node = new StateMachineNode();
-            node.setStateMachineId(stateMachineId);
-            node.setOrganizationId(organizationId);
-            nodeDeployMapper.delete(node);
-            //删除发布转换
-            StateMachineTransform transform = new StateMachineTransform();
-            transform.setStateMachineId(stateMachineId);
-            transform.setOrganizationId(organizationId);
-            transformDeployMapper.delete(transform);
-            //删除发布配置
-            StateMachineConfig config = new StateMachineConfig();
-            config.setStateMachineId(stateMachineId);
-            config.setOrganizationId(organizationId);
-            configDeployMapper.delete(config);
         }
         return true;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
     public List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId) {
         //查询出所有状态机，新建的查草稿，活跃的查发布
         StateMachine select = new StateMachine();
