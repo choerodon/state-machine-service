@@ -592,17 +592,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             Long stateMachineId = stateMachine.getId();
             stateMachine.setStatus(StateMachineStatus.CREATE);
             updateOptional(stateMachine, "status");
-            //删除草稿节点
+            //删除发布节点
             StateMachineNode node = new StateMachineNode();
             node.setStateMachineId(stateMachineId);
             node.setOrganizationId(organizationId);
             nodeDeployMapper.delete(node);
-            //删除草稿转换
+            //删除发布转换
             StateMachineTransform transform = new StateMachineTransform();
             transform.setStateMachineId(stateMachineId);
             transform.setOrganizationId(organizationId);
             transformDeployMapper.delete(transform);
-            //删除草稿配置
+            //删除发布配置
             StateMachineConfig config = new StateMachineConfig();
             config.setStateMachineId(stateMachineId);
             config.setOrganizationId(organizationId);
