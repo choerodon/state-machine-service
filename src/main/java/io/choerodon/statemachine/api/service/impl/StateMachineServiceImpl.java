@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -212,22 +211,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public Boolean deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga) {
-        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
-        String oldStatus = stateMachine.getStatus();
         if (stateMachineId == null) {
             throw new CommonException("error.stateMachineId.null");
         }
-        if (null == stateMachine) {
-            throw new CommonException("error.stateMachine.null");
-        }
-        if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
-            throw new CommonException("error.stateMachine.status.deployed");
-        }
-        stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        int stateMachineDeploy = updateOptional(stateMachine, "status");
-        if (stateMachineDeploy != 1) {
-            throw new CommonException("error.stateMachine.deploy");
-        }
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
+        String oldStatus = stateMachine.getStatus();
         //是否同步状态到其他服务:前置处理
         Map<String, List<Status>> changeMap = null;
         if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
@@ -238,6 +226,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             if (!result) {
                 return false;
             }
+        }
+        if (stateMachine == null) {
+            throw new CommonException("error.stateMachine.null");
+        }
+        if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
+            throw new CommonException("error.stateMachine.status.deployed");
+        }
+        stateMachine.setStatus(StateMachineStatus.ACTIVE);
+        int stateMachineDeploy = updateOptional(stateMachine, "status");
+        if (stateMachineDeploy != 1) {
+            throw new CommonException("error.stateMachine.deploy");
         }
 
         //删除上一版本的节点
@@ -290,10 +289,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
         //是否同步状态到其他服务:发saga
         if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
-            deploySendSaga(organizationId, stateMachineId, changeMap);
+            sagaService.deployStateMachine(organizationId, stateMachineId, changeMap);
         }
         return true;
-//        return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
     }
 
     /**
@@ -344,24 +342,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             }
         }
         return true;
-    }
-
-    /**
-     * 处理发布状态机时，根据节点状态的变化发saga
-     */
-    private void deploySendSaga(Long organizationId, Long stateMachineId, Map<String, List<Status>> changeMap) {
-        //新增的状态
-        List<Status> addList = changeMap.get("addList");
-        if (!addList.isEmpty()) {
-            //发送saga
-            sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, addList);
-        }
-        //删除的状态
-        List<Status> deleteList = changeMap.get("deleteList");
-        if (!deleteList.isEmpty()) {
-            //发送saga
-            sagaService.deployStateMachineDeleteStatus(organizationId, stateMachineId, deleteList);
-        }
     }
 
     @Override
@@ -622,7 +602,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
     public List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId) {
         //查询出所有状态机，新建的查草稿，活跃的查发布
         StateMachine select = new StateMachine();

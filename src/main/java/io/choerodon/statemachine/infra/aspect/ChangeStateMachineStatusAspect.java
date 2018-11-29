@@ -46,7 +46,6 @@ public class ChangeStateMachineStatusAspect {
                 stateMachineId = Long.valueOf(args[i] + "");
             }
         }
-        logger.info("stateMachineId:{}", stateMachineId);
         StateMachine stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notFound");
