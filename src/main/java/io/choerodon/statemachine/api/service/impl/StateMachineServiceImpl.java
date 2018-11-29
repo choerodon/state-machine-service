@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -290,7 +289,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
         //是否同步状态到其他服务:发saga
         if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
-            deploySendSaga(organizationId, stateMachineId, changeMap);
+            sagaService.deployStateMachine(organizationId, stateMachineId, changeMap);
         }
         return true;
     }
@@ -343,24 +342,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             }
         }
         return true;
-    }
-
-    /**
-     * 处理发布状态机时，根据节点状态的变化发saga
-     */
-    private void deploySendSaga(Long organizationId, Long stateMachineId, Map<String, List<Status>> changeMap) {
-        //新增的状态
-        List<Status> addList = changeMap.get("addList");
-        if (!addList.isEmpty()) {
-            //发送saga
-            sagaService.deployStateMachineAddStatus(organizationId, stateMachineId, addList);
-        }
-        //删除的状态
-        List<Status> deleteList = changeMap.get("deleteList");
-        if (!deleteList.isEmpty()) {
-            //发送saga
-            sagaService.deployStateMachineDeleteStatus(organizationId, stateMachineId, deleteList);
-        }
     }
 
     @Override
@@ -621,7 +602,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
     public List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId) {
         //查询出所有状态机，新建的查草稿，活跃的查发布
         StateMachine select = new StateMachine();

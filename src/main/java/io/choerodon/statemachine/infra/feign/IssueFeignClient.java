@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.infra.feign;
 
-import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.event.DeployStateMachinePayload;
+import io.choerodon.statemachine.infra.feign.dto.ChangeStatus;
 import io.choerodon.statemachine.infra.feign.dto.RemoveStatusWithProject;
 import io.choerodon.statemachine.infra.feign.fallback.IssueFeignClientFallback;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -43,11 +44,11 @@ public interface IssueFeignClient {
      *
      * @param organizationId
      * @param stateMachineId
-     * @param deleteStatusIds
+     * @param changeStatus
      * @return
      */
-    @PostMapping(value = "/v1/organizations/{organization_id}/state_machine/handle_remove_status_by_state_machine_id")
-    ResponseEntity<List<RemoveStatusWithProject>> handleRemoveStatusByStateMachineId(@PathVariable("organization_id") Long organizationId,
-                                                                                   @RequestParam("stateMachineId") Long stateMachineId,
-                                                                                   @RequestBody List<Long> deleteStatusIds);
+    @PostMapping(value = "/v1/organizations/{organization_id}/state_machine/handle_state_machine_change_status_by_state_machine_id")
+    ResponseEntity<DeployStateMachinePayload> handleStateMachineChangeStatusByStateMachineId(@PathVariable("organization_id") Long organizationId,
+                                                                                             @RequestParam("stateMachineId") Long stateMachineId,
+                                                                                             @RequestBody ChangeStatus changeStatus);
 }

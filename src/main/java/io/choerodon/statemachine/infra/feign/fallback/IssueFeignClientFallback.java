@@ -1,9 +1,9 @@
 package io.choerodon.statemachine.infra.feign.fallback;
 
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.event.DeployStateMachinePayload;
 import io.choerodon.statemachine.infra.feign.IssueFeignClient;
-import io.choerodon.statemachine.infra.feign.dto.RemoveStatusWithProject;
+import io.choerodon.statemachine.infra.feign.dto.ChangeStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +27,8 @@ public class IssueFeignClientFallback implements IssueFeignClient {
     }
 
     @Override
-    public ResponseEntity<List<RemoveStatusWithProject>> handleRemoveStatusByStateMachineId(Long organizationId, Long stateMachineId, List<Long> deleteStatusIds) {
-        throw new CommonException("error.issueFeignClient.handleRemoveStatusByStateMachineId");
+    public ResponseEntity<DeployStateMachinePayload> handleStateMachineChangeStatusByStateMachineId(Long organizationId, Long stateMachineId, ChangeStatus changeStatus) {
+        throw new CommonException("error.issueFeignClient.handleStateMachineChangeStatusByStateMachineId");
     }
 }
 
