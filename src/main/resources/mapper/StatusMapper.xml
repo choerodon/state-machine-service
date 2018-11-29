@@ -69,27 +69,27 @@
         </foreach>
     </select>
 
-    <select id="fulltextSearch" resultType="io.choerodon.statemachine.domain.Status">
-        SELECT * FROM status
-        WHERE 1=1
-        <if test="status.organizationId != null">
-            AND organization_id = #{status.organizationId}
-        </if>
-        <if test="status.name != null">
-            AND name LIKE concat('%',#{status.name},'%')
-        </if>
-        <if test="status.type != null">
-            AND type LIKE concat('%',#{status.type},'%')
-        </if>
-        <if test="status.description != null">
-            AND description = #{status.description}
-        </if>
-        <if test="param != null">
-            AND ( name LIKE concat('%',#{param},'%')
-            OR description LIKE concat('%',#{param},'%')
-            )
-        </if>
-    </select>
+    <!--<select id="fulltextSearch" resultType="io.choerodon.statemachine.domain.Status">-->
+        <!--SELECT * FROM status-->
+        <!--WHERE 1=1-->
+        <!--<if test="status.organizationId != null">-->
+            <!--AND organization_id = #{status.organizationId}-->
+        <!--</if>-->
+        <!--<if test="status.name != null">-->
+            <!--AND name LIKE concat('%',#{status.name},'%')-->
+        <!--</if>-->
+        <!--<if test="status.type != null">-->
+            <!--AND type LIKE concat('%',#{status.type},'%')-->
+        <!--</if>-->
+        <!--<if test="status.description != null">-->
+            <!--AND description = #{status.description}-->
+        <!--</if>-->
+        <!--<if test="param != null">-->
+            <!--AND ( name LIKE concat('%',#{param},'%')-->
+            <!--OR description LIKE concat('%',#{param},'%')-->
+            <!--)-->
+        <!--</if>-->
+    <!--</select>-->
 
     <select id="batchStatusGet" resultType="io.choerodon.statemachine.domain.Status">
         select * from status where id in
