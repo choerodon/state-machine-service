@@ -42,34 +42,34 @@ public class StatusServiceImpl implements StatusService {
 
     private ModelMapper modelMapper = new ModelMapper();
 
-    @Override
-    public Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param) {
-        Status status = modelMapper.map(statusDTO, Status.class);
-        Page<Status> page = PageHelper.doPageAndSort(pageRequest,
-                () -> statusMapper.fulltextSearch(status, param));
-        List<Status> statuses = page.getContent();
-        List<StatusDTO> statusDTOs = modelMapper.map(statuses, new TypeToken<List<StatusDTO>>() {
-        }.getType());
-        for (StatusDTO dto : statusDTOs) {
-            //该状态已被草稿状态机使用个数
-            Long draftUsed = nodeMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
-            //该状态已被发布状态机使用个数
-            Long deployUsed = nodeDeployMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
-            if (draftUsed == 0 && deployUsed == 0) {
-                dto.setCanDelete(true);
-            } else {
-                dto.setCanDelete(false);
-            }
-        }
-        Page<StatusDTO> returnPage = new Page<>();
-        returnPage.setContent(statusDTOs);
-        returnPage.setNumber(page.getNumber());
-        returnPage.setNumberOfElements(page.getNumberOfElements());
-        returnPage.setSize(page.getSize());
-        returnPage.setTotalElements(page.getTotalElements());
-        returnPage.setTotalPages(page.getTotalPages());
-        return returnPage;
-    }
+//    @Override
+//    public Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param) {
+//        Status status = modelMapper.map(statusDTO, Status.class);
+//        Page<Status> page = PageHelper.doPageAndSort(pageRequest,
+//                () -> statusMapper.fulltextSearch(status, param));
+//        List<Status> statuses = page.getContent();
+//        List<StatusDTO> statusDTOs = modelMapper.map(statuses, new TypeToken<List<StatusDTO>>() {
+//        }.getType());
+//        for (StatusDTO dto : statusDTOs) {
+//            //该状态已被草稿状态机使用个数
+//            Long draftUsed = nodeMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
+//            //该状态已被发布状态机使用个数
+//            Long deployUsed = nodeDeployMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
+//            if (draftUsed == 0 && deployUsed == 0) {
+//                dto.setCanDelete(true);
+//            } else {
+//                dto.setCanDelete(false);
+//            }
+//        }
+//        Page<StatusDTO> returnPage = new Page<>();
+//        returnPage.setContent(statusDTOs);
+//        returnPage.setNumber(page.getNumber());
+//        returnPage.setNumberOfElements(page.getNumberOfElements());
+//        returnPage.setSize(page.getSize());
+//        returnPage.setTotalElements(page.getTotalElements());
+//        returnPage.setTotalPages(page.getTotalPages());
+//        return returnPage;
+//    }
 
     private void removeDuplicate(List<StatusWithInfo> statuses) {
         for (StatusWithInfo statusWithInfo : statuses) {

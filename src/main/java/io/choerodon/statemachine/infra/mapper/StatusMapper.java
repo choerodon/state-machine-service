@@ -14,14 +14,14 @@ import java.util.List;
  */
 public interface StatusMapper extends BaseMapper<Status> {
 
-    /**
-     * 分页查询状态
-     *
-     * @param status 状态对象
-     * @param param  模糊查询参数
-     * @return 状态列表
-     */
-    List<Status> fulltextSearch(@Param("status") Status status, @Param("param") String param);
+//    /**
+//     * 分页查询状态
+//     *
+//     * @param status 状态对象
+//     * @param param  模糊查询参数
+//     * @return 状态列表
+//     */
+//    List<Status> fulltextSearch(@Param("status") Status status, @Param("param") String param);
 
     List<Long> selectStatusIds(@Param("organizationId") Long organizationId, @Param("statusSearchDTO") StatusSearchDTO statusSearchDTO);
 

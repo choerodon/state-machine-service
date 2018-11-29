@@ -15,15 +15,15 @@ import java.util.Map;
  */
 public interface StatusService {
 
-    /**
-     * 分页查询状态列表
-     *
-     * @param pageRequest 分页对象
-     * @param statusDTO   参数对象
-     * @param param       模糊查询参数
-     * @return 状态列表
-     */
-    Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param);
+//    /**
+//     * 分页查询状态列表
+//     *
+//     * @param pageRequest 分页对象
+//     * @param statusDTO   参数对象
+//     * @param param       模糊查询参数
+//     * @return 状态列表
+//     */
+//    Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param);
 
     Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO);
 

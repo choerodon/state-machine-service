@@ -61,7 +61,7 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "分页查询状态列表")
     @CustomPageRequest
-    @PostMapping("/organizations/{organization_id}/statuses")
+    @PostMapping("/organizations/{organization_id}/status/list")
     public ResponseEntity<Page<StatusWithInfoDTO>> queryStatusList(@ApiIgnore
                                                                    @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                                    @ApiParam(value = "组织id", required = true)
