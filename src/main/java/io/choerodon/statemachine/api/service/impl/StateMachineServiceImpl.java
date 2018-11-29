@@ -212,22 +212,11 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public Boolean deploy(Long organizationId, Long stateMachineId, Boolean isStartSaga) {
-        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
-        String oldStatus = stateMachine.getStatus();
         if (stateMachineId == null) {
             throw new CommonException("error.stateMachineId.null");
         }
-        if (null == stateMachine) {
-            throw new CommonException("error.stateMachine.null");
-        }
-        if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
-            throw new CommonException("error.stateMachine.status.deployed");
-        }
-        stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        int stateMachineDeploy = updateOptional(stateMachine, "status");
-        if (stateMachineDeploy != 1) {
-            throw new CommonException("error.stateMachine.deploy");
-        }
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
+        String oldStatus = stateMachine.getStatus();
         //是否同步状态到其他服务:前置处理
         Map<String, List<Status>> changeMap = null;
         if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
@@ -238,6 +227,17 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             if (!result) {
                 return false;
             }
+        }
+        if (stateMachine == null) {
+            throw new CommonException("error.stateMachine.null");
+        }
+        if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
+            throw new CommonException("error.stateMachine.status.deployed");
+        }
+        stateMachine.setStatus(StateMachineStatus.ACTIVE);
+        int stateMachineDeploy = updateOptional(stateMachine, "status");
+        if (stateMachineDeploy != 1) {
+            throw new CommonException("error.stateMachine.deploy");
         }
 
         //删除上一版本的节点
@@ -293,7 +293,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             deploySendSaga(organizationId, stateMachineId, changeMap);
         }
         return true;
-//        return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
     }
 
     /**
