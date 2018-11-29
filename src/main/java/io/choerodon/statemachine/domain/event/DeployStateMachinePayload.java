@@ -4,15 +4,23 @@ import io.choerodon.statemachine.infra.feign.dto.AddStatusWithProject;
 import io.choerodon.statemachine.infra.feign.dto.RemoveStatusWithProject;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author shinan.chen
  * @date 2018/10/31
  */
 public class DeployStateMachinePayload {
+    private Long userId;
     private List<RemoveStatusWithProject> removeStatusWithProjects;
     private List<AddStatusWithProject> addStatusWithProjects;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public List<RemoveStatusWithProject> getRemoveStatusWithProjects() {
         return removeStatusWithProjects;

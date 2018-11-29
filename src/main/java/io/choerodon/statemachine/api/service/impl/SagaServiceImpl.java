@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.event.DeployStateMachinePayload;
 import io.choerodon.statemachine.infra.feign.IssueFeignClient;
@@ -42,6 +43,7 @@ public class SagaServiceImpl {
         List<Long> deleteStatusIds = deleteList.stream().map(Status::getId).collect(Collectors.toList());
         ChangeStatus changeStatus = new ChangeStatus(addStatusIds, deleteStatusIds);
         DeployStateMachinePayload deployStateMachinePayload = issueFeignClient.handleStateMachineChangeStatusByStateMachineId(organizationId, stateMachineId, changeStatus).getBody();
+        deployStateMachinePayload.setUserId(DetailsHelper.getUserDetails().getUserId());
         //新增的状态赋予实体
         deployStateMachinePayload.getAddStatusWithProjects().forEach(addStatusWithProject -> {
             List<Status> statuses = new ArrayList<>(addStatusWithProject.getAddStatusIds().size());
@@ -53,6 +55,7 @@ public class SagaServiceImpl {
             });
             addStatusWithProject.setAddStatuses(statuses);
         });
+        //发送saga，
         sagaClient.startSaga(DEPLOY_STATE_MACHINE, new StartInstanceDTO(JSON.toJSONString(deployStateMachinePayload), "", ""));
         logger.info("startSaga deploy-state-machine addStatusIds: {}, deleteStatusIds: {}", changeStatus.getAddStatusIds(), changeStatus.getDeleteStatusIds());
     }
