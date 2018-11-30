@@ -76,11 +76,10 @@ public interface StatusService {
      * 校验状态名字是否未被使用
      *
      * @param organizationId 组织id
-     * @param statusId       状态
      * @param name           名称
      * @return
      */
-    Boolean checkName(Long organizationId, Long statusId, String name);
+    StatusCheckDTO checkName(Long organizationId, String name);
 
     Map<Long, Status> batchStatusGet(List<Long> ids);
 

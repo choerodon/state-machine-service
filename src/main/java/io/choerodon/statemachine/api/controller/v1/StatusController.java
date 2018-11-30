@@ -137,10 +137,12 @@ public class StatusController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验状态名字是否未被使用")
     @GetMapping(value = "/organizations/{organization_id}/status/check_name")
-    public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
-                                             @RequestParam(value = "status_id", required = false) Long statusId,
+    public ResponseEntity<StatusCheckDTO> checkName(@PathVariable("organization_id") Long organizationId,
                                              @RequestParam("name") String name) {
-        return new ResponseEntity<>(statusService.checkName(organizationId, statusId, name), HttpStatus.OK);
+        return Optional.ofNullable(statusService.checkName(organizationId, name))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.statusName.check"));
+
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

@@ -91,6 +91,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public StateMachineDTO create(Long organizationId, StateMachineDTO stateMachineDTO) {
+        if (checkName(organizationId, stateMachineDTO.getName())) {
+            throw new CommonException("error.stateMachineName.exist");
+        }
         stateMachineDTO.setId(null);
         stateMachineDTO.setStatus(StateMachineStatus.CREATE);
         stateMachineDTO.setOrganizationId(organizationId);
@@ -543,14 +546,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     @Override
-    public Boolean checkName(Long organizationId, Long stateMachineId, String name) {
+    public Boolean checkName(Long organizationId, String name) {
         StateMachine stateMachine = new StateMachine();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(name);
-        stateMachine = stateMachineMapper.selectOne(stateMachine);
-        if (stateMachine != null) {
-            //若传了id，则为更新校验（更新校验不校验本身），不传为创建校验
-            return stateMachine.getId().equals(stateMachineId);
+        StateMachine res = stateMachineMapper.selectOne(stateMachine);
+        if (res == null) {
+            return false;
         }
         return true;
     }

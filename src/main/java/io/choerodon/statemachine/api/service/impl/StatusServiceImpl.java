@@ -105,6 +105,9 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public StatusDTO create(Long organizationId, StatusDTO statusDTO) {
+        if (checkName(organizationId, statusDTO.getName()).getStatusExist()) {
+            throw new CommonException("error.statusName.exist");
+        }
         if (!EnumUtil.contain(StatusType.class, statusDTO.getType())) {
             throw new CommonException("error.status.type.illegal");
         }
@@ -183,16 +186,21 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public Boolean checkName(Long organizationId, Long statusId, String name) {
+    public StatusCheckDTO checkName(Long organizationId, String name) {
         Status status = new Status();
         status.setOrganizationId(organizationId);
         status.setName(name);
-        status = statusMapper.selectOne(status);
-        if (status != null) {
-            //若传了id，则为更新校验（更新校验不校验本身），不传为创建校验
-            return status.getId().equals(statusId);
+        Status res = statusMapper.selectOne(status);
+        StatusCheckDTO statusCheckDTO = new StatusCheckDTO();
+        if (res != null) {
+            statusCheckDTO.setStatusExist(true);
+            statusCheckDTO.setId(res.getId());
+            statusCheckDTO.setName(res.getName());
+            statusCheckDTO.setType(res.getType());
+        } else {
+            statusCheckDTO.setStatusExist(false);
         }
-        return true;
+        return statusCheckDTO;
     }
 
     @Override

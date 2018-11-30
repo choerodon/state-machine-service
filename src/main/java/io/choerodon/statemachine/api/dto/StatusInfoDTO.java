@@ -1,5 +1,9 @@
 package io.choerodon.statemachine.api.dto;
 
+/**
+ * Created by HuangFuqiang@choerodon.io on 2018/11/30.
+ * Email: fuqianghuang01@gmail.com
+ */
 public class StatusInfoDTO {
 
     private Long id;
