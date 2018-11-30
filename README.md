@@ -1,7 +1,7 @@
 # State Machine Service
 `State Machine Service` is the core service of Choerodon.  
 
-The service is responsible for controlling the flow of the state, and is driven by the state machine to set the conditions, verification, and post-action of the state transition, combined with the state machine client and the solution of the concern.
+The service is responsible for controlling the flow of the state, and is driven by the state machine to set the condition, verification, and post-action of the state transition, and is implemented in conjunction with the state machine client.
 
 ## Features
 - **Status Management**
