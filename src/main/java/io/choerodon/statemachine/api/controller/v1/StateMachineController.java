@@ -189,6 +189,13 @@ public class StateMachineController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "【issue服务】获取组织下所有状态机（无配置）")
+    @GetMapping(value = "/query_by_org_id")
+    public ResponseEntity<List<StateMachineDTO>> queryByOrgId(@PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(stateMachineService.queryByOrgId(organizationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "移除单个节点")
     @DeleteMapping(value = "/remove_node")
     public ResponseEntity removeStateMachineNode(@ApiParam(value = "组织id", required = true)
