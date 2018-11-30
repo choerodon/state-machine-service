@@ -121,8 +121,22 @@ public class StatusServiceImpl implements StatusService {
         return modelMapper.map(status, StatusDTO.class);
     }
 
+    private Boolean checkNameUpdate(Long organizationId, Long statusId, String name) {
+        Status status = new Status();
+        status.setOrganizationId(organizationId);
+        status.setName(name);
+        Status res = statusMapper.selectOne(status);
+        if (res != null && !statusId.equals(res.getId())) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public StatusDTO update(StatusDTO statusDTO) {
+        if (checkNameUpdate(statusDTO.getOrganizationId(), statusDTO.getId(), statusDTO.getName())) {
+            throw new CommonException("error.statusName.exist");
+        }
         if (!EnumUtil.contain(StatusType.class, statusDTO.getType())) {
             throw new CommonException("error.status.type.illegal");
         }

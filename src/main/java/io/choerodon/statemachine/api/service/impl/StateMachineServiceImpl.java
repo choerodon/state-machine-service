@@ -152,8 +152,22 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), true);
     }
 
+    private Boolean checkNameUpdate(Long organizationId, Long stateMachineId, String name) {
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.setOrganizationId(organizationId);
+        stateMachine.setName(name);
+        StateMachine res = stateMachineMapper.selectOne(stateMachine);
+        if (res != null && !stateMachineId.equals(res.getId())) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public StateMachineDTO update(Long organizationId, Long stateMachineId, StateMachineDTO stateMachineDTO) {
+        if (checkNameUpdate(organizationId, stateMachineId, stateMachineDTO.getName())) {
+            throw new CommonException("error.stateMachineName.exist");
+        }
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
         stateMachine.setId(stateMachineId);
         stateMachine.setOrganizationId(organizationId);
