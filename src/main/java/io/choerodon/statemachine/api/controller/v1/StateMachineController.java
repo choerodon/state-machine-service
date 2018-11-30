@@ -2,6 +2,7 @@ package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -25,6 +26,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -134,9 +136,10 @@ public class StateMachineController extends BaseController {
     @ApiOperation(value = "校验状态机名字是否未被使用")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
-                                             @RequestParam(value = "state_machine_id", required = false) Long stateMachineId,
                                              @RequestParam("name") String name) {
-        return new ResponseEntity<>(stateMachineService.checkName(organizationId, stateMachineId, name), HttpStatus.OK);
+        return Optional.ofNullable(stateMachineService.checkName(organizationId, name))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.stateMachineName.check"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

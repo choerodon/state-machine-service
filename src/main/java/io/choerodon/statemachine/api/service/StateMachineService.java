@@ -110,7 +110,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param name           名称
      * @return
      */
-    Boolean checkName(Long organizationId, Long stateMachineId, String name);
+    Boolean checkName(Long organizationId, String name);
 
     /**
      * 获取所有状态机
