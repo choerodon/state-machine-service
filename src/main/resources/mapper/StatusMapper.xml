@@ -67,6 +67,7 @@
                  open="(" close=")" separator=",">
             #{statusId}
         </foreach>
+        order by st.id desc
     </select>
 
     <!--<select id="fulltextSearch" resultType="io.choerodon.statemachine.domain.Status">-->
