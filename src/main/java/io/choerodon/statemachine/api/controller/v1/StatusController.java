@@ -134,7 +134,7 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.queryAllStatusMap(organizationId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "校验状态名字是否未被使用")
     @GetMapping(value = "/organizations/{organization_id}/status/check_name")
     public ResponseEntity<StatusCheckDTO> checkName(@PathVariable("organization_id") Long organizationId,
@@ -143,6 +143,17 @@ public class StatusController extends BaseController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusName.check"));
 
+    }
+
+    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation(value = "校验状态名字是否未被使用,项目层")
+    @GetMapping(value = "/projects/{project_id}/status/project_check_name")
+    public ResponseEntity<StatusCheckDTO> checkName(@PathVariable("project_id") Long projectId,
+                                                    @RequestParam("organization_id") Long organizationId,
+                                                    @RequestParam("name") String name) {
+        return Optional.ofNullable(statusService.checkName(organizationId, name))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.statusName.check"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
