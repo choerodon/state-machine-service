@@ -660,6 +660,14 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         return stateMachineWithStatusDTOS;
     }
 
+    @Override
+    public List<StateMachineDTO> queryByOrgId(Long organizationId) {
+        StateMachine select = new StateMachine();
+        select.setOrganizationId(organizationId);
+        List<StateMachine> stateMachines = stateMachineMapper.select(select);
+        return modelMapper.map(stateMachines, new TypeToken<List<StateMachineDTO>>() {
+        }.getType());
+    }
 
     @Override
     public void removeStateMachineNode(Long organizationId, Long stateMachineId, Long statusId) {

@@ -148,12 +148,20 @@ public interface StateMachineService extends BaseService<StateMachine> {
     Boolean notActiveStateMachines(Long organizationId, List<Long> stateMachineIds);
 
     /**
-     * 获取所有状态机，附带状态
+     * 获取组织下所有状态机，附带状态
      *
      * @param organizationId 组织id
      * @return 状态机列表
      */
     List<StateMachineWithStatusDTO> queryAllWithStatus(Long organizationId);
+
+    /**
+     * 获取组织下所有状态机
+     *
+     * @param organizationId
+     * @return
+     */
+    List<StateMachineDTO> queryByOrgId(Long organizationId);
 
     void removeStateMachineNode(Long organizationId, Long stateMachineId, Long statusId);
 }
