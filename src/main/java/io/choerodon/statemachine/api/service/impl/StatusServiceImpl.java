@@ -9,9 +9,12 @@ import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.domain.StateMachineInfo;
+import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.StatusWithInfo;
+import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.StatusType;
+import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
@@ -39,6 +42,8 @@ public class StatusServiceImpl implements StatusService {
     private StateMachineNodeService nodeService;
     @Autowired
     private StateMachineService stateMachineService;
+    @Autowired
+    private InstanceCache instanceCache;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -244,6 +249,21 @@ public class StatusServiceImpl implements StatusService {
         //发布状态机
         stateMachineService.deploy(organizationId, stateMachineId, false);
         return statusDTO;
+    }
+
+    @Override
+    public void removeStatusForAgile(Long organizationId, Long stateMachineId, Long statusId) {
+        StateMachineNode stateNode = new StateMachineNode();
+        stateNode.setOrganizationId(organizationId);
+        stateNode.setStateMachineId(stateMachineId);
+        stateNode.setStatusId(statusId);
+        StateMachineNode res = nodeDeployMapper.selectOne(stateNode);
+        if (res == null) {
+            throw new RemoveStatusException("error.status.exist");
+        }
+        nodeDeployMapper.delete(stateNode);
+        //清理状态机实例
+        instanceCache.cleanStateMachine(stateMachineId);
     }
 
     @Override

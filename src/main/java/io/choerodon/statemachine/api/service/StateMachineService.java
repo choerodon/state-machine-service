@@ -162,6 +162,4 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @return
      */
     List<StateMachineDTO> queryByOrgId(Long organizationId);
-
-    void removeStateMachineNode(Long organizationId, Long stateMachineId, Long statusId);
 }

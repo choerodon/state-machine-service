@@ -4,9 +4,8 @@ import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.InputDTO;
-import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.InstanceService;
-import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +29,7 @@ public class InstanceController extends BaseController {
     @Autowired
     private InstanceService instanceService;
     @Autowired
-    private InitService initService;
+    private InstanceCache instanceCache;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建状态机实例")
@@ -84,13 +83,15 @@ public class InstanceController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "测试创建项目初始化状态、状态机")
-    @GetMapping(value = "/testInit")
+    @ApiOperation(value = "手动清理状态机实例")
+    @GetMapping(value = "/cleanInstance")
     @Transactional(rollbackFor = Exception.class)
-    public void testInit(@PathVariable("organization_id") Long organizationId) {
-        //初始化状态
-        List<Status> initStatuses = initService.initStatus(organizationId);
-        //初始化敏捷状态机
-//        initService.initAGStateMachine(organizationId);
+    public void testInit(@PathVariable("organization_id") Long organizationId,
+                         @RequestParam("is_clean_all") Boolean isCleanAll) {
+        if (isCleanAll) {
+            instanceCache.cleanAllInstances();
+        } else {
+            instanceCache.cleanInstanceTask();
+        }
     }
 }

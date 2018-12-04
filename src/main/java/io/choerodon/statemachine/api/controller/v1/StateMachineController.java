@@ -194,18 +194,4 @@ public class StateMachineController extends BaseController {
     public ResponseEntity<List<StateMachineDTO>> queryByOrgId(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(stateMachineService.queryByOrgId(organizationId), HttpStatus.OK);
     }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "移除单个节点")
-    @DeleteMapping(value = "/remove_node")
-    public ResponseEntity removeStateMachineNode(@ApiParam(value = "组织id", required = true)
-                                                 @PathVariable("organization_id") Long organizationId,
-                                                 @ApiParam(value = "state machine id", required = true)
-                                                 @RequestParam Long stateMachineId,
-                                                 @ApiParam(value = "status id", required = true)
-                                                 @RequestParam Long statusId) {
-        stateMachineService.removeStateMachineNode(organizationId, stateMachineId, statusId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
 }

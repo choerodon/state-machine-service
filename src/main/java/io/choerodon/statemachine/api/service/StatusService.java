@@ -85,11 +85,21 @@ public interface StatusService {
 
     /**
      * 敏捷添加状态
+     *
      * @param organizationId
      * @param statusDTO
      * @return
      */
     StatusDTO createStatusForAgile(Long organizationId, Long stateMachineId, StatusDTO statusDTO);
+
+    /**
+     * 敏捷移除状态
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @param statusId
+     */
+    void removeStatusForAgile(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 查询状态机下的所有状态
