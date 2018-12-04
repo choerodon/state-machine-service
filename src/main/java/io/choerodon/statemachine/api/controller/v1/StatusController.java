@@ -176,4 +176,17 @@ public class StatusController extends BaseController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.status.get"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "【敏捷】移除状态")
+    @DeleteMapping(value = "/organizations/{organization_id}/status/remove_status_for_agile")
+    public ResponseEntity removeStatusForAgile(@ApiParam(value = "组织id", required = true)
+                                                 @PathVariable("organization_id") Long organizationId,
+                                                 @ApiParam(value = "state machine id", required = true)
+                                                 @RequestParam Long stateMachineId,
+                                                 @ApiParam(value = "status id", required = true)
+                                                 @RequestParam Long statusId) {
+        statusService.removeStatusForAgile(organizationId, stateMachineId, statusId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

@@ -615,6 +615,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 config.setStateMachineId(stateMachineId);
                 config.setOrganizationId(organizationId);
                 configDeployMapper.delete(config);
+                //清理状态机实例
+                instanceCache.cleanStateMachine(stateMachineId);
             }
         }
         return true;
@@ -670,18 +672,5 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<StateMachine> stateMachines = stateMachineMapper.select(select);
         return modelMapper.map(stateMachines, new TypeToken<List<StateMachineDTO>>() {
         }.getType());
-    }
-
-    @Override
-    public void removeStateMachineNode(Long organizationId, Long stateMachineId, Long statusId) {
-        StateMachineNode stateNode = new StateMachineNode();
-        stateNode.setOrganizationId(organizationId);
-        stateNode.setStateMachineId(stateMachineId);
-        stateNode.setStatusId(statusId);
-        StateMachineNode res = nodeDeployMapper.selectOne(stateNode);
-        if (res == null) {
-            throw new RemoveStatusException("error.status.exist");
-        }
-        nodeDeployMapper.delete(stateNode);
     }
 }
