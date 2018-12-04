@@ -34,11 +34,17 @@ public class InstanceCache {
      */
     private static Map<String, StateMachine<String, String>> instanceMap = new ConcurrentHashMap<>();
 
+    /**
+     * 清除单个实例
+     */
     public void cleanInstance(String serviceCode, Long stateMachineId, Long instanceId) {
         String key = serviceCode + ":" + stateMachineId + ":" + instanceId;
         instanceMap.remove(key);
     }
 
+    /**
+     * 清除某个状态机的所有实例
+     */
     public void cleanStateMachine(Long stateMachineId) {
         builderMap.remove(stateMachineId);
         Set<String> instanceKeys = stateMachineMap.get(stateMachineId);
@@ -46,10 +52,16 @@ public class InstanceCache {
         instanceKeys.forEach(key -> instanceMap.remove(key));
     }
 
+    /**
+     * 缓存状态机构建器
+     */
     public void putBuilder(Long stateMachineId, StateMachineBuilder.Builder<String, String> builder) {
         builderMap.put(stateMachineId, builder);
     }
 
+    /**
+     * 缓存状态机实例
+     */
     public void putInstance(String serviceCode, Long stateMachineId, Long instanceId, StateMachine<String, String> stateMachineInstance) {
         String key = serviceCode + ":" + stateMachineId + ":" + instanceId;
         instanceMap.put(key, stateMachineInstance);
@@ -59,11 +71,17 @@ public class InstanceCache {
         serviceInstanceKeys.add(key);
     }
 
+    /**
+     * 获取状态机构建器
+     */
     public StateMachineBuilder.Builder<String, String> getBuilder(Long stateMachineId) {
         return builderMap.get(stateMachineId);
     }
 
-    public StateMachine<String, String> getInstance(String serviceCode,Long stateMachineId, Long instanceId) {
+    /**
+     * 获取单个实例
+     */
+    public StateMachine<String, String> getInstance(String serviceCode, Long stateMachineId, Long instanceId) {
         String key = serviceCode + ":" + stateMachineId + ":" + instanceId;
         return instanceMap.get(key);
     }
