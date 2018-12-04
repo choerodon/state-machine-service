@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.infra.cache;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineBuilder;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class InstanceCache {
+    private static final Logger logger = LoggerFactory.getLogger(InstanceCache.class);
     /**
      * 状态机id -> 状态机构建器
      */
@@ -35,10 +38,14 @@ public class InstanceCache {
     private static Map<String, StateMachine<String, String>> instanceMap = new ConcurrentHashMap<>();
 
     /**
+     * 实例存活计数，初始创建value = 2，每次 get + 1，定时任务每次全部实例-1，并清除value为0的实例，
+     */
+    private static Map<String, Integer> aliveMap = new ConcurrentHashMap<>();
+
+    /**
      * 清除单个实例
      */
-    public void cleanInstance(String serviceCode, Long stateMachineId, Long instanceId) {
-        String key = serviceCode + ":" + stateMachineId + ":" + instanceId;
+    public void cleanInstance(String key) {
         instanceMap.remove(key);
     }
 
@@ -65,6 +72,7 @@ public class InstanceCache {
     public void putInstance(String serviceCode, Long stateMachineId, Long instanceId, StateMachine<String, String> stateMachineInstance) {
         String key = serviceCode + ":" + stateMachineId + ":" + instanceId;
         instanceMap.put(key, stateMachineInstance);
+        aliveMap.put(key, 2);
         Set<String> instanceKeys = stateMachineMap.get(stateMachineId);
         instanceKeys.add(key);
         Set<String> serviceInstanceKeys = serviceMap.get(stateMachineId);
@@ -83,6 +91,47 @@ public class InstanceCache {
      */
     public StateMachine<String, String> getInstance(String serviceCode, Long stateMachineId, Long instanceId) {
         String key = serviceCode + ":" + stateMachineId + ":" + instanceId;
+        Integer aliveCount = aliveMap.get(key);
+        if (aliveCount != null && aliveCount != 0) {
+            aliveMap.put(key, aliveCount + 1);
+        }
         return instanceMap.get(key);
+    }
+
+    /**
+     * 每天凌晨定时清理所有实例数据
+     */
+    public void cleanInstanceTaskByDay() {
+        logger.info("每天凌晨清理状态机实例：清理构建器{}个，状态机实例{}个", builderMap.size(), instanceMap.size());
+        builderMap.clear();
+        serviceMap.clear();
+        stateMachineMap.clear();
+        instanceMap.clear();
+        aliveMap.clear();
+    }
+
+    /**
+     * 定时清理状态机实例，每次进行判断所有实例的aliveCount-1，
+     * 当aliveCount为0时，则清除该实例，该实例在每次使用时
+     * aliveCount+1，使用次数越多存活时间越久
+     */
+    public void cleanInstanceTask() {
+        int alive = 0;
+        int clean = 0;
+        for (Map.Entry<String, Integer> entry : aliveMap.entrySet()) {
+            String key = entry.getKey();
+            Integer aliveCount = entry.getValue();
+            aliveCount = aliveCount - 1;
+            if (aliveCount == 0) {
+                //清理实例
+                cleanInstance(key);
+                aliveMap.remove(key);
+                clean++;
+            } else {
+                aliveMap.put(key, aliveCount);
+                alive++;
+            }
+        }
+        logger.info("定时清理状态机实例：清理实例{}个，存活实例{}个", clean, alive);
     }
 }
