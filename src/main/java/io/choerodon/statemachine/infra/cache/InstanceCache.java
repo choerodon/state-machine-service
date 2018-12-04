@@ -101,7 +101,7 @@ public class InstanceCache {
     /**
      * 每天凌晨定时清理所有实例数据
      */
-    public void cleanInstanceTaskByDay() {
+    public void cleanAllInstances() {
         logger.info("每天凌晨清理状态机实例：清理构建器{}个，状态机实例{}个", builderMap.size(), instanceMap.size());
         builderMap.clear();
         serviceMap.clear();

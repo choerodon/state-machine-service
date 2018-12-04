@@ -19,8 +19,8 @@ public class ScheduledTask {
      * 每天凌晨清理所有实例数据
      */
     @Scheduled(cron = "0 0 0 * * ?")
-    public void cleanInstanceTaskByDay() {
-        instanceCache.cleanInstanceTaskByDay();
+    public void cleanAllInstances() {
+        instanceCache.cleanAllInstances();
     }
 
     /**
