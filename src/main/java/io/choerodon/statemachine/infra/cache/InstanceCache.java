@@ -6,6 +6,7 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineBuilder;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,11 +22,6 @@ public class InstanceCache {
      * 状态机id -> 状态机构建器
      */
     private static Map<Long, StateMachineBuilder.Builder<String, String>> builderMap = new ConcurrentHashMap<>();
-
-    /**
-     * 服务名 -> 状态机实例key的list
-     */
-    private static Map<String, Set<String>> serviceMap = new ConcurrentHashMap<>();
 
     /**
      * 状态机id -> 状态机实例key的list
@@ -55,7 +51,9 @@ public class InstanceCache {
     public void cleanStateMachine(Long stateMachineId) {
         builderMap.remove(stateMachineId);
         Set<String> instanceKeys = stateMachineMap.get(stateMachineId);
-        stateMachineMap.remove(stateMachineId);
+        if (instanceKeys != null) {
+            stateMachineMap.remove(stateMachineId);
+        }
         instanceKeys.forEach(key -> instanceMap.remove(key));
     }
 
@@ -74,9 +72,13 @@ public class InstanceCache {
         instanceMap.put(key, stateMachineInstance);
         aliveMap.put(key, 2);
         Set<String> instanceKeys = stateMachineMap.get(stateMachineId);
-        instanceKeys.add(key);
-        Set<String> serviceInstanceKeys = serviceMap.get(stateMachineId);
-        serviceInstanceKeys.add(key);
+        if (instanceKeys != null) {
+            instanceKeys.add(key);
+        } else {
+            instanceKeys = new HashSet<>();
+            instanceKeys.add(key);
+            stateMachineMap.put(stateMachineId, instanceKeys);
+        }
     }
 
     /**
@@ -104,7 +106,6 @@ public class InstanceCache {
     public void cleanAllInstances() {
         logger.info("每天凌晨清理状态机实例：清理构建器{}个，状态机实例{}个", builderMap.size(), instanceMap.size());
         builderMap.clear();
-        serviceMap.clear();
         stateMachineMap.clear();
         instanceMap.clear();
         aliveMap.clear();
