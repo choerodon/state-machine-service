@@ -14,6 +14,7 @@ import io.choerodon.statemachine.app.assembler.StateMachineConfigAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.*;
+import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
@@ -68,6 +69,8 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     private MachineFactory machineFactory;
     @Autowired
     private SagaServiceImpl sagaService;
+    @Autowired
+    private InstanceCache instanceCache;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -302,7 +305,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
         }
         //清理内存中的旧状态机构建器与实例
-        machineFactory.deployStateMachine(stateMachineId);
+        instanceCache.cleanStateMachine(stateMachineId);
 
         //是否同步状态到其他服务:发saga
         if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
