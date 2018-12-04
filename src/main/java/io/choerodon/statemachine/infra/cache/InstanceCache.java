@@ -53,8 +53,8 @@ public class InstanceCache {
         Set<String> instanceKeys = stateMachineMap.get(stateMachineId);
         if (instanceKeys != null) {
             stateMachineMap.remove(stateMachineId);
+            instanceKeys.forEach(key -> instanceMap.remove(key));
         }
-        instanceKeys.forEach(key -> instanceMap.remove(key));
     }
 
     /**
