@@ -12,7 +12,6 @@ import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.api.validator.StateValidator;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.domain.StatusWithInfo;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -24,14 +23,13 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
- * @author peng.jiang, dinghuang123@gmail.com
+ * @author shinan.chen
+ * @since 2018/9/27
  */
 @RestController
 @RequestMapping(value = "/v1")
@@ -138,7 +136,7 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "校验状态名字是否未被使用")
     @GetMapping(value = "/organizations/{organization_id}/status/check_name")
     public ResponseEntity<StatusCheckDTO> checkName(@PathVariable("organization_id") Long organizationId,
-                                             @RequestParam("name") String name) {
+                                                    @RequestParam("name") String name) {
         return Optional.ofNullable(statusService.checkName(organizationId, name))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusName.check"));
@@ -181,11 +179,11 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "【敏捷】移除状态")
     @DeleteMapping(value = "/organizations/{organization_id}/status/remove_status_for_agile")
     public ResponseEntity removeStatusForAgile(@ApiParam(value = "组织id", required = true)
-                                                 @PathVariable("organization_id") Long organizationId,
-                                                 @ApiParam(value = "state machine id", required = true)
-                                                 @RequestParam Long stateMachineId,
-                                                 @ApiParam(value = "status id", required = true)
-                                                 @RequestParam Long statusId) {
+                                               @PathVariable("organization_id") Long organizationId,
+                                               @ApiParam(value = "state machine id", required = true)
+                                               @RequestParam Long stateMachineId,
+                                               @ApiParam(value = "status id", required = true)
+                                               @RequestParam Long statusId) {
         statusService.removeStatusForAgile(organizationId, stateMachineId, statusId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -4,6 +4,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
+import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
@@ -14,6 +15,8 @@ import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.annotation.ChangeStateMachineStatus;
 import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
+import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
+import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.feign.IssueFeignClient;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +39,9 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     @Autowired
     private StateMachineNodeMapper nodeDeployMapper;
     @Autowired
-    private StateMachineTransformDraftMapper transformMapper;
+    private StateMachineTransformDraftMapper transformDraftMapper;
     @Autowired
-    private StateMachineService stateMachineService;
+    private StateMachineTransformMapper transformDeployMapper;
     @Autowired
     private StateMachineNodeAssembler stateMachineNodeAssembler;
     @Autowired
@@ -94,7 +97,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             if (isDelete != 1) {
                 throw new CommonException("error.stateMachineNode.delete");
             }
-            transformMapper.deleteByNodeId(nodeId);
+            transformDraftMapper.deleteByNodeId(nodeId);
         } else {
             throw new CommonException("error.stateMachineNode.statusHasIssues");
         }
@@ -125,12 +128,12 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         //获取进入的转换
         StateMachineTransformDraft intoTransformSerach = new StateMachineTransformDraft();
         intoTransformSerach.setEndNodeId(nodeId);
-        List<StateMachineTransformDraft> intoTransforms = transformMapper.select(intoTransformSerach);
+        List<StateMachineTransformDraft> intoTransforms = transformDraftMapper.select(intoTransformSerach);
         nodeDTO.setIntoTransform(stateMachineTransformAssembler.toTargetList(intoTransforms, StateMachineTransformDTO.class));
         //获取出去的转换
         StateMachineTransformDraft outTransformSerach = new StateMachineTransformDraft();
         outTransformSerach.setStartNodeId(nodeId);
-        List<StateMachineTransformDraft> outTransforms = transformMapper.select(outTransformSerach);
+        List<StateMachineTransformDraft> outTransforms = transformDraftMapper.select(outTransformSerach);
         nodeDTO.setOutTransform(stateMachineTransformAssembler.toTargetList(outTransforms, StateMachineTransformDTO.class));
         return nodeDTO;
     }
@@ -187,30 +190,54 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     }
 
     @Override
-    public void createNodeForAgile(Long organizationId, Long stateMachineId, Long statusId) {
+    public void createNodeAndTransformForAgile(Long organizationId, Long stateMachineId, StatusDTO statusDTO) {
         //校验是否已经存在在状态机中
-        StateMachineNodeDraft select = new StateMachineNodeDraft();
-        select.setStatusId(statusId);
+        StateMachineNode select = new StateMachineNode();
+        select.setStatusId(statusDTO.getId());
         select.setStateMachineId(stateMachineId);
-        if (nodeDraftMapper.select(select).isEmpty()) {
+        if (nodeDeployMapper.select(select).isEmpty()) {
             //获取状态机中positionY最大的节点
-            StateMachineNodeDraft maxNode = nodeDraftMapper.selectMaxPositionY(stateMachineId);
+            StateMachineNode maxNode = nodeDeployMapper.selectMaxPositionY(stateMachineId);
             //创建节点
-            StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft();
-            nodeDraft.setStatusId(statusId);
-            nodeDraft.setOrganizationId(organizationId);
-            nodeDraft.setStateMachineId(stateMachineId);
-            nodeDraft.setType(NodeType.CUSTOM);
-            nodeDraft.setPositionX(maxNode.getPositionX());
-            nodeDraft.setPositionY(maxNode.getPositionY() + 100);
-            nodeDraft.setHeight(maxNode.getHeight());
-            nodeDraft.setWidth(maxNode.getWidth());
-            int isInsert = nodeDraftMapper.insert(nodeDraft);
+            StateMachineNode nodeDeploy = new StateMachineNode();
+            nodeDeploy.setStatusId(statusDTO.getId());
+            nodeDeploy.setOrganizationId(organizationId);
+            nodeDeploy.setStateMachineId(stateMachineId);
+            nodeDeploy.setType(NodeType.CUSTOM);
+            nodeDeploy.setPositionX(maxNode.getPositionX());
+            nodeDeploy.setPositionY(maxNode.getPositionY() + 100);
+            nodeDeploy.setHeight(maxNode.getHeight());
+            nodeDeploy.setWidth(maxNode.getWidth());
+            int isInsert = nodeDeployMapper.insert(nodeDeploy);
             if (isInsert != 1) {
                 throw new CommonException("error.stateMachineNode.create");
             }
-            //创建转换
-            transformService.createAllStatusTransform(organizationId, stateMachineId, nodeDraft.getId());
+            //判断当前节点是否已存在【全部】的转换id
+            StateMachineTransform transform = new StateMachineTransform();
+            transform.setStateMachineId(stateMachineId);
+            transform.setEndNodeId(nodeDeploy.getId());
+            transform.setType(TransformType.ALL);
+            if (!transformDeployMapper.select(transform).isEmpty()) {
+                throw new CommonException("error.stateMachineTransform.exist");
+            }
+            //创建全部转换
+            StateMachineTransform transformDelpoy = new StateMachineTransform();
+            transformDelpoy.setStateMachineId(stateMachineId);
+            transformDelpoy.setName(statusDTO.getName());
+            transformDelpoy.setDescription("全部转换");
+            transformDelpoy.setStartNodeId(0L);
+            transformDelpoy.setEndNodeId(nodeDeploy.getId());
+            transformDelpoy.setOrganizationId(organizationId);
+            transformDelpoy.setType(TransformType.ALL);
+            transformDelpoy.setConditionStrategy(TransformConditionStrategy.ALL);
+            if (transformDeployMapper.insert(transformDelpoy) != 1) {
+                throw new CommonException("error.stateMachineTransform.create");
+            }
+            //更新node的【全部转换到当前】转换id
+            int update = nodeDeployMapper.updateAllStatusTransformId(organizationId, nodeDeploy.getId(), transformDelpoy.getId());
+            if (update != 1) {
+                throw new CommonException("error.createAllStatusTransform.updateAllStatusTransformId");
+            }
         }
     }
 }

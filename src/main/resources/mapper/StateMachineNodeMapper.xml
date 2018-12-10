@@ -114,4 +114,21 @@
         AND SM.organization_id = #{organizationId}
     </select>
 
+    <select id="selectMaxPositionY" resultType="io.choerodon.statemachine.domain.StateMachineNode">
+        SELECT *
+        FROM state_machine_node
+        WHERE position_y = (
+            SELECT max(position_y)
+            FROM state_machine_node
+            WHERE state_machine_id = #{stateMachineId}
+        )
+        LIMIT 1
+    </select>
+
+    <update id="updateAllStatusTransformId">
+        UPDATE state_machine_node
+        SET all_status_transform_id = #{allStatusTransformId}
+        WHERE organization_id = #{organizationId}
+        AND id = #{id}
+    </update>
 </mapper>

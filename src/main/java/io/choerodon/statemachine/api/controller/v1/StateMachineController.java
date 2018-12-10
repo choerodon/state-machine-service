@@ -17,7 +17,6 @@ import io.choerodon.statemachine.infra.enums.SchemeApplyType;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +29,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @author peng.jiang, dinghuang123@gmail.com
+ * @author shinan.chen
+ * @since 2018/9/27
  */
 @RestController
 @RequestMapping(value = "/v1/organizations/{organization_id}/state_machines")
 public class StateMachineController extends BaseController {
-
     @Autowired
     private StateMachineService stateMachineService;
-
     @Autowired
     private StateMachineValidator stateMachineValidator;
     @Autowired

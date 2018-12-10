@@ -23,4 +23,16 @@ public interface StateMachineNodeMapper extends BaseMapper<StateMachineNode> {
     StateMachineNode queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 
     List<StateMachineNode> queryByStateMachineIds(@Param("stateMachineIds") List<Long> stateMachineIds, @Param("organizationId") Long organizationId);
+
+    /**
+     * 获取最大的postionY
+     *
+     * @param stateMachineId
+     * @return
+     */
+    StateMachineNode selectMaxPositionY(@Param("stateMachineId") Long stateMachineId);
+    /**
+     * 单独写更新，版本号不变，否则前端处理复杂
+     */
+    int updateAllStatusTransformId(@Param("organizationId") Long organizationId, @Param("id") Long id, @Param("allStatusTransformId") Long allStatusTransformId);
 }

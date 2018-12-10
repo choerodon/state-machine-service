@@ -2,6 +2,7 @@ package io.choerodon.statemachine.api.service;
 
 import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
+import io.choerodon.statemachine.api.dto.StatusDTO;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 
 import java.util.List;
@@ -79,8 +80,8 @@ public interface StateMachineNodeService extends BaseService<StateMachineNodeDra
      *
      * @param organizationId
      * @param stateMachineId
-     * @param statusId
+     * @param statusDTO
      */
-    void createNodeForAgile(Long organizationId, Long stateMachineId, Long statusId);
+    void createNodeAndTransformForAgile(Long organizationId, Long stateMachineId, StatusDTO statusDTO);
 
 }

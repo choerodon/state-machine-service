@@ -15,6 +15,7 @@ import io.choerodon.statemachine.domain.StatusWithInfo;
 import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
+import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
@@ -44,6 +45,8 @@ public class StatusServiceImpl implements StatusService {
     private StateMachineService stateMachineService;
     @Autowired
     private InstanceCache instanceCache;
+    @Autowired
+    private StateMachineMapper stateMachineMapper;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -234,6 +237,13 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public StatusDTO createStatusForAgile(Long organizationId, Long stateMachineId, StatusDTO statusDTO) {
+        if (stateMachineId == null) {
+            throw new CommonException("error.stateMachineId.notNull");
+        }
+        if (stateMachineMapper.queryById(organizationId, stateMachineId) == null) {
+            throw new CommonException("error.stateMachine.notFound");
+        }
+
         String statusName = statusDTO.getName();
         Status select = new Status();
         select.setName(statusName);
@@ -245,14 +255,17 @@ public class StatusServiceImpl implements StatusService {
             statusDTO = modelMapper.map(status, StatusDTO.class);
         }
         //将状态加入状态机中
-        nodeService.createNodeForAgile(organizationId, stateMachineId, statusDTO.getId());
-        //发布状态机
-        stateMachineService.deploy(organizationId, stateMachineId, false);
+        nodeService.createNodeAndTransformForAgile(organizationId, stateMachineId, statusDTO);
+        //清理状态机实例
+        instanceCache.cleanStateMachine(stateMachineId);
         return statusDTO;
     }
 
     @Override
     public void removeStatusForAgile(Long organizationId, Long stateMachineId, Long statusId) {
+        if (statusId == null) {
+            throw new CommonException("error.statusId.notNull");
+        }
         StateMachineNode stateNode = new StateMachineNode();
         stateNode.setOrganizationId(organizationId);
         stateNode.setStateMachineId(stateMachineId);
