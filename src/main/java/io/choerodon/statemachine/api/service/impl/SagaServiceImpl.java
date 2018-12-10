@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
+import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.event.DeployStateMachinePayload;
@@ -56,7 +57,7 @@ public class SagaServiceImpl {
             addStatusWithProject.setAddStatuses(statuses);
         });
         //发送saga，
-        sagaClient.startSaga(DEPLOY_STATE_MACHINE, new StartInstanceDTO(JSON.toJSONString(deployStateMachinePayload), "", ""));
+        sagaClient.startSaga(DEPLOY_STATE_MACHINE, new StartInstanceDTO(JSON.toJSONString(deployStateMachinePayload), "", "", ResourceLevel.ORGANIZATION.value(),organizationId));
         logger.info("startSaga deploy-state-machine addStatusIds: {}, deleteStatusIds: {}", changeStatus.getAddStatusIds(), changeStatus.getDeleteStatusIds());
     }
 }

@@ -6,6 +6,7 @@ import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.service.InitService;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.domain.StateMachine;
@@ -225,10 +226,11 @@ public class InitServiceImpl implements InitService {
     @Saga(code = "project-create-state-machine", description = "创建项目发送消息至agile", inputSchemaClass = ProjectCreateAgilePayload.class)
     public void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId) {
         List<StatusPayload> statusPayloads = stateMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+        Long projectId = projectEvent.getProjectId();
         ProjectCreateAgilePayload projectCreateAgilePayload = new ProjectCreateAgilePayload();
         projectCreateAgilePayload.setProjectEvent(projectEvent);
         projectCreateAgilePayload.setStatusPayloads(statusPayloads);
-        sagaClient.startSaga("project-create-state-machine", new StartInstanceDTO(JSON.toJSONString(projectCreateAgilePayload), "", ""));
+        sagaClient.startSaga("project-create-state-machine", new StartInstanceDTO(JSON.toJSONString(projectCreateAgilePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
     }
 
 

@@ -29,11 +29,11 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 /**
  * @author shinan.chen
- * @since 2018/11/19
+ * @since 2018/12/10
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
-class StateControllerSpec extends Specification {
+class StatusControllerSpec extends Specification {
     @Autowired
     TestRestTemplate restTemplate
     @Autowired

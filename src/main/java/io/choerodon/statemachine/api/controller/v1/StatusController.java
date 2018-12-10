@@ -28,7 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * @author peng.jiang, dinghuang123@gmail.com
+ * @author shinan.chen
+ * @since 2018/9/27
  */
 @RestController
 @RequestMapping(value = "/v1")
