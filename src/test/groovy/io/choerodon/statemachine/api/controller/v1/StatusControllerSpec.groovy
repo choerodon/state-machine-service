@@ -3,7 +3,6 @@ package io.choerodon.statemachine.api.controller.v1
 import io.choerodon.core.domain.Page
 import io.choerodon.statemachine.IntegrationTestConfiguration
 import io.choerodon.statemachine.api.dto.*
-import io.choerodon.statemachine.api.service.StatusService
 import io.choerodon.statemachine.domain.StateMachine
 import io.choerodon.statemachine.domain.StateMachineNode
 import io.choerodon.statemachine.domain.StateMachineNodeDraft
@@ -36,8 +35,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class StatusControllerSpec extends Specification {
     @Autowired
     TestRestTemplate restTemplate
-    @Autowired
-    StatusService service
     @Autowired
     StatusMapper statusMapper
     @Autowired

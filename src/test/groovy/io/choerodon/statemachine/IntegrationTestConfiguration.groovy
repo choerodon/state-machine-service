@@ -8,6 +8,7 @@ import feign.RequestInterceptor
 import feign.Target
 import feign.codec.Decoder
 import feign.codec.Encoder
+import io.choerodon.asgard.saga.feign.SagaClient
 import io.choerodon.core.oauth.CustomUserDetails
 import io.choerodon.liquibase.LiquibaseConfig
 import io.choerodon.liquibase.LiquibaseExecutor
@@ -15,6 +16,7 @@ import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -42,6 +44,9 @@ class IntegrationTestConfiguration {
 
     @Value('${choerodon.oauth.jwt.key:choerodon}')
     String key
+
+    @MockBean(name = "sagaClient")
+    private SagaClient sagaClient
 
     @Autowired
     TestRestTemplate testRestTemplate
