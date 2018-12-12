@@ -45,9 +45,6 @@ class IntegrationTestConfiguration {
     @Value('${choerodon.oauth.jwt.key:choerodon}')
     String key
 
-    @MockBean(name = "sagaClient")
-    private SagaClient sagaClient
-
     @Autowired
     TestRestTemplate testRestTemplate
 
