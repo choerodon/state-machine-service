@@ -156,6 +156,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     private Boolean checkNameUpdate(Long organizationId, Long stateMachineId, String name) {
+        System.out.println("ttttttt："+name);
         StateMachine stateMachine = new StateMachine();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(name);
