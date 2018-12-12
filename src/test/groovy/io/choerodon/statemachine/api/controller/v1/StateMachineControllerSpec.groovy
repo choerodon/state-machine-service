@@ -550,7 +550,7 @@ class StateMachineControllerSpec extends Specification {
         projectEvent.setProjectName(projectName)
         when: '【issue服务】批量使活跃状态机变成未活跃'
         HttpEntity<ProjectEvent> httpEntity = new HttpEntity<>(projectEvent)
-        def entity = restTemplate.exchange(baseUrl + "/create_with_create_project?applyType=" + applyType, HttpMethod.POST, httpEntity, Object, testOrganizationId)
+        def entity = restTemplate.exchange(baseUrl + "/active_state_machines?applyType=" + applyType, HttpMethod.POST, httpEntity, Object, testOrganizationId)
 
         then: '状态码为200，创建成功'
         def actRequest = false
