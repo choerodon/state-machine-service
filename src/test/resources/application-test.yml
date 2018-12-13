@@ -15,6 +15,8 @@ hystrix:
   stream:
     queue:
       enabled: false # 关闭hystrix stream，否则kafka报错
+  metrics:
+    enabled: false
 data:
   dir: src/main/resources
 eureka:
@@ -38,3 +40,5 @@ choerodon:
       retry-interval: 3 # 自动重试间隔(秒)
       skip-services: register-server, api-gateway, gateway-helper, oauth-server, config-server, state-machine-service # 跳过的服务
       target-services: agile-service # 发现的服务
+feignScan:
+  enabled: false

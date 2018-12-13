@@ -44,5 +44,7 @@ public interface InitService {
     Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent);
 
     void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId);
+
+    void createStateMachineDetail(Long organizationId, Long stateMachineId);
 }
 

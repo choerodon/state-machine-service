@@ -149,7 +149,8 @@ public class InitServiceImpl implements InitService {
      * @param organizationId
      * @param stateMachineId
      */
-    private void createStateMachineDetail(Long organizationId, Long stateMachineId) {
+    @Override
+    public void createStateMachineDetail(Long organizationId, Long stateMachineId) {
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);
@@ -183,11 +184,12 @@ public class InitServiceImpl implements InitService {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
             transform.setStateMachineId(stateMachineId);
             transform.setName(initTransform.getName());
-            transform.setDescription("【全部】转换");
             if (initTransform.getType().equals(TransformType.ALL)) {
                 transform.setStartNodeId(0L);
+                transform.setDescription("【全部】转换");
             } else {
                 transform.setStartNodeId(nodeMap.get(initTransform.getStartNodeCode()).getId());
+                transform.setDescription("初始化");
             }
             transform.setEndNodeId(nodeMap.get(initTransform.getEndNodeCode()).getId());
             transform.setType(initTransform.getType());

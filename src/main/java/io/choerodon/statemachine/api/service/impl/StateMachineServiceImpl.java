@@ -156,6 +156,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     private Boolean checkNameUpdate(Long organizationId, Long stateMachineId, String name) {
+        System.out.println("ttttttt："+name);
         StateMachine stateMachine = new StateMachine();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(name);
@@ -235,6 +236,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             throw new CommonException("error.stateMachineId.null");
         }
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
+        if (stateMachine == null) {
+            throw new CommonException("error.stateMachine.null");
+        }
+        if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
+            throw new CommonException("error.stateMachine.status.deployed");
+        }
         String oldStatus = stateMachine.getStatus();
         //是否同步状态到其他服务:前置处理
         Map<String, List<Status>> changeMap = null;
@@ -246,12 +253,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             if (!result) {
                 return false;
             }
-        }
-        if (stateMachine == null) {
-            throw new CommonException("error.stateMachine.null");
-        }
-        if (StateMachineStatus.ACTIVE.equals(stateMachine.getStatus())) {
-            throw new CommonException("error.stateMachine.status.deployed");
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
         int stateMachineDeploy = updateOptional(stateMachine, "status");

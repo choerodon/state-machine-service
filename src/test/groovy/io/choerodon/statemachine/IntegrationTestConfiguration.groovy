@@ -1,13 +1,10 @@
 package io.choerodon.statemachine
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import feign.Client
-import feign.Contract
-import feign.Feign
-import feign.RequestInterceptor
-import feign.Target
+import feign.*
 import feign.codec.Decoder
 import feign.codec.Encoder
+import io.choerodon.asgard.saga.feign.SagaClient
 import io.choerodon.core.oauth.CustomUserDetails
 import io.choerodon.liquibase.LiquibaseConfig
 import io.choerodon.liquibase.LiquibaseExecutor
@@ -15,9 +12,11 @@ import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -56,15 +55,27 @@ class IntegrationTestConfiguration {
         detachedMockFactory.Mock(KafkaTemplate)
     }
 
-    @Bean
-    CustomFeignClientAdaptor customFeignClientAdaptor(Client client, Decoder decoder, Encoder encoder, RequestInterceptor interceptor) {
-        CustomFeignClientAdaptor customFeignClientAdaptor = Feign.builder().encoder(encoder).decoder(decoder)
-                .client(client)
-                .contract(new Contract.Default())
-                .requestInterceptor(interceptor)
-                .target(Target.EmptyTarget.create(CustomFeignClientAdaptor.class));
-        return customFeignClientAdaptor;
+    @Bean("sagaClient")
+    @Primary
+    SagaClient sagaClient() {
+        detachedMockFactory.Mock(SagaClient)
     }
+
+    @Bean("customFeignClientAdaptor")
+    @Primary
+    CustomFeignClientAdaptor customFeignClientAdaptor() {
+        detachedMockFactory.Mock(CustomFeignClientAdaptor)
+    }
+
+//    @Bean
+//    CustomFeignClientAdaptor customFeignClientAdaptor(Client client, Decoder decoder, Encoder encoder, RequestInterceptor interceptor) {
+//        CustomFeignClientAdaptor customFeignClientAdaptor = Feign.builder().encoder(encoder).decoder(decoder)
+//                .client(client)
+//                .contract(new Contract.Default())
+//                .requestInterceptor(interceptor)
+//                .target(Target.EmptyTarget.create(CustomFeignClientAdaptor.class));
+//        return customFeignClientAdaptor;
+//    }
 
     @PostConstruct
     void init() {
