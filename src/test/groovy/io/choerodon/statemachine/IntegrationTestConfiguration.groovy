@@ -1,9 +1,6 @@
 package io.choerodon.statemachine
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import feign.*
-import feign.codec.Decoder
-import feign.codec.Encoder
 import io.choerodon.asgard.saga.feign.SagaClient
 import io.choerodon.core.oauth.CustomUserDetails
 import io.choerodon.liquibase.LiquibaseConfig
@@ -12,7 +9,6 @@ import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -22,7 +18,6 @@ import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.security.jwt.JwtHelper
 import org.springframework.security.jwt.crypto.sign.MacSigner
 import org.springframework.security.jwt.crypto.sign.Signer
@@ -49,11 +44,6 @@ class IntegrationTestConfiguration {
     LiquibaseExecutor liquibaseExecutor
 
     final ObjectMapper objectMapper = new ObjectMapper()
-
-    @Bean
-    KafkaTemplate kafkaTemplate() {
-        detachedMockFactory.Mock(KafkaTemplate)
-    }
 
     @Bean("sagaClient")
     @Primary
