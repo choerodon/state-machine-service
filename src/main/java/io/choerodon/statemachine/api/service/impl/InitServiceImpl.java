@@ -149,7 +149,8 @@ public class InitServiceImpl implements InitService {
      * @param organizationId
      * @param stateMachineId
      */
-    private void createStateMachineDetail(Long organizationId, Long stateMachineId) {
+    @Override
+    public void createStateMachineDetail(Long organizationId, Long stateMachineId) {
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);

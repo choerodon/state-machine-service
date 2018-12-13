@@ -22,6 +22,7 @@ import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper
 import io.choerodon.statemachine.infra.mapper.StatusMapper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Import
@@ -83,7 +84,7 @@ class StateMachineControllerSpec extends Specification {
     void setup() {
         if (needInit) {
             needInit = false
-            //mock
+            //mock saga
             sagaClient.startSaga(_, _) >> null
 
             //初始化状态
@@ -396,6 +397,7 @@ class StateMachineControllerSpec extends Specification {
     def "deleteDraft"() {
         given: '准备工作'
         def deleteStateMachineId = stateMachineId
+        println deleteStateMachineId
         when: '删除草稿'
         def entity = restTemplate.exchange(baseUrl + '/delete_draft/{state_machine_id}', HttpMethod.DELETE, null, Object, testOrganizationId, deleteStateMachineId)
 
@@ -644,6 +646,7 @@ class StateMachineControllerSpec extends Specification {
                 actRequest = true
                 if (entity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
                     actResponse = true
+                    needClean = true
                 }
             }
         }
@@ -651,8 +654,8 @@ class StateMachineControllerSpec extends Specification {
         actResponse == expResponse
         where: '测试用例：'
         stateMachineId     || expRequest | expResponse
-        stateMachineIds[0] || true       | true
         999L               || true       | false
+        stateMachineIds[0] || true       | true
     }
 
 }
