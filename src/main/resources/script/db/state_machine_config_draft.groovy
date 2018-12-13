@@ -1,7 +1,12 @@
 package script.db
 
 databaseChangeLog(logicalFilePath: 'script/db/state_machine_config_draft.groovy') {
-    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-09-12-state-machine-config-draft') {
+    changeSet(id: '2018-12-13-delete-table-state-machine-config-draft', author: 'shinan.chenX@gmail') {
+        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+            "DROP TABLE IF EXISTS state_machine_config_draft"
+        }
+    }
+    changeSet(author: 'shinan.chenX@gmail.com', id: '2018-12-13-state-machine-config-draft') {
         createTable(tableName: 'state_machine_config_draft') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: 'true', remarks: 'ID,主键') {
                 constraints(primaryKey: 'true')
@@ -27,10 +32,10 @@ databaseChangeLog(logicalFilePath: 'script/db/state_machine_config_draft.groovy'
             column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
-        createIndex(tableName: "state_machine_config_draft", indexName: "state_machine_config_n1") {
+        createIndex(tableName: "state_machine_config_draft", indexName: "state_machine_config_draft_n1") {
             column(name: "transform_id", type: "BIGINT UNSIGNED")
         }
-        createIndex(tableName: "state_machine_config_draft", indexName: "state_machine_config_n2") {
+        createIndex(tableName: "state_machine_config_draft", indexName: "state_machine_config_draft_n2") {
             column(name: "type", type: "VARCHAR(30)")
         }
     }
