@@ -193,4 +193,8 @@ class ConfigCodeControllerSpec extends Specification {
         10L         | ConfigType.ACTION    || true       | true
         10L         | ConfigType.VALIDATOR || true       | false
     }
+
+    def "clean"() {
+        needClean = true
+    }
 }

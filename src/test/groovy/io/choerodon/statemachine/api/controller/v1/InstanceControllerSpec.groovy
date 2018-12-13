@@ -192,7 +192,7 @@ class InstanceControllerSpec extends Specification {
         stateMachineId | serviceCode | input | instanceId | invokeCode || expRequest | expResponse
         10L            | 'agile'     | null  | 1L         | "create"   || true       | true
         10L            | 'test'      | null  | 1L         | "create"   || true       | true
-        11L            | 'agile'     | null  | 1L         | "create"   || true       | false
+        9999L          | 'agile'     | null  | 1L         | "create"   || true       | false
     }
 
     def "executeTransform"() {
@@ -233,9 +233,9 @@ class InstanceControllerSpec extends Specification {
         where: '测试用例：'
         serviceCode | stateMachineId | currentStatusId | transformId | input | instanceId | invokeCode || expRequest | expResponse
         'agile'     | 10L            | 10L             | 10L         | null  | 1L         | "create"   || true       | true
-        'agile'     | 11L            | 10L             | 10L         | null  | 1L         | "create"   || true       | false
-        'agile'     | 10L            | 11L             | 10L         | null  | 1L         | "create"   || true       | false
-        'agile'     | 10L            | 10L             | 11L         | null  | 1L         | "create"   || true       | false
+        'agile'     | 9999L          | 10L             | 10L         | null  | 1L         | "create"   || true       | false
+        'agile'     | 10L            | 9999L           | 10L         | null  | 1L         | "create"   || true       | false
+        'agile'     | 10L            | 10L             | 9999L       | null  | 1L         | "create"   || true       | false
     }
 
     def "queryListTransform"() {
@@ -287,7 +287,7 @@ class InstanceControllerSpec extends Specification {
         if (entity != null) {
             if (entity.getStatusCode().is2xxSuccessful()) {
                 actRequest = true
-                if (entity.getBody() != null&& entity.getBody() instanceof Integer) {
+                if (entity.getBody() != null && entity.getBody() instanceof Integer) {
                     actResponse = true
                 }
             }
@@ -297,7 +297,7 @@ class InstanceControllerSpec extends Specification {
         where: '测试用例：'
         stateMachineId || expRequest | expResponse
         10L            || true       | true
-        11L            || true       | false
+        9999L          || true       | false
     }
 
     def "queryInitStatusIds"() {

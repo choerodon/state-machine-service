@@ -7,22 +7,11 @@ import io.choerodon.statemachine.api.dto.StateMachineDTO
 import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO
 import io.choerodon.statemachine.api.service.InitService
 import io.choerodon.statemachine.api.service.StateMachineService
-import io.choerodon.statemachine.domain.StateMachine
-import io.choerodon.statemachine.domain.StateMachineNode
-import io.choerodon.statemachine.domain.StateMachineNodeDraft
-import io.choerodon.statemachine.domain.StateMachineTransform
-import io.choerodon.statemachine.domain.StateMachineTransformDraft
-import io.choerodon.statemachine.domain.Status
+import io.choerodon.statemachine.domain.*
 import io.choerodon.statemachine.domain.event.ProjectEvent
 import io.choerodon.statemachine.infra.enums.StateMachineStatus
-import io.choerodon.statemachine.infra.mapper.StateMachineMapper
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper
-import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper
-import io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper
-import io.choerodon.statemachine.infra.mapper.StatusMapper
+import io.choerodon.statemachine.infra.mapper.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Import
@@ -84,8 +73,6 @@ class StateMachineControllerSpec extends Specification {
     void setup() {
         if (needInit) {
             needInit = false
-            //mock saga
-            sagaClient.startSaga(_, _) >> null
 
             //初始化状态
             initService.initStatus(testOrganizationId)

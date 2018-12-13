@@ -76,8 +76,6 @@ class StatusControllerSpec extends Specification {
     void setup() {
         if (needInit) {
             needInit = false
-            //mock
-            sagaClient.startSaga(_, _) >> null
 
             //初始化状态
             initService.initStatus(testOrganizationId)
