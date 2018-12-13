@@ -182,6 +182,7 @@ class ConfigCodeControllerSpec extends Specification {
                 actRequest = true
                 if (entity.getBody() != null && entity.getBody().size() > 0) {
                     actResponse = true
+                    needClean = true
                 }
             }
         }
