@@ -8,8 +8,7 @@ import io.choerodon.statemachine.api.dto.StateMachineDTO
 import io.choerodon.statemachine.api.service.InitService
 import io.choerodon.statemachine.api.service.StateMachineService
 import io.choerodon.statemachine.domain.*
-import io.choerodon.statemachine.infra.enums.StateMachineStatus
-import io.choerodon.statemachine.infra.enums.StatusType
+import io.choerodon.statemachine.infra.enums.*
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor
 import io.choerodon.statemachine.infra.mapper.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -102,7 +101,7 @@ class InstanceControllerSpec extends Specification {
             stateMachine.setOrganizationId(testOrganizationId)
             stateMachine.setName("新状态机")
             stateMachine.setDescription("新状态机")
-            stateMachine.setStatus(StateMachineStatus.ACTIVE)
+            stateMachine.setStatus(StateMachineStatus.CREATE)
             stateMachine.setDefault(false)
             stateMachineMapper.insert(stateMachine)
 
@@ -117,8 +116,30 @@ class InstanceControllerSpec extends Specification {
             status.setType(StatusType.DOING)
             statusMapper.insert(status)
             //新增一个节点
-
+            StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft()
+            nodeDraft.id = 10L
+            nodeDraft.organizationId = testOrganizationId
+            nodeDraft.statusId = 10L
+            nodeDraft.type = NodeType.CUSTOM
+            nodeDraft.positionX = 100
+            nodeDraft.positionY = 100
+            nodeDraft.stateMachineId = 10L
+            nodeDraft.allStatusTransformId = 10L
+            nodeDraftMapper.insert(nodeDraft)
             //新增一个转换
+            StateMachineTransformDraft transformDraft = new StateMachineTransformDraft()
+            transformDraft.id = 10L
+            transformDraft.organizationId = testOrganizationId
+            transformDraft.name = "新转换"
+            transformDraft.description = "新转换"
+            transformDraft.type = TransformType.ALL
+            transformDraft.conditionStrategy = TransformConditionStrategy.ALL
+            transformDraft.endNodeId = 10L
+            transformDraft.startNodeId = 0L
+            transformDraft.stateMachineId = 10L
+            transformDraftMapper.insert(transformDraft)
+            //发布状态机
+            stateMachineService.deploy(testOrganizationId, 10L, false)
         }
     }
     /**
@@ -156,7 +177,6 @@ class InstanceControllerSpec extends Specification {
 
     def "startInstance"() {
         given: '准备工作'
-        def stateMachineId = stateMachineIds[0]
         def url = baseUrl + "/start_instance?1=1"
         if (serviceCode != null) {
             url = url + "&service_code=" + serviceCode
@@ -186,17 +206,14 @@ class InstanceControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        serviceCode | input | instanceId | invokeCode || expRequest | expResponse
-        'agile'     | null  | 1L         | "create"   || true       | true
-        'agile1'    | null  | 1L         | "create"   || true       | false
+        stateMachineId | serviceCode | input | instanceId | invokeCode || expRequest | expResponse
+        10L            | 'agile'     | null  | 1L         | "create"   || true       | true
+        10L            | 'agile1'    | null  | 1L         | "create"   || true       | false
+        11L            | 'agile'     | null  | 1L         | "create"   || true       | false
     }
 
 //    def "executeTransform"() {
 //        given: '准备工作'
-//        StateMachineDTO stateMachine = stateMachineList.get(0)
-//        def stateMachineId = stateMachine.id
-//        def currentStatusId = stateMachine.nodeDTOs.get(0).statusId
-//        def transformId = stateMachine.transformDTOs.get(0).id
 //        def url = baseUrl + "/execute_transform?1=1"
 //        if (serviceCode != null) {
 //            url = url + "&service_code=" + serviceCode
@@ -233,6 +250,6 @@ class InstanceControllerSpec extends Specification {
 //        actResponse == expResponse
 //        where: '测试用例：'
 //        serviceCode | stateMachineId | currentStatusId | transformId | input | instanceId | invokeCode || expRequest | expResponse
-//        'agile'     | 1L             | 1L              | 1L          | null  | 1L         | "create"   || true       | true
+//        'agile'     | 10L            | 10L             | 10L         | null  | 1L         | "create"   || true       | true
 //    }
 }
