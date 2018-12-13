@@ -91,13 +91,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
-        ExecuteResult executeResult;
-        try {
-            executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
-        } catch (Exception e) {
-            e.printStackTrace();
-            executeResult = new ExecuteResult(false, null, "执行转换失败");
-        }
+        ExecuteResult executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
         return executeResult;
     }
 

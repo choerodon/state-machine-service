@@ -1,6 +1,5 @@
 package io.choerodon.statemachine.api.controller.v1
 
-import io.choerodon.asgard.saga.feign.SagaClient
 import io.choerodon.statemachine.IntegrationTestConfiguration
 import io.choerodon.statemachine.api.dto.ExecuteResult
 import io.choerodon.statemachine.api.dto.InputDTO
@@ -9,16 +8,14 @@ import io.choerodon.statemachine.api.service.InitService
 import io.choerodon.statemachine.api.service.StateMachineService
 import io.choerodon.statemachine.domain.*
 import io.choerodon.statemachine.infra.enums.*
-import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor
 import io.choerodon.statemachine.infra.mapper.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Import
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -51,10 +48,6 @@ class InstanceControllerSpec extends Specification {
     StateMachineService stateMachineService
     @Autowired
     InitService initService
-    @Autowired
-    SagaClient sagaClient
-    @Autowired
-    CustomFeignClientAdaptor customFeignClientAdaptor
     @Shared
     def needInit = true
     @Shared
@@ -75,15 +68,6 @@ class InstanceControllerSpec extends Specification {
     void setup() {
         if (needInit) {
             needInit = false
-            //mock saga
-            sagaClient.startSaga(_, _) >> null
-            //mock customFeignClientAdaptor
-            ExecuteResult executeResult = new ExecuteResult()
-            executeResult.success = true
-            executeResult.resultStatusId = 1L
-            ResponseEntity<ExecuteResult> responseEntity = new ResponseEntity(executeResult, HttpStatus.OK)
-            customFeignClientAdaptor.executeConfig(_, _) >> responseEntity
-
             //初始化状态
             statusList = initService.initStatus(testOrganizationId)
             //初始化默认状态机
@@ -191,7 +175,6 @@ class InstanceControllerSpec extends Specification {
         when: '创建状态机实例'
         HttpEntity<InputDTO> httpEntity = new HttpEntity<>(inputDTO)
         def entity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, ExecuteResult, testOrganizationId)
-
         then: '状态码为200，创建成功'
         def actRequest = false
         def actResponse = false
@@ -208,48 +191,165 @@ class InstanceControllerSpec extends Specification {
         where: '测试用例：'
         stateMachineId | serviceCode | input | instanceId | invokeCode || expRequest | expResponse
         10L            | 'agile'     | null  | 1L         | "create"   || true       | true
-        10L            | 'agile1'    | null  | 1L         | "create"   || true       | false
+        10L            | 'test'      | null  | 1L         | "create"   || true       | true
         11L            | 'agile'     | null  | 1L         | "create"   || true       | false
     }
 
-//    def "executeTransform"() {
-//        given: '准备工作'
-//        def url = baseUrl + "/execute_transform?1=1"
-//        if (serviceCode != null) {
-//            url = url + "&service_code=" + serviceCode
-//        }
-//        if (stateMachineId != null) {
-//            url = url + "&state_machine_id=" + stateMachineId
-//        }
-//        if (currentStatusId != null) {
-//            url = url + "&current_status_id=" + currentStatusId
-//        }
-//        if (transformId != null) {
-//            url = url + "&transform_id=" + transformId
-//        }
-//        InputDTO inputDTO = new InputDTO()
-//        inputDTO.input = input
-//        inputDTO.instanceId = instanceId
-//        inputDTO.invokeCode = invokeCode
-//        when: '执行状态转换，并返回转换后的状态'
-//        HttpEntity<InputDTO> httpEntity = new HttpEntity<>(inputDTO)
-//        def entity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, ExecuteResult, testOrganizationId)
-//
-//        then: '状态码为200，创建成功'
-//        def actRequest = false
-//        def actResponse = false
-//        if (entity != null) {
-//            if (entity.getStatusCode().is2xxSuccessful()) {
-//                actRequest = true
-//                if (entity.getBody() != null && entity.getBody().getSuccess() != null) {
-//                    actResponse = entity.getBody().getSuccess()
-//                }
-//            }
-//        }
-//        actRequest == expRequest
-//        actResponse == expResponse
-//        where: '测试用例：'
-//        serviceCode | stateMachineId | currentStatusId | transformId | input | instanceId | invokeCode || expRequest | expResponse
-//        'agile'     | 10L            | 10L             | 10L         | null  | 1L         | "create"   || true       | true
-//    }
+    def "executeTransform"() {
+        given: '准备工作'
+        def url = baseUrl + "/execute_transform?1=1"
+        if (serviceCode != null) {
+            url = url + "&service_code=" + serviceCode
+        }
+        if (stateMachineId != null) {
+            url = url + "&state_machine_id=" + stateMachineId
+        }
+        if (currentStatusId != null) {
+            url = url + "&current_status_id=" + currentStatusId
+        }
+        if (transformId != null) {
+            url = url + "&transform_id=" + transformId
+        }
+        InputDTO inputDTO = new InputDTO()
+        inputDTO.input = input
+        inputDTO.instanceId = instanceId
+        inputDTO.invokeCode = invokeCode
+        when: '执行状态转换，并返回转换后的状态'
+        HttpEntity<InputDTO> httpEntity = new HttpEntity<>(inputDTO)
+        def entity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, ExecuteResult, testOrganizationId)
+        then: '状态码为200，创建成功'
+        def actRequest = false
+        def actResponse = false
+        if (entity != null) {
+            if (entity.getStatusCode().is2xxSuccessful()) {
+                actRequest = true
+                if (entity.getBody() != null && entity.getBody().getSuccess() != null) {
+                    actResponse = entity.getBody().getSuccess()
+                }
+            }
+        }
+        actRequest == expRequest
+        actResponse == expResponse
+        where: '测试用例：'
+        serviceCode | stateMachineId | currentStatusId | transformId | input | instanceId | invokeCode || expRequest | expResponse
+        'agile'     | 10L            | 10L             | 10L         | null  | 1L         | "create"   || true       | true
+        'agile'     | 11L            | 10L             | 10L         | null  | 1L         | "create"   || true       | false
+        'agile'     | 10L            | 11L             | 10L         | null  | 1L         | "create"   || true       | false
+        'agile'     | 10L            | 10L             | 11L         | null  | 1L         | "create"   || true       | false
+    }
+
+    def "queryListTransform"() {
+        given: '准备工作'
+        def url = baseUrl + "/transform_list?1=1"
+        if (serviceCode != null) {
+            url = url + "&service_code=" + serviceCode
+        }
+        if (stateMachineId != null) {
+            url = url + "&state_machine_id=" + stateMachineId
+        }
+        if (currentStatusId != null) {
+            url = url + "&current_status_id=" + currentStatusId
+        }
+        if (instanceId != null) {
+            url = url + "&instance_id=" + instanceId
+        }
+        when: '获取当前状态拥有的转换列表，feign调用对应服务的条件验证'
+        def entity = restTemplate.exchange(url, HttpMethod.GET, null, Object, testOrganizationId)
+        then: '状态码为200，创建成功'
+        def actRequest = false
+        def actResponse = false
+        if (entity != null) {
+            if (entity.getStatusCode().is2xxSuccessful()) {
+                actRequest = true
+                if (entity.getBody() != null && entity.getBody().size() > 0) {
+                    actResponse = true
+                }
+            }
+        }
+        actRequest == expRequest
+        actResponse == expResponse
+        where: '测试用例：'
+        serviceCode | stateMachineId | currentStatusId | instanceId || expRequest | expResponse
+        'agile'     | 10L            | 10L             | 1L         || true       | true
+    }
+
+    def "queryInitStatusId"() {
+        given: '准备工作'
+        def url = baseUrl + "/query_init_status_id?1=1"
+        if (stateMachineId != null) {
+            url = url + "&state_machine_id=" + stateMachineId
+        }
+        when: '获取状态机的初始状态'
+        def entity = restTemplate.exchange(url, HttpMethod.GET, null, Object, testOrganizationId)
+        then: '状态码为200，创建成功'
+        def actRequest = false
+        def actResponse = false
+        if (entity != null) {
+            if (entity.getStatusCode().is2xxSuccessful()) {
+                actRequest = true
+                if (entity.getBody() != null&& entity.getBody() instanceof Integer) {
+                    actResponse = true
+                }
+            }
+        }
+        actRequest == expRequest
+        actResponse == expResponse
+        where: '测试用例：'
+        stateMachineId || expRequest | expResponse
+        10L            || true       | true
+        11L            || true       | false
+    }
+
+    def "queryInitStatusIds"() {
+        given: '准备工作'
+        def url = baseUrl + "/query_init_status_ids?1=1"
+        if (stateMachineId != null) {
+            url = url + "&state_machine_id=" + stateMachineId
+        }
+        when: '获取状态机对应的初始状态Map'
+        ParameterizedTypeReference<Map<Long, Long>> typeRef = new ParameterizedTypeReference<Map<Long, Long>>() {
+        }
+        def entity = restTemplate.exchange(url, HttpMethod.GET, null, typeRef, testOrganizationId)
+        then: '状态码为200，创建成功'
+        def actRequest = false
+        def actResponse = false
+        if (entity != null) {
+            if (entity.getStatusCode().is2xxSuccessful()) {
+                actRequest = true
+                if (entity.getBody() != null && entity.getBody() instanceof Map) {
+                    actResponse = true
+                }
+            }
+        }
+        actRequest == expRequest
+        actResponse == expResponse
+        where: '测试用例：'
+        stateMachineId || expRequest | expResponse
+        10L            || true       | true
+    }
+
+    def "cleanInstance"() {
+        given: '准备工作'
+        def url = baseUrl + "/cleanInstance?1=1"
+        if (isCleanAll != null) {
+            url = url + "&is_clean_all=" + isCleanAll
+        }
+        when: '手动清理状态机实例'
+        def entity = restTemplate.exchange(url, HttpMethod.GET, null, Object, testOrganizationId)
+        then: '状态码为200，创建成功'
+        def actRequest = false
+        def actResponse = false
+        if (entity != null) {
+            if (entity.getStatusCode().is2xxSuccessful()) {
+                actRequest = true
+                actResponse = true
+            }
+        }
+        actRequest == expRequest
+        actResponse == expResponse
+        where: '测试用例：'
+        isCleanAll || expRequest | expResponse
+        true       || true       | true
+        false      || true       | true
+    }
 }
