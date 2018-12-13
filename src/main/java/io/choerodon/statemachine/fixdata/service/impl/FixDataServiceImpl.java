@@ -267,12 +267,12 @@ public class FixDataServiceImpl implements FixDataService {
         }
         //补充，每个项目都要有初始的三个状态
         Map<Long, List<Status>> orgMap = statusList.stream().collect(Collectors.groupingBy(Status::getOrganizationId));
-        for(Map.Entry<Long, List<Status>> listEntry:orgMap.entrySet()){
+        for (Map.Entry<Long, List<Status>> listEntry : orgMap.entrySet()) {
             Long organizationId = listEntry.getKey();
             List<Status> statuses = listEntry.getValue();
             List<String> names = statuses.stream().map(Status::getName).collect(Collectors.toList());
-            for(InitStatus initStatus:InitStatus.values()){
-                if(!names.contains(initStatus.getName())){
+            for (InitStatus initStatus : InitStatus.values()) {
+                if (!names.contains(initStatus.getName())) {
                     String name = initStatus.getName();
                     Status status = new Status();
                     status.setOrganizationId(organizationId);
@@ -285,7 +285,9 @@ public class FixDataServiceImpl implements FixDataService {
             }
 
         }
-        statusMapper.batchInsert(statusList);
+        if (!statusList.isEmpty()) {
+            statusMapper.batchInsert(statusList);
+        }
         return true;
     }
 

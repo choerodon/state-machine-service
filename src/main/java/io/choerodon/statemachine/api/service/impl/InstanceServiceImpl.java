@@ -28,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -91,13 +88,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
-        ExecuteResult executeResult;
-        try {
-            executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
-        } catch (Exception e) {
-            e.printStackTrace();
-            executeResult = new ExecuteResult(false, null, "执行转换失败");
-        }
+        ExecuteResult executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
         return executeResult;
     }
 
@@ -196,8 +187,12 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public Map<Long, Long> queryInitStatusIds(Long organizationId, List<Long> stateMachineIds) {
-        return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
-                .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
+        if (!stateMachineIds.isEmpty()) {
+            return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
+                    .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
+        } else {
+            return new HashMap<>();
+        }
     }
 
     /**

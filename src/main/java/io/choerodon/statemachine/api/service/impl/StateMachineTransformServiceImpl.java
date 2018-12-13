@@ -8,10 +8,7 @@ import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.app.assembler.StateMachineNodeAssembler;
 import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
-import io.choerodon.statemachine.domain.StateMachineNodeDraft;
-import io.choerodon.statemachine.domain.StateMachineTransform;
-import io.choerodon.statemachine.domain.StateMachineTransformDraft;
-import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.annotation.ChangeStateMachineStatus;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
@@ -29,7 +26,6 @@ import java.util.List;
  * @author peng.jiang, dinghuang123@gmail.com
  */
 @Component
-@Transactional(rollbackFor = Exception.class)
 public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachineTransformDraft> implements StateMachineTransformService {
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
@@ -54,6 +50,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
     @Override
     @ChangeStateMachineStatus
+    @Transactional(rollbackFor = Exception.class)
     public StateMachineTransformDTO create(Long organizationId, Long stateMachineId, StateMachineTransformDTO transformDTO) {
         transformDTO.setStateMachineId(stateMachineId);
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
@@ -70,6 +67,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
     @Override
     @ChangeStateMachineStatus
+    @Transactional(rollbackFor = Exception.class)
     public StateMachineTransformDTO update(Long organizationId, Long stateMachineId, Long transformId, StateMachineTransformDTO transformDTO) {
         transformDTO.setStateMachineId(stateMachineId);
         StateMachineTransformDraft origin = transformDraftMapper.queryById(organizationId, transformId);
@@ -90,6 +88,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
     @Override
     @ChangeStateMachineStatus
+    @Transactional(rollbackFor = Exception.class)
     public Boolean delete(Long organizationId, Long stateMachineId, Long transformId) {
         StateMachineTransformDraft transform = transformDraftMapper.queryById(organizationId, transformId);
         if (!stateMachineId.equals(transform.getStateMachineId())) {
@@ -153,7 +152,11 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
     @Override
     public List<TransformInfo> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId) {
-        Long startNodeId = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, statusId).getId();
+        StateMachineNode startNode = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, statusId);
+        if(startNode==null){
+            throw new CommonException("error.statusId.notFound");
+        }
+        Long startNodeId = startNode.getId();
         StateMachineTransform select1 = new StateMachineTransform();
         select1.setStateMachineId(stateMachineId);
         select1.setStartNodeId(startNodeId);
@@ -169,6 +172,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
     @Override
     @ChangeStateMachineStatus
+    @Transactional(rollbackFor = Exception.class)
     public StateMachineTransformDTO createAllStatusTransform(Long organizationId, Long stateMachineId, Long endNodeId) {
         if (endNodeId == null) {
             throw new CommonException("error.endNodeId.null");
@@ -219,6 +223,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAllStatusTransform(Long organizationId, Long transformId) {
         StateMachineTransformDraft transformDraft = transformDraftMapper.queryById(organizationId, transformId);
         if (transformDraft == null) {
@@ -243,6 +248,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateConditionStrategy(Long organizationId, Long transformId, String conditionStrategy) {
         if (!EnumUtil.contain(TransformConditionStrategy.class, conditionStrategy)) {
             throw new CommonException("error.updateConditionStrategy.conditionStrategy.illegal");

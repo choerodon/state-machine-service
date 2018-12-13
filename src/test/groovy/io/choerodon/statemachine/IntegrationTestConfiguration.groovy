@@ -45,18 +45,6 @@ class IntegrationTestConfiguration {
 
     final ObjectMapper objectMapper = new ObjectMapper()
 
-    @Bean("sagaClient")
-    @Primary
-    SagaClient sagaClient() {
-        detachedMockFactory.Mock(SagaClient)
-    }
-
-    @Bean("customFeignClientAdaptor")
-    @Primary
-    CustomFeignClientAdaptor customFeignClientAdaptor() {
-        detachedMockFactory.Mock(CustomFeignClientAdaptor)
-    }
-
 //    @Bean
 //    CustomFeignClientAdaptor customFeignClientAdaptor(Client client, Decoder decoder, Encoder encoder, RequestInterceptor interceptor) {
 //        CustomFeignClientAdaptor customFeignClientAdaptor = Feign.builder().encoder(encoder).decoder(decoder)

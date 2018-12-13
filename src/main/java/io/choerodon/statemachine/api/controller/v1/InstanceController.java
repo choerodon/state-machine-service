@@ -86,7 +86,7 @@ public class InstanceController extends BaseController {
     @ApiOperation(value = "手动清理状态机实例")
     @GetMapping(value = "/cleanInstance")
     @Transactional(rollbackFor = Exception.class)
-    public void testInit(@PathVariable("organization_id") Long organizationId,
+    public void cleanInstance(@PathVariable("organization_id") Long organizationId,
                          @RequestParam("is_clean_all") Boolean isCleanAll) {
         if (isCleanAll) {
             instanceCache.cleanAllInstances();

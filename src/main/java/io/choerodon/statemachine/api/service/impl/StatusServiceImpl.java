@@ -97,10 +97,13 @@ public class StatusServiceImpl implements StatusService {
     @Override
     public Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO) {
         Page<Long> statusIdsPage = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.selectStatusIds(organizationId, statusSearchDTO));
-        List<StatusWithInfo> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getContent());
+        List<StatusWithInfoDTO> statusWithInfoDTOList = new ArrayList<>();
+        if (!statusIdsPage.getContent().isEmpty()) {
+            List<StatusWithInfo> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getContent());
 //        removeDuplicate(statuses);
-        List<StatusWithInfoDTO> statusWithInfoDTOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoDTO>>() {
-        }.getType());
+            statusWithInfoDTOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoDTO>>() {
+            }.getType());
+        }
         Page<StatusWithInfoDTO> returnPage = new Page<>();
         returnPage.setContent(statusWithInfoDTOList);
         returnPage.setNumber(statusIdsPage.getNumber());
@@ -227,12 +230,17 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Map<Long, Status> batchStatusGet(List<Long> ids) {
-        List<Status> statuses = statusMapper.batchStatusGet(ids);
-        Map<Long, Status> map = new HashMap();
-        for (Status status : statuses) {
-            map.put(status.getId(), status);
+        if(!ids.isEmpty()){
+            List<Status> statuses = statusMapper.batchStatusGet(ids);
+            Map<Long, Status> map = new HashMap();
+            for (Status status : statuses) {
+                map.put(status.getId(), status);
+            }
+            return map;
+        }else{
+            return new HashMap<>();
         }
-        return map;
+
     }
 
     @Override
