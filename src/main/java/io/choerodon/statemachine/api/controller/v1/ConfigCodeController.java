@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.core.base.BaseController;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ConfigCodeDTO;
 import io.choerodon.statemachine.api.service.ConfigCodeService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author shinan.chen
@@ -30,7 +32,9 @@ public class ConfigCodeController extends BaseController {
     public ResponseEntity<List<ConfigCodeDTO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,
                                                                   @PathVariable("transform_id") Long transformId,
                                                                   @RequestParam String type) {
-        return new ResponseEntity<>(configCodeService.queryByTransformId(organizationId, transformId, type), HttpStatus.OK);
+        return Optional.ofNullable(configCodeService.queryByTransformId(organizationId, transformId, type))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.configCode.queryByTransformId"));
     }
 
 }

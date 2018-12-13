@@ -343,6 +343,7 @@ class InstanceControllerSpec extends Specification {
             if (entity.getStatusCode().is2xxSuccessful()) {
                 actRequest = true
                 actResponse = true
+                needClean = true
             }
         }
         actRequest == expRequest
