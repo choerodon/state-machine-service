@@ -1,15 +1,16 @@
 package io.choerodon.statemachine.api.controller.v1
 
+import io.choerodon.asgard.saga.feign.SagaClient
 import io.choerodon.core.domain.Page
 import io.choerodon.statemachine.IntegrationTestConfiguration
 import io.choerodon.statemachine.api.dto.*
-import io.choerodon.statemachine.api.service.StatusService
+import io.choerodon.statemachine.api.service.InitService
+import io.choerodon.statemachine.api.service.StateMachineService
 import io.choerodon.statemachine.domain.StateMachine
 import io.choerodon.statemachine.domain.StateMachineNode
 import io.choerodon.statemachine.domain.StateMachineNodeDraft
 import io.choerodon.statemachine.domain.Status
 import io.choerodon.statemachine.infra.enums.NodeType
-import io.choerodon.statemachine.infra.enums.StateMachineStatus
 import io.choerodon.statemachine.infra.mapper.StateMachineMapper
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper
@@ -24,6 +25,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Stepwise
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 
@@ -33,11 +35,12 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
+@Stepwise
 class StatusControllerSpec extends Specification {
     @Autowired
     TestRestTemplate restTemplate
     @Autowired
-    StatusService service
+    StateMachineService stateMachineService
     @Autowired
     StatusMapper statusMapper
     @Autowired
@@ -46,66 +49,125 @@ class StatusControllerSpec extends Specification {
     StateMachineNodeMapper nodeMapper
     @Autowired
     StateMachineNodeDraftMapper nodeDraftMapper
+    @Autowired
+    InitService initService
+    @Autowired
+    SagaClient sagaClient
     @Shared
     Long testOrganizationId = 1L
     @Shared
     Long testProjectId = 1L
     @Shared
+    def needInit = true
+    @Shared
+    def needClean = false
+    @Shared
     String baseUrl = '/v1/organizations/{organization_id}/status'
     @Shared
-    List<Status> list = new ArrayList<>()
+    def statusList = []
+    @Shared
+    def statusIds = []
+    @Shared
+    def stateMachineIds = []
 
-    //初始化10条数据
-    def setup() {
-        Status del = new Status()
-        statusMapper.delete(del)//清空数据
-        list.clear()
-        def testName = 'name'
-        def testDescription = 'description'
-        def testType = 'done'
-        for (int i = 1; i <= 10; i++) {
+    /**
+     * 初始化
+     */
+    void setup() {
+        if (needInit) {
+            needInit = false
+            //mock
+            sagaClient.startSaga(_, _) >> null
+
+            //初始化状态
+            initService.initStatus(testOrganizationId)
+            //初始化默认状态机
+            def stateMachineId = initService.initDefaultStateMachine(testOrganizationId)
+            //发布状态机
+            stateMachineService.deploy(testOrganizationId, stateMachineId, true)
+            //新增一个状态把该状态添加到状态机中
             Status status = new Status()
-            status.setId(i)
-            status.setName(testName + i)
-            status.setDescription(testDescription + i)
+            status.setName("测试中")
+            status.setType("doing")
             status.setOrganizationId(testOrganizationId)
-            status.setType(testType)
-            int isInsert = statusMapper.insert(status)
-            if (isInsert == 1) {
-                list.add(status)
-            }
+            statusMapper.insert(status)
+            StateMachineNode node = new StateMachineNode()
+            node.organizationId = testOrganizationId
+            node.statusId = status.getId()
+            node.type = NodeType.CUSTOM
+            node.positionX = 100
+            node.positionY = 100
+            node.stateMachineId = stateMachineId
+            nodeMapper.insert(node)
+            StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft()
+            nodeDraft.organizationId = testOrganizationId
+            nodeDraft.statusId = status.getId()
+            nodeDraft.type = NodeType.CUSTOM
+            nodeDraft.positionX = 100
+            nodeDraft.positionY = 100
+            nodeDraft.stateMachineId = stateMachineId
+            nodeDraftMapper.insert(nodeDraft)
+            stateMachineIds.add(stateMachineId)
+            statusList.add(status)
+            statusIds.add(status.getId())
+            //新增一个状态
+            Status status2 = new Status()
+            status2.setName("测试中2")
+            status2.setType("doing")
+            status2.setOrganizationId(testOrganizationId)
+            statusMapper.insert(status2)
+            statusList.add(status2)
+            statusIds.add(status2.getId())
+        }
+    }
+    /**
+     * 删除数据
+     */
+    void cleanup() {
+        if (needClean) {
+            needClean = false
+            //删除状态
+            Status status = new Status()
+            status.organizationId = testOrganizationId
+            statusMapper.delete(status)
+            //删除状态机
+            StateMachine stateMachine = new StateMachine()
+            stateMachine.organizationId = testOrganizationId
+            stateMachineMapper.delete(stateMachine)
+            //删除节点
+            StateMachineNode node = new StateMachineNode()
+            node.organizationId = testOrganizationId
+            nodeMapper.delete(node)
+            //删除草稿节点
+            StateMachineNodeDraft draft = new StateMachineNodeDraft()
+            draft.organizationId = testOrganizationId
+            nodeDraftMapper.delete(draft)
         }
     }
 
-    /**
-     * 初始化一个活跃状态机
-     */
-    void initStateMachine() {
-        StateMachine stateMachine = new StateMachine()
-        stateMachineMapper.delete(stateMachine)
-        stateMachine.setId(1L)
-        stateMachine.setName("初始状态机")
-        stateMachine.setOrganizationId(1L)
-        stateMachine.setStatus(StateMachineStatus.ACTIVE)
-        stateMachineMapper.insert(stateMachine)
+    def "queryStatusList"() {
+        given: '准备工作'
+        StatusSearchDTO searchDTO = new StatusSearchDTO()
+        searchDTO.setType(type)
+        searchDTO.setName(name)
+        searchDTO.setParam(param)
+        when: '分页查询'
+        HttpEntity<StatusSearchDTO> httpEntity = new HttpEntity<>(searchDTO)
+        ParameterizedTypeReference<Page<StatusWithInfoDTO>> typeRef = new ParameterizedTypeReference<Page<StatusWithInfoDTO>>() {
+        }
+        def entity = restTemplate.exchange(baseUrl + "/list?page=0&size=10", HttpMethod.POST, httpEntity, typeRef, testOrganizationId)
 
-        StateMachineNode node = new StateMachineNode()
-        node.organizationId = testOrganizationId
-        node.statusId = 1L
-        node.type = NodeType.CUSTOM
-        node.positionX = 100
-        node.positionY = 100
-        node.stateMachineId = 1L
-        nodeMapper.insert(node)
+        then: '返回结果'
+        entity.getStatusCode().is2xxSuccessful() == isSuccess
+        entity.getBody().size() == size
 
-        StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft()
-        nodeDraft.organizationId = testOrganizationId
-        nodeDraft.statusId = 1L
-        nodeDraft.type = NodeType.CUSTOM
-        nodeDraft.positionX = 100
-        nodeDraft.positionY = 100
-        nodeDraft.stateMachineId = 1L
-        nodeDraftMapper.insert(nodeDraft)
+        where: '测试用例：'
+        name  | type    | param || isSuccess | size
+        null  | null    | null  || true      | 5
+        '待处理' | null    | null  || true      | 1
+        null  | null    | '待处理' || true      | 1
+        null  | "done"  | null  || true      | 1
+        null  | "done1" | null  || true      | 0
     }
 
     def "create"() {
@@ -133,25 +195,26 @@ class StatusControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        testName     | testDescription     | testType || expRequest | expResponse
-        'test-name1' | 'test-description1' | 'done'   || true       | true
-        'test-name1' | 'test-description1' | 'done1'  || true       | false
-        'name1'      | 'test-description1' | 'done'   || true       | false
-        null         | 'test-description1' | 'done'   || true       | false
+        testName | testDescription     | testType || expRequest | expResponse
+        'new1'   | 'test-description1' | 'done'   || true       | true
+        'new2'   | 'test-description1' | 'done1'  || true       | false
+        'new1'   | 'test-description1' | 'done'   || true       | false
+        null     | 'test-description1' | 'done'   || true       | false
     }
 
     def "update"() {
         given: '准备工作'
-        Status status = list.get(0)
+        Status status = statusList.get(0)
         StatusDTO statusDTO = new StatusDTO()
-        statusDTO.setId(status.getId())
+        statusDTO.setOrganizationId(testOrganizationId)
         statusDTO.setType(status.getType())
+        statusDTO.setId(status.getId())
         statusDTO.setObjectVersionNumber(1L)
         statusDTO.setName(updateName)
 
         when: '更新状态'
         HttpEntity<StatusDTO> httpEntity = new HttpEntity<>(statusDTO)
-        def entity = restTemplate.exchange(baseUrl + '/{status_id}', HttpMethod.PUT, httpEntity, StatusDTO, testOrganizationId, status.getId())
+        def entity = restTemplate.exchange(baseUrl + '/{status_id}', HttpMethod.PUT, httpEntity, StatusDTO, testOrganizationId, statusDTO.getId())
 
         then: '状态码为200，更新成功'
         def actRequest = false
@@ -170,31 +233,6 @@ class StatusControllerSpec extends Specification {
         updateName   || expRequest | expResponse
         'test-name1' || true       | true
         null         || true       | false
-    }
-
-    def "delete"() {
-        given: '准备工作'
-        def deleteStatusId = statusId
-        when: '删除状态'
-        def entity = restTemplate.exchange(baseUrl + '/{status_id}', HttpMethod.DELETE, null, Object, testOrganizationId, deleteStatusId)
-
-        then: '状态码为200，更新成功'
-        def actRequest = false
-        def actResponse = false
-        if (entity != null) {
-            if (entity.getStatusCode().is2xxSuccessful()) {
-                actRequest = true
-                if (entity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
-                    actResponse = true
-                }
-            }
-        }
-        actRequest == expRequest
-        actResponse == expResponse
-        where: '测试用例：'
-        statusId || expRequest | expResponse
-        1L       || true       | true
-        999L     || true       | false
     }
 
     def "queryStatusById"() {
@@ -222,15 +260,14 @@ class StatusControllerSpec extends Specification {
         actResponse == expResponse
 
         where: '测试用例：'
-        statusId || expRequest | expResponse
-        1L       || true       | true
-        9999L    || true       | false
-        null     || false      | false
+        statusId     || expRequest | expResponse
+        statusIds[0] || true       | true
+        9999L        || true       | false
+        null         || false      | false
     }
 
     def "queryByStateMachineIds"() {
         given: '准备工作'
-        initStateMachine()
         def queryId = stateMachineId
 
         when: '查询状态机下的所有状态'
@@ -257,9 +294,9 @@ class StatusControllerSpec extends Specification {
         actResponse == expResponse
 
         where: '测试用例：'
-        stateMachineId || expRequest | expResponse
-        1L             || true       | true
-        9999L          || true       | false
+        stateMachineId     || expRequest | expResponse
+        stateMachineIds[0] || true       | true
+        9999L              || true       | false
     }
 
     def "queryAllStatus"() {
@@ -289,9 +326,9 @@ class StatusControllerSpec extends Specification {
         actResponse == expResponse
 
         where: '测试用例：'
-        organizationId || expRequest | expResponse
-        1L             || true       | true
-        9999L          || true       | false
+        organizationId     || expRequest | expResponse
+        testOrganizationId || true       | true
+        9999L              || true       | false
     }
 
     def "queryAllStatusMap"() {
@@ -321,9 +358,9 @@ class StatusControllerSpec extends Specification {
         actResponse == expResponse
 
         where: '测试用例：'
-        organizationId || expRequest | expResponse
-        1L             || true       | true
-        9999L          || true       | false
+        organizationId     || expRequest | expResponse
+        testOrganizationId || true       | true
+        9999L              || true       | false
     }
 
     def "checkName"() {
@@ -351,9 +388,9 @@ class StatusControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        name         || expRequest | expResponse
-        'init_name1' || true       | false
-        'name1'      || true       | true
+        name  || expRequest | expResponse
+        '新状态' || true       | false
+        '待处理' || true       | true
     }
 
     def "checkNameByProject"() {
@@ -384,9 +421,9 @@ class StatusControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        name         || expRequest | expResponse
-        'init_name1' || true       | false
-        'name1'      || true       | true
+        name  || expRequest | expResponse
+        '新状态' || true       | false
+        '待处理' || true       | true
     }
 
     def "batchStatusGet"() {
@@ -413,14 +450,13 @@ class StatusControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        statusId || expRequest | expResponse
-        1L       || true       | true
-        999L     || true       | false
+        statusId     || expRequest | expResponse
+        statusIds[0] || true       | true
+        999L         || true       | false
     }
 
     def "createStatusForAgile"() {
         given: '准备工作'
-        initStateMachine()
         def queryStateMachineId = stateMachineId
         StatusDTO statusDTO = new StatusDTO()
         statusDTO.setOrganizationId(testOrganizationId)
@@ -445,17 +481,15 @@ class StatusControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        stateMachineId | name    | statusType || expRequest | expResponse
-        1L             | '测试'    | 'done'     || true       | true
-        1L             | 'name1' | 'done'     || true       | true
-        1L             | '测试'    | 'done1'    || true       | false
-        2L             | '测试'    | 'done'     || true       | false
+        stateMachineId     | name    | statusType || expRequest | expResponse
+        stateMachineIds[0] | '测试1'   | 'done'     || true       | true
+        stateMachineIds[0] | 'name1' | 'done'     || true       | true
+        stateMachineIds[0] | '测试2'   | 'done1'    || true       | false
+        9999L              | '测试3'   | 'done'     || true       | false
     }
 
     def "removeStatusForAgile"() {
         given: '准备工作'
-        initStateMachine()
-
         def queryStateMachineId = stateMachineId
         def queryStatusId = statusId
         def url = baseUrl + "/remove_status_for_agile?1=1"
@@ -481,34 +515,36 @@ class StatusControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        stateMachineId | statusId || expRequest | expResponse
-        1L             | 1L       || true       | true
-        null           | 1L       || false      | false
-        1L             | null     || false      | false
+        stateMachineId     | statusId     || expRequest | expResponse
+        null               | statusIds[0] || false      | false
+        stateMachineIds[0] | null         || false      | false
+        stateMachineIds[0] | statusIds[0] || true       | true
     }
 
-    def "queryStatusList"() {
+    def "delete"() {
         given: '准备工作'
-        StatusSearchDTO searchDTO = new StatusSearchDTO()
-        searchDTO.setType(type)
-        searchDTO.setName(name)
-        searchDTO.setParam(param)
-        when: '分页查询'
-        HttpEntity<StatusSearchDTO> httpEntity = new HttpEntity<>(searchDTO)
-        ParameterizedTypeReference<Page<StatusWithInfoDTO>> typeRef = new ParameterizedTypeReference<Page<StatusWithInfoDTO>>() {
+        def deleteStatusId = statusId
+        when: '删除状态'
+        def entity = restTemplate.exchange(baseUrl + '/{status_id}', HttpMethod.DELETE, null, Object, testOrganizationId, deleteStatusId)
+
+        then: '状态码为200，更新成功'
+        def actRequest = false
+        def actResponse = false
+        if (entity != null) {
+            if (entity.getStatusCode().is2xxSuccessful()) {
+                actRequest = true
+                if (entity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
+                    actResponse = true
+                    needClean = true
+                }
+            }
         }
-        def entity = restTemplate.exchange(baseUrl + "/list?page=0&size=10", HttpMethod.POST, httpEntity, typeRef, testOrganizationId)
-
-        then: '返回结果'
-        entity.getStatusCode().is2xxSuccessful() == isSuccess
-        entity.getBody().size() == size
-
+        actRequest == expRequest
+        actResponse == expResponse
         where: '测试用例：'
-        name    | type    | param  || isSuccess | size
-        null    | null    | null   || true      | 10
-        'name2' | null    | null   || true      | 1
-        null    | null    | 'name' || true      | 10
-        null    | "done"  | null   || true      | 10
-        null    | "done1" | null   || true      | 0
+        statusId     || expRequest | expResponse
+        9999L        || true       | false
+        statusIds[1] || true       | true
     }
+
 }
