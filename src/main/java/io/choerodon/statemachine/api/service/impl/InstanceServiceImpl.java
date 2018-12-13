@@ -28,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -190,8 +187,12 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public Map<Long, Long> queryInitStatusIds(Long organizationId, List<Long> stateMachineIds) {
-        return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
-                .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
+        if (!stateMachineIds.isEmpty()) {
+            return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
+                    .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
+        } else {
+            return new HashMap<>();
+        }
     }
 
     /**

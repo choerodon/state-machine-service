@@ -230,12 +230,17 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Map<Long, Status> batchStatusGet(List<Long> ids) {
-        List<Status> statuses = statusMapper.batchStatusGet(ids);
-        Map<Long, Status> map = new HashMap();
-        for (Status status : statuses) {
-            map.put(status.getId(), status);
+        if(!ids.isEmpty()){
+            List<Status> statuses = statusMapper.batchStatusGet(ids);
+            Map<Long, Status> map = new HashMap();
+            for (Status status : statuses) {
+                map.put(status.getId(), status);
+            }
+            return map;
+        }else{
+            return new HashMap<>();
         }
-        return map;
+
     }
 
     @Override
