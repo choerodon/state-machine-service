@@ -132,7 +132,7 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.queryAllStatusMap(organizationId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "校验状态名字是否未被使用")
     @GetMapping(value = "/organizations/{organization_id}/status/check_name")
     public ResponseEntity<StatusCheckDTO> checkName(@PathVariable("organization_id") Long organizationId,

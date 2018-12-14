@@ -1,7 +1,6 @@
 package io.choerodon.statemachine.api.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
@@ -13,7 +12,6 @@ import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.domain.event.OrganizationEventPayload;
 import io.choerodon.statemachine.domain.event.ProjectCreateAgilePayload;
 import io.choerodon.statemachine.domain.event.ProjectEvent;
 import io.choerodon.statemachine.domain.event.StatusPayload;
@@ -65,13 +63,18 @@ public class InitServiceImpl implements InitService {
             Status status = new Status();
             status.setOrganizationId(organizationId);
             status.setCode(initStatus.getCode());
-            status.setName(initStatus.getName());
-            status.setDescription(initStatus.getName());
-            status.setType(initStatus.getType());
-            if (statusMapper.insert(status) != 1) {
-                throw new CommonException("error.initStatus.create");
+            List<Status> statuses = statusMapper.select(status);
+            if (statuses.isEmpty()) {
+                status.setName(initStatus.getName());
+                status.setDescription(initStatus.getName());
+                status.setType(initStatus.getType());
+                if (statusMapper.insert(status) != 1) {
+                    throw new CommonException("error.initStatus.create");
+                }
+                initStatuses.add(status);
+            } else {
+                initStatuses.add(statuses.get(0));
             }
-            initStatuses.add(status);
         }
         return initStatuses;
     }
