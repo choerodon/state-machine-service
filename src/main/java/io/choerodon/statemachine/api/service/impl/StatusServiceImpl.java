@@ -124,9 +124,14 @@ public class StatusServiceImpl implements StatusService {
         }
         statusDTO.setOrganizationId(organizationId);
         Status status = modelMapper.map(statusDTO, Status.class);
-        int isInsert = statusMapper.insert(status);
-        if (isInsert != 1) {
-            throw new CommonException("error.status.create");
+        List<Status> select = statusMapper.select(status);
+        if (select.isEmpty()) {
+            int isInsert = statusMapper.insert(status);
+            if (isInsert != 1) {
+                throw new CommonException("error.status.create");
+            }
+        } else {
+            status = select.get(0);
         }
         status = statusMapper.queryById(organizationId, status.getId());
         return modelMapper.map(status, StatusDTO.class);
@@ -230,14 +235,14 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Map<Long, Status> batchStatusGet(List<Long> ids) {
-        if(!ids.isEmpty()){
+        if (!ids.isEmpty()) {
             List<Status> statuses = statusMapper.batchStatusGet(ids);
             Map<Long, Status> map = new HashMap();
             for (Status status : statuses) {
                 map.put(status.getId(), status);
             }
             return map;
-        }else{
+        } else {
             return new HashMap<>();
         }
 
