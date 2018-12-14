@@ -16,7 +16,6 @@ import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.*;
-import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.modelmapper.ModelMapper;
@@ -156,7 +155,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     }
 
     private Boolean checkNameUpdate(Long organizationId, Long stateMachineId, String name) {
-        System.out.println("ttttttt："+name);
         StateMachine stateMachine = new StateMachine();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(name);
@@ -169,7 +167,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
 
     @Override
     public StateMachineDTO update(Long organizationId, Long stateMachineId, StateMachineDTO stateMachineDTO) {
-        if (checkNameUpdate(organizationId, stateMachineId, stateMachineDTO.getName())) {
+        if (stateMachineDTO.getName() != null && checkNameUpdate(organizationId, stateMachineId, stateMachineDTO.getName())) {
             throw new CommonException("error.stateMachineName.exist");
         }
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
