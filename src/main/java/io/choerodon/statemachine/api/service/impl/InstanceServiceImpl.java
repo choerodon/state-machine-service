@@ -7,6 +7,7 @@ import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
+import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.infra.enums.ConfigType;
@@ -14,6 +15,7 @@ import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
+import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper;
 import org.slf4j.Logger;
@@ -26,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,12 +51,18 @@ public class InstanceServiceImpl implements InstanceService {
     private MachineFactory machineFactory;
     @Autowired
     private CustomFeignClientAdaptor customFeignClientAdaptor;
+    @Autowired
+    private StateMachineMapper stateMachineMapper;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
     private static final String EXCEPTION = "Exception:{}";
 
     @Override
     public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, InputDTO inputDTO) {
+        StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
+        if (stateMachine == null) {
+            throw new CommonException("error.stateMachine.notFound");
+        }
         ExecuteResult executeResult;
         try {
             executeResult = machineFactory.startInstance(organizationId, serviceCode, stateMachineId, inputDTO);
@@ -83,13 +88,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
-        ExecuteResult executeResult;
-        try {
-            executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
-        } catch (Exception e) {
-            e.printStackTrace();
-            executeResult = new ExecuteResult(false, null, "执行转换失败");
-        }
+        ExecuteResult executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
         return executeResult;
     }
 
@@ -188,8 +187,12 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public Map<Long, Long> queryInitStatusIds(Long organizationId, List<Long> stateMachineIds) {
-        return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
-                .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
+        if (!stateMachineIds.isEmpty()) {
+            return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
+                    .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
+        } else {
+            return new HashMap<>();
+        }
     }
 
     /**

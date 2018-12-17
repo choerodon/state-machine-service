@@ -1,15 +1,17 @@
 package io.choerodon.statemachine.api.controller.v1
 
 import io.choerodon.asgard.saga.feign.SagaClient
-import io.choerodon.core.domain.Page
 import io.choerodon.statemachine.IntegrationTestConfiguration
 import io.choerodon.statemachine.api.dto.StateMachineDTO
+import io.choerodon.statemachine.api.dto.StateMachineNodeDTO
 import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO
 import io.choerodon.statemachine.api.service.InitService
 import io.choerodon.statemachine.api.service.StateMachineService
 import io.choerodon.statemachine.domain.*
 import io.choerodon.statemachine.domain.event.ProjectEvent
+import io.choerodon.statemachine.infra.enums.NodeType
 import io.choerodon.statemachine.infra.enums.StateMachineStatus
+import io.choerodon.statemachine.infra.enums.StatusType
 import io.choerodon.statemachine.infra.mapper.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -27,12 +29,12 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 /**
  * @author shinan.chen
- * @since 2018/12/10
+ * @since 2018/12/13
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
 @Stepwise
-class StateMachineControllerSpec extends Specification {
+class NodeControllerSpec extends Specification {
     @Autowired
     TestRestTemplate restTemplate
     @Autowired
@@ -62,7 +64,7 @@ class StateMachineControllerSpec extends Specification {
     @Shared
     Long testProjectId = 1L
     @Shared
-    String baseUrl = '/v1/organizations/{organization_id}/state_machines'
+    String baseUrl = '/v1/organizations/{organization_id}/state_machine_nodes'
     @Shared
     def stateMachineList = []
     @Shared
@@ -75,29 +77,54 @@ class StateMachineControllerSpec extends Specification {
             needInit = false
 
             //初始化状态
-            initService.initStatus(testOrganizationId)
+            statusList = initService.initStatus(testOrganizationId)
             //初始化默认状态机
-            def stateMachineId = initService.initDefaultStateMachine(testOrganizationId)
+            Long stateMachineId = initService.initDefaultStateMachine(testOrganizationId)
             //发布状态机
             stateMachineService.deploy(testOrganizationId, stateMachineId, true)
-            //新增一个状态机
-            StateMachineDTO stateMachineDTO = new StateMachineDTO()
-            stateMachineDTO.setStatus(StateMachineStatus.CREATE)
-            stateMachineDTO.setName("新状态机")
-            stateMachineDTO.setDescription("描述")
-            stateMachineDTO.setOrganizationId(testOrganizationId)
-            stateMachineDTO = stateMachineService.create(testOrganizationId, stateMachineDTO)
+
+            StateMachineDTO stateMachineDTO = stateMachineService.queryStateMachineWithConfigById(testOrganizationId, stateMachineId, false)
             stateMachineList.add(stateMachineDTO)
-            stateMachineIds.add(stateMachineDTO.getId())
-            //新增一个状态机
-            StateMachineDTO stateMachineDTO2 = new StateMachineDTO()
-            stateMachineDTO2.setStatus(StateMachineStatus.CREATE)
-            stateMachineDTO2.setName("新新状态机")
-            stateMachineDTO2.setDescription("描述")
-            stateMachineDTO2.setOrganizationId(testOrganizationId)
-            stateMachineDTO2 = stateMachineService.create(testOrganizationId, stateMachineDTO2)
-            stateMachineList.add(stateMachineDTO2)
-            stateMachineIds.add(stateMachineDTO2.getId())
+            stateMachineIds.add(stateMachineId)
+
+            //初始化一个状态机
+            StateMachine stateMachine = new StateMachine()
+            stateMachine.setId(10L)
+            stateMachine.setOrganizationId(testOrganizationId)
+            stateMachine.setName("新状态机")
+            stateMachine.setDescription("新状态机")
+            stateMachine.setStatus(StateMachineStatus.CREATE)
+            stateMachine.setDefault(false)
+            stateMachineMapper.insert(stateMachine)
+
+            //创建初始状态机节点和转换
+            initService.createStateMachineDetail(testOrganizationId, 10L)
+
+            //新增一个状态
+            Status status = new Status()
+            status.setId(10L)
+            status.setName("新状态")
+            status.setDescription("新状态")
+            status.setOrganizationId(testOrganizationId)
+            status.setType(StatusType.DOING)
+            statusMapper.insert(status)
+            //新增一个状态节点
+            Status newStatus = new Status()
+            newStatus.setId(11L)
+            newStatus.setName("新状态")
+            newStatus.setDescription("新状态")
+            newStatus.setOrganizationId(testOrganizationId)
+            newStatus.setType(StatusType.DOING)
+            statusMapper.insert(newStatus)
+            StateMachineNodeDraft nodeDraft = new StateMachineNodeDraft()
+            nodeDraft.id = 10L
+            nodeDraft.organizationId = testOrganizationId
+            nodeDraft.statusId = 11L
+            nodeDraft.type = NodeType.CUSTOM
+            nodeDraft.positionX = 100
+            nodeDraft.positionY = 100
+            nodeDraft.stateMachineId = 10L
+            nodeDraftMapper.insert(nodeDraft)
         }
     }
     /**
@@ -133,54 +160,20 @@ class StateMachineControllerSpec extends Specification {
         }
     }
 
-    def "pagingQuery"() {
-        given: '准备工作'
-        def url = baseUrl + "?1=1"
-        if (name != null) {
-            url = url + "&name=" + name
-        }
-        if (description != null) {
-            url = url + "&description=" + description
-        }
-        if (param != null) {
-            url = url + "&param=" + param
-        }
-        when: '分页查询'
-        ParameterizedTypeReference<Page<StateMachineDTO>> typeRef = new ParameterizedTypeReference<Page<StateMachineDTO>>() {
-        }
-        def entity = restTemplate.exchange(url, HttpMethod.GET, null, typeRef, testOrganizationId)
-
-        then: '返回结果'
-        def actRequest = false
-        def actResponseSize = 0
-        if (entity != null) {
-            if (entity.getStatusCode().is2xxSuccessful()) {
-                actRequest = true
-                if (entity.getBody() != null) {
-                    actResponseSize = entity.getBody().size()
-                }
-            }
-        }
-        actRequest == expRequest
-        actResponseSize == expResponseSize
-
-        where: '测试用例：'
-        name       | description | param || expRequest | expResponseSize
-        null       | null        | null  || true       | 3
-        '默认'       | null        | null  || true       | 1
-        null       | null        | '默认'  || true       | 1
-        'notFound' | null        | null  || true       | 0
-    }
-
     def "create"() {
         given: '准备工作'
-        StateMachineDTO stateMachineDTO = new StateMachineDTO()
-        stateMachineDTO.setName(testName)
-        stateMachineDTO.setDescription(testDescription)
-        stateMachineDTO.setOrganizationId(testOrganizationId)
-        when: '创建状态机'
-        HttpEntity<StateMachineDTO> httpEntity = new HttpEntity<>(stateMachineDTO)
-        def entity = restTemplate.exchange(baseUrl, HttpMethod.POST, httpEntity, StateMachineDTO, testOrganizationId)
+        StateMachineNodeDTO nodeDTO = new StateMachineNodeDTO()
+        nodeDTO.type = nodeType
+        nodeDTO.statusId = statusId
+        nodeDTO.stateMachineId = stateMachineId
+        nodeDTO.organizationId = testOrganizationId
+        nodeDTO.positionY = 100L
+        nodeDTO.positionX = 100L
+        when: '创建节点（草稿）'
+        HttpEntity<StateMachineNodeDTO> httpEntity = new HttpEntity<>(nodeDTO)
+        ParameterizedTypeReference<List<StateMachineNodeDTO>> typeRef = new ParameterizedTypeReference<List<StateMachineNodeDTO>>() {
+        }
+        def entity = restTemplate.exchange(baseUrl+"?stateMachineId="+stateMachineId, HttpMethod.POST, httpEntity, typeRef, testOrganizationId)
 
         then: '状态码为200，创建成功'
         def actRequest = false
@@ -188,7 +181,7 @@ class StateMachineControllerSpec extends Specification {
         if (entity != null) {
             if (entity.getStatusCode().is2xxSuccessful()) {
                 actRequest = true
-                if (entity.getBody() != null && entity.getBody().getId() != null) {
+                if (entity.getBody() != null && entity.getBody().size() > 0) {
                     actResponse = true
                 }
             }
@@ -196,10 +189,11 @@ class StateMachineControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        testName | testDescription     || expRequest | expResponse
-        '新状态机1'  | 'test-description1' || true       | true
-        '默认状态机'  | 'test-description1' || true       | false
-        null     | 'test-description1' || true       | false
+        nodeType        | statusId | stateMachineId || expRequest | expResponse
+        "xx"            | 10L      | 10L            || true       | false
+        NodeType.CUSTOM | 10L      | 9999L          || true       | false
+        NodeType.CUSTOM | 9999L    | 10L            || true       | false
+        NodeType.CUSTOM | 10L      | 10L            || true       | true
     }
 
     def "update"() {
@@ -207,9 +201,9 @@ class StateMachineControllerSpec extends Specification {
         StateMachineDTO stateMachineDTO = stateMachineList.get(0)
         stateMachineDTO.setName(updateName)
 
-        when: '更新状态'
-        HttpEntity<StateMachineDTO> httpEntity = new HttpEntity<>(stateMachineDTO)
-        def entity = restTemplate.exchange(baseUrl + '/{state_machine_id}', HttpMethod.PUT, httpEntity, StateMachineDTO, testOrganizationId, stateMachineDTO.getId())
+        when: '更新节点（草稿）'
+        HttpEntity<StateMachineNodeDTO> httpEntity = new HttpEntity<>(stateMachineDTO)
+        def entity = restTemplate.exchange(baseUrl + '/{node_id}', HttpMethod.PUT, httpEntity, StateMachineDTO, testOrganizationId, stateMachineDTO.getId())
 
         then: '状态码为200，更新成功'
         def actRequest = false

@@ -65,9 +65,11 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         createStatus(organizationId, nodeDTO);
         StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
         node.setType(NodeType.CUSTOM);
-        int isInsert = nodeDraftMapper.insert(node);
-        if (isInsert != 1) {
-            throw new CommonException("error.stateMachineNode.create");
+        if(nodeDraftMapper.select(node).isEmpty()){
+            int isInsert = nodeDraftMapper.insert(node);
+            if (isInsert != 1) {
+                throw new CommonException("error.stateMachineNode.create");
+            }
         }
         return queryByStateMachineId(organizationId, node.getStateMachineId(), true);
     }

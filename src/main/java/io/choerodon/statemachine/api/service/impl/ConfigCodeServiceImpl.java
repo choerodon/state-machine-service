@@ -9,6 +9,7 @@ import io.choerodon.statemachine.app.assembler.ConfigCodeAssembler;
 import io.choerodon.statemachine.domain.ConfigCode;
 import io.choerodon.statemachine.domain.StateMachineConfigDraft;
 import io.choerodon.statemachine.infra.enums.ConfigType;
+import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.mapper.ConfigCodeMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineConfigDraftMapper;
 import io.choerodon.statemachine.infra.utils.EnumUtil;
@@ -49,6 +50,12 @@ public class ConfigCodeServiceImpl extends BaseServiceImpl<ConfigCode> implement
 
     @Override
     public List<ConfigCodeDTO> queryByTransformId(Long organizationId, Long transformId, String type) {
+        if (type == null) {
+            throw new CommonException("error.type.notNull");
+        }
+        if (!EnumUtil.contain(ConfigType.class, type)) {
+            throw new CommonException("error.status.type.illegal");
+        }
         StateMachineConfigDraft config = new StateMachineConfigDraft();
         config.setOrganizationId(organizationId);
         config.setTransformId(transformId);
