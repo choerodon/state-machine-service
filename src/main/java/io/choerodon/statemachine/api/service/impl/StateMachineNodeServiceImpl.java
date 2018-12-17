@@ -99,6 +99,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
             if (isDelete != 1) {
                 throw new CommonException("error.stateMachineNode.delete");
             }
+            //删除关联的转换
             transformDraftMapper.deleteByNodeId(nodeId);
         } else {
             throw new CommonException("error.stateMachineNode.statusHasIssues");
