@@ -19,6 +19,7 @@ import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.feign.IssueFeignClient;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -260,16 +261,20 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
                 throw new CommonException("error.createAllStatusTransform.updateAllStatusTransformId");
             }
             //将节点和转换添加到发布中
-            insertNodeAndTransformForDeploy(nodeDraft, transformDraft);
+            insertNodeAndTransformForDeploy(nodeDraft.getId(), transformDraft.getId());
         }
     }
 
-    private void insertNodeAndTransformForDeploy(StateMachineNodeDraft nodeDraft, StateMachineTransformDraft transformDraft) {
+    private void insertNodeAndTransformForDeploy(Long nodeDraftId, Long transformDraftId) {
+        StateMachineNodeDraft nodeDraft = nodeDraftMapper.selectByPrimaryKey(nodeDraftId);
+        StateMachineTransformDraft transformDraft = transformDraftMapper.selectByPrimaryKey(transformDraftId);
         //插入节点
-        StateMachineNode nodeDeploy = modelMapper.map(nodeDraft, StateMachineNode.class);
+        StateMachineNode nodeDeploy = new StateMachineNode();
+        BeanUtils.copyProperties(nodeDraft, nodeDeploy);
         nodeDeployMapper.insert(nodeDeploy);
         //插入转换
-        StateMachineTransform transformDeploy = modelMapper.map(transformDraft, StateMachineTransform.class);
+        StateMachineTransform transformDeploy = new StateMachineTransform();
+        BeanUtils.copyProperties(transformDraft, transformDeploy);
         transformDeployMapper.insert(transformDeploy);
     }
 }
