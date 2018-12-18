@@ -16,14 +16,8 @@
 
     <delete id="fixDeleteIllegalTransforms">
         DELETE FROM state_machine_transform
-        WHERE id in (
-          select t.id
-          from state_machine_transform t
-          where t.end_node_id not in (
-            select n.id from state_machine_node n
-          )
-          and t.organization_id = #{organizationId}
-        )
+        WHERE end_node_id NOT IN ( SELECT n.id FROM state_machine_node n )
+	    AND organization_id = #{organizationId}
     </delete>
 
 
