@@ -9,6 +9,7 @@ import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.cache.InstanceCache;
+import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
@@ -282,6 +283,9 @@ public class StatusServiceImpl implements StatusService {
         StateMachineNode res = nodeDeployMapper.selectOne(stateNode);
         if (res == null) {
             throw new RemoveStatusException("error.status.exist");
+        }
+        if(res.getType().equals(NodeType.INIT)){
+            throw new RemoveStatusException("error.status.illegal");
         }
         if(res.getId()!=null){
             //删除节点
