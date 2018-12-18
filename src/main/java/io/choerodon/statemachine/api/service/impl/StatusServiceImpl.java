@@ -30,11 +30,13 @@ public class StatusServiceImpl implements StatusService {
     @Autowired
     private StatusMapper statusMapper;
     @Autowired
-    private StateMachineNodeDraftMapper nodeMapper;
+    private StateMachineNodeDraftMapper nodeDraftMapper;
     @Autowired
     private StateMachineNodeMapper nodeDeployMapper;
     @Autowired
     private StateMachineNodeService nodeService;
+    @Autowired
+    private StateMachineTransformDraftMapper transformDraftMapper;
     @Autowired
     private StateMachineTransformMapper transformDeployMapper;
     @Autowired
@@ -54,7 +56,7 @@ public class StatusServiceImpl implements StatusService {
 //        }.getType());
 //        for (StatusDTO dto : statusDTOs) {
 //            //该状态已被草稿状态机使用个数
-//            Long draftUsed = nodeMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
+//            Long draftUsed = nodeDraftMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
 //            //该状态已被发布状态机使用个数
 //            Long deployUsed = nodeDeployMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
 //            if (draftUsed == 0 && deployUsed == 0) {
@@ -165,7 +167,7 @@ public class StatusServiceImpl implements StatusService {
         if (status == null) {
             throw new CommonException("error.status.delete.nofound");
         }
-        Long draftUsed = nodeMapper.checkStateDelete(organizationId, statusId);
+        Long draftUsed = nodeDraftMapper.checkStateDelete(organizationId, statusId);
         Long deployUsed = nodeDeployMapper.checkStateDelete(organizationId, statusId);
         if (draftUsed != 0 || deployUsed != 0) {
             throw new CommonException("error.status.delete");
@@ -286,6 +288,10 @@ public class StatusServiceImpl implements StatusService {
             nodeDeployMapper.deleteByPrimaryKey(res.getId());
             //删除节点关联的转换
             transformDeployMapper.deleteByNodeId(res.getId());
+            //删除节点
+            nodeDraftMapper.deleteByPrimaryKey(res.getId());
+            //删除节点关联的转换
+            transformDraftMapper.deleteByNodeId(res.getId());
         }
         //清理状态机实例
         instanceCache.cleanStateMachine(stateMachineId);
