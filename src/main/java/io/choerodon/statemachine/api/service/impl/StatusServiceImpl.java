@@ -6,19 +6,13 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
-import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.api.service.StatusService;
-import io.choerodon.statemachine.domain.StateMachineInfo;
-import io.choerodon.statemachine.domain.StateMachineNode;
-import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.domain.StatusWithInfo;
+import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.StatusType;
+import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
-import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
-import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
-import io.choerodon.statemachine.infra.mapper.StatusMapper;
+import io.choerodon.statemachine.infra.mapper.*;
 import io.choerodon.statemachine.infra.utils.EnumUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -42,7 +36,7 @@ public class StatusServiceImpl implements StatusService {
     @Autowired
     private StateMachineNodeService nodeService;
     @Autowired
-    private StateMachineService stateMachineService;
+    private StateMachineTransformMapper transformDeployMapper;
     @Autowired
     private InstanceCache instanceCache;
     @Autowired
@@ -267,7 +261,7 @@ public class StatusServiceImpl implements StatusService {
         } else {
             statusDTO = modelMapper.map(status, StatusDTO.class);
         }
-        //将状态加入状态机中
+        //将状态加入状态机中，直接加到发布表中
         nodeService.createNodeAndTransformForAgile(organizationId, stateMachineId, statusDTO);
         //清理状态机实例
         instanceCache.cleanStateMachine(stateMachineId);
@@ -287,7 +281,12 @@ public class StatusServiceImpl implements StatusService {
         if (res == null) {
             throw new RemoveStatusException("error.status.exist");
         }
-        nodeDeployMapper.delete(stateNode);
+        if(res.getId()!=null){
+            //删除节点
+            nodeDeployMapper.deleteByPrimaryKey(res.getId());
+            //删除节点关联的转换
+            transformDeployMapper.deleteByNodeId(res.getId());
+        }
         //清理状态机实例
         instanceCache.cleanStateMachine(stateMachineId);
     }
