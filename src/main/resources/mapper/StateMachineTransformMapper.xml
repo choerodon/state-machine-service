@@ -14,4 +14,17 @@
         WHERE start_node_id = #{nodeId} OR end_node_id = #{nodeId}
     </update>
 
+    <delete id="fixDeleteIllegalTransforms">
+        DELETE FROM state_machine_transform
+        WHERE id in (
+          select t.id
+          from state_machine_transform t
+          where t.end_node_id not in (
+            select n.id from state_machine_node n
+          )
+          and t.organization_id = #{organizationId}
+        )
+    </delete>
+
+
 </mapper>

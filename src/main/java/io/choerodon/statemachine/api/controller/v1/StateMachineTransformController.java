@@ -99,4 +99,11 @@ public class StateMachineTransformController extends BaseController {
                                                            @RequestParam("condition_strategy") String conditionStrategy) {
         return new ResponseEntity<>(transformService.updateConditionStrategy(organizationId, transformId, conditionStrategy), HttpStatus.CREATED);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "修复0.12.0发布后，敏捷移除节点，但没移除转换")
+    @GetMapping(value = "/fix_delete_illegal_transforms")
+    public ResponseEntity<Boolean> fixDeleteIllegalTransforms(@PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(transformService.fixDeleteIllegalTransforms(organizationId), HttpStatus.CREATED);
+    }
 }
