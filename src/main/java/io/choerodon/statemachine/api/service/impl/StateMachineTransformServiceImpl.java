@@ -52,6 +52,9 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     @ChangeStateMachineStatus
     @Transactional(rollbackFor = Exception.class)
     public StateMachineTransformDTO create(Long organizationId, Long stateMachineId, StateMachineTransformDTO transformDTO) {
+        if(!checkName(organizationId,stateMachineId,null,transformDTO.getName())){
+            throw new CommonException("error.name.exist");
+        }
         transformDTO.setStateMachineId(stateMachineId);
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setType(TransformType.CUSTOM);
