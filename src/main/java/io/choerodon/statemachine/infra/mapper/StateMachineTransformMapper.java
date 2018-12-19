@@ -17,4 +17,12 @@ public interface StateMachineTransformMapper extends BaseMapper<StateMachineTran
     int deleteByNodeId(Long nodeId);
 
     StateMachineTransform queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
+
+    /**
+     * 修复0.12.0发布后，敏捷移除节点，但没移除转换
+     *
+     * @param organizationId
+     * @return
+     */
+    int fixDeleteIllegalTransforms(@Param("organizationId") Long organizationId);
 }

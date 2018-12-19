@@ -153,7 +153,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     @Override
     public List<TransformInfo> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId) {
         StateMachineNode startNode = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, statusId);
-        if(startNode==null){
+        if (startNode == null) {
             throw new CommonException("error.statusId.notFound");
         }
         Long startNodeId = startNode.getId();
@@ -262,6 +262,12 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         if (update != 1) {
             throw new CommonException("error.updateConditionStrategy.updateOptional");
         }
+        return true;
+    }
+
+    @Override
+    public Boolean fixDeleteIllegalTransforms(Long organizationId) {
+        transformDeployMapper.fixDeleteIllegalTransforms(organizationId);
         return true;
     }
 }
