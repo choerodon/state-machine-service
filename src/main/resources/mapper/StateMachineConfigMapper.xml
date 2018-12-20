@@ -19,4 +19,18 @@
         and smc.transform_id = #{transformId}
         and smc.type = #{type}
     </select>
+
+    <select id="queryWithCodeInfoByTransformIds" resultType="io.choerodon.statemachine.domain.StateMachineConfig">
+        SELECT smc.*,
+        cc.name code_name,
+        cc.description code_description
+        FROM state_machine_config smc
+        LEFT JOIN config_code cc on cc.code = smc.code
+        WHERE smc.organization_id = #{organizationId}
+        and smc.type = #{type}
+        AND smc.transform_id IN
+        <foreach item="item" index="index" collection="transformIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

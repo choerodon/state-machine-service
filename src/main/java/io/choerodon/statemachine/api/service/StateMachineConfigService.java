@@ -37,4 +37,14 @@ public interface StateMachineConfigService extends BaseService<StateMachineConfi
      * @return
      */
     List<StateMachineConfigDTO> queryByTransformId(Long organizationId, Long transformId, String type, Boolean isDraft);
+
+    /**
+     * 批量获取转换的配置列表
+     *
+     * @param organizationId
+     * @param transformIds
+     * @param type
+     * @return
+     */
+    List<StateMachineConfigDTO> queryDeployByTransformIds(Long organizationId, String type, List<Long> transformIds);
 }

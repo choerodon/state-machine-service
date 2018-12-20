@@ -52,7 +52,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     @ChangeStateMachineStatus
     @Transactional(rollbackFor = Exception.class)
     public StateMachineTransformDTO create(Long organizationId, Long stateMachineId, StateMachineTransformDTO transformDTO) {
-        if(!checkName(organizationId,stateMachineId,null,transformDTO.getName())){
+        if (!checkName(organizationId, stateMachineId, null, transformDTO.getName())) {
             throw new CommonException("error.name.exist");
         }
         transformDTO.setStateMachineId(stateMachineId);
@@ -154,23 +154,12 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
-    public List<TransformInfo> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId) {
+    public List<StateMachineTransform> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId) {
         StateMachineNode startNode = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, statusId);
         if (startNode == null) {
             throw new CommonException("error.statusId.notFound");
         }
-        Long startNodeId = startNode.getId();
-        StateMachineTransform select1 = new StateMachineTransform();
-        select1.setStateMachineId(stateMachineId);
-        select1.setStartNodeId(startNodeId);
-        List<StateMachineTransform> stateMachineTransforms = transformDeployMapper.select(select1);
-        //增加【全部】类型的转换
-        StateMachineTransform select2 = new StateMachineTransform();
-        select2.setStateMachineId(stateMachineId);
-        select2.setType(TransformType.ALL);
-        List<StateMachineTransform> typeAllTransforms = transformDeployMapper.select(select2);
-        stateMachineTransforms.addAll(typeAllTransforms);
-        return stateMachineTransformAssembler.toTransformInfo(stateMachineId, stateMachineTransforms);
+        return transformDeployMapper.queryByStartNodeIdOrType(organizationId, stateMachineId, startNode.getId(), TransformType.ALL);
     }
 
     @Override

@@ -12,10 +12,7 @@ import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.app.assembler.StatusAssembler;
 import io.choerodon.statemachine.domain.*;
 import io.choerodon.statemachine.infra.annotation.ChangeStateMachineStatus;
-import io.choerodon.statemachine.infra.enums.NodeType;
-import io.choerodon.statemachine.infra.enums.StateMachineStatus;
-import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
-import io.choerodon.statemachine.infra.enums.TransformType;
+import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.feign.IssueFeignClient;
 import io.choerodon.statemachine.infra.mapper.*;
 import org.modelmapper.ModelMapper;
@@ -52,13 +49,9 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
     @Autowired
     private StatusMapper statusMapper;
     @Autowired
-    private StateMachineTransformService transformService;
-    @Autowired
     private StateMachineMapper stateMachineMapper;
     @Autowired
     private IssueFeignClient issueFeignClient;
-
-    private ModelMapper modelMapper = new ModelMapper();
 
     @Override
     @ChangeStateMachineStatus
@@ -67,6 +60,8 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
         nodeDTO.setOrganizationId(organizationId);
         createStatus(organizationId, nodeDTO);
         StateMachineNodeDraft node = stateMachineNodeAssembler.toTarget(nodeDTO, StateMachineNodeDraft.class);
+        node.setWidth(InitNode.INIT.getWidth());
+        node.setHeight(InitNode.INIT.getHeight());
         node.setType(NodeType.CUSTOM);
         if (nodeDraftMapper.select(node).isEmpty()) {
             int isInsert = nodeDraftMapper.insert(node);
@@ -238,7 +233,7 @@ public class StateMachineNodeServiceImpl extends BaseServiceImpl<StateMachineNod
                 nodeDraft.setStateMachineId(stateMachineId);
                 nodeDraft.setType(NodeType.CUSTOM);
                 nodeDraft.setPositionX(maxNode.getPositionX());
-                nodeDraft.setPositionY(maxNode.getPositionY() + 100);
+                nodeDraft.setPositionY(maxNode.getPositionY() + 50);
                 nodeDraft.setHeight(maxNode.getHeight());
                 nodeDraft.setWidth(maxNode.getWidth());
                 int isInsert = nodeDraftMapper.insert(nodeDraft);
