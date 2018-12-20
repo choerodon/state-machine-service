@@ -4,6 +4,8 @@ import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.statemachine.domain.StateMachineTransform;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
@@ -17,6 +19,16 @@ public interface StateMachineTransformMapper extends BaseMapper<StateMachineTran
     int deleteByNodeId(Long nodeId);
 
     StateMachineTransform queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
+
+    /**
+     * 获取某个节点拥有的转换（包括全部转换）
+     * @param organizationId
+     * @param stateMachineId
+     * @param startNodeId
+     * @param transformType
+     * @return
+     */
+    List<StateMachineTransform> queryByStartNodeIdOrType(@Param("organizationId") Long organizationId, @Param("stateMachineId") Long stateMachineId, @Param("startNodeId") Long startNodeId,@Param("transformType") String transformType);
 
     /**
      * 修复0.12.0发布后，敏捷移除节点，但没移除转换

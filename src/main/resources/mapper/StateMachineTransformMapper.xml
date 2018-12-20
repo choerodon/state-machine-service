@@ -20,5 +20,16 @@
 	    AND organization_id = #{organizationId}
     </delete>
 
+    <select id="queryByStartNodeIdOrType" resultType="io.choerodon.statemachine.domain.StateMachineTransform">
+        SELECT *
+        FROM state_machine_transform
+        WHERE organization_id = #{organizationId}
+        and state_machine_id = #{stateMachineId}
+        and (
+          start_node_id = #{startNodeId}
+          OR
+          type = #{transformType}
+        )
+    </select>
 
 </mapper>

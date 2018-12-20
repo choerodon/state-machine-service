@@ -11,7 +11,6 @@ import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.TransformType;
-import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import org.springframework.statemachine.config.StateMachineBuilder;
 import org.springframework.statemachine.guard.Guard;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -142,11 +140,11 @@ public class MachineFactory {
      * @return
      */
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
-        try{
+        try {
             Long instanceId = inputDTO.getInstanceId();
             //校验transformId是否合法
-            List<TransformInfo> transformInfos = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
-            if (transformInfos.stream().noneMatch(x -> x.getId().equals(transformId))) {
+            List<StateMachineTransform> transforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
+            if (transforms.stream().noneMatch(x -> x.getId().equals(transformId))) {
                 throw new CommonException("error.executeTransform.transformId.illegal");
             }
             //状态转节点

@@ -7,6 +7,7 @@ import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
+import io.choerodon.statemachine.app.assembler.StateMachineTransformAssembler;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.StateMachineTransform;
@@ -53,6 +54,8 @@ public class InstanceServiceImpl implements InstanceService {
     private CustomFeignClientAdaptor customFeignClientAdaptor;
     @Autowired
     private StateMachineMapper stateMachineMapper;
+    @Autowired
+    private StateMachineTransformAssembler stateMachineTransformAssembler;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
     private static final String EXCEPTION = "Exception:{}";
@@ -94,9 +97,21 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public List<TransformInfo> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId) {
-        List<TransformInfo> transformInfos = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, statusId);
-        //获取转换的条件配置
-        transformInfos.forEach(transformInfo -> transformInfo.setConditions(condition(transformInfo.getOrganizationId(), transformInfo.getId())));
+        List<StateMachineTransform> stateMachineTransforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, statusId);
+        //获取节点信息
+        List<StateMachineNode> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
+        List<StateMachineConfigDTO> configs = configService.queryDeployByTransformIds(organizationId, ConfigType.CONDITION, stateMachineTransforms.stream().map(StateMachineTransform::getId).collect(Collectors.toList()));
+        Map<Long, Long> nodeMap = nodes.stream().collect(Collectors.toMap(StateMachineNode::getId, StateMachineNode::getStatusId));
+        Map<Long, List<StateMachineConfigDTO>> configMaps = configs.stream().collect(Collectors.groupingBy(StateMachineConfigDTO::getTransformId));
+        List<TransformInfo> transformInfos = new ArrayList<>(stateMachineTransforms.size());
+        for (StateMachineTransform transform : stateMachineTransforms) {
+            TransformInfo transformInfo = stateMachineTransformAssembler.toTarget(transform, TransformInfo.class);
+            transformInfo.setStartStatusId(nodeMap.get(transform.getStartNodeId()));
+            transformInfo.setEndStatusId(nodeMap.get(transform.getEndNodeId()));
+            //获取转换的条件配置
+            transformInfo.setConditions(configMaps.get(transform.getId()) == null ? Collections.EMPTY_LIST : configMaps.get(transform.getId()));
+            transformInfos.add(transformInfo);
+        }
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
         try {
             ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getFilterTransformURI(serviceCode, instanceId), transformInfos);

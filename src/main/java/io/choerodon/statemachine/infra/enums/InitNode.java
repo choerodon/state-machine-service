@@ -5,10 +5,10 @@ package io.choerodon.statemachine.infra.enums;
  * @date 2018/10/15
  */
 public enum InitNode {
-    START("start", 25L, 0L, 50L, 50L, NodeType.START),
-    INIT("create", 0L, 120L, 100L, 50L, NodeType.INIT),
-    NODE2("processing", 0L, 220L, 100L, 50L, NodeType.CUSTOM),
-    NODE5("complete", 0L, 320L, 100L, 50L, NodeType.CUSTOM);
+    START("start", 21L, 0L, 20L, 20L, NodeType.START),
+    INIT("create", 0L, 50L, 62L, 26L, NodeType.INIT),
+    NODE1("processing", 0L, 100L, 62L, 26L, NodeType.CUSTOM),
+    NODE2("complete", 0L, 150L, 62L, 26L, NodeType.CUSTOM);
     String code;
     Long positionX;
     Long positionY;

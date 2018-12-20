@@ -2,6 +2,7 @@ package io.choerodon.statemachine.api.service;
 
 import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
+import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 
@@ -75,7 +76,7 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @param statusId
      * @return
      */
-    List<TransformInfo> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId);
+    List<StateMachineTransform> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 创建【全部转换到此状态】转换，所有节点均可转换到当前节点

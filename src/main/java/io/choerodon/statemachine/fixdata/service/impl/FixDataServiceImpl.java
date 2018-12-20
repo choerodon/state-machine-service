@@ -91,18 +91,18 @@ public class FixDataServiceImpl implements FixDataService {
         } else {
             initStatus = statuses.get(0);
         }
-        FixNode init = new FixNode(initStatus, 0L, 120L, 100L, 50L, NodeType.INIT);
+        FixNode init = new FixNode(initStatus, InitNode.INIT.getPositionX(), InitNode.INIT.getPositionY(), InitNode.INIT.getWidth(), InitNode.INIT.getHeight(), InitNode.INIT.getType());
 
         fixNodes.add(start);
         fixNodes.add(init);
-        Long positionY = 120L;
+        Long positionY = 50L;
         for (String statusName : statuses) {
             //跳过init节点
             if (initStatus.equals(statusName)) {
                 continue;
             }
-            positionY += 100L;
-            FixNode custom = new FixNode(statusName, 0L, positionY, 100L, 50L, NodeType.CUSTOM);
+            positionY += 50L;
+            FixNode custom = new FixNode(statusName, 0L, positionY, InitNode.INIT.getWidth(), InitNode.INIT.getHeight(), NodeType.CUSTOM);
             fixNodes.add(custom);
         }
 

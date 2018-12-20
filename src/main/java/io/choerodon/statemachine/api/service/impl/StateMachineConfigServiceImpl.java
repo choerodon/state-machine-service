@@ -87,6 +87,21 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
         return configDTOS;
     }
 
+    @Override
+    public List<StateMachineConfigDTO> queryDeployByTransformIds(Long organizationId, String type, List<Long> transformIds) {
+        if (!EnumUtil.contain(ConfigType.class, type)) {
+            throw new CommonException("error.status.type.illegal");
+        }
+        if(transformIds!=null&&!transformIds.isEmpty()){
+            List<StateMachineConfig> configs = configDeployMapper.queryWithCodeInfoByTransformIds(organizationId, type, transformIds);
+            List<StateMachineConfigDTO> configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
+            return configDTOS;
+        }else{
+            return null;
+        }
+
+    }
+
     public void checkCode(Long transformId, String type, String code) {
         List<ConfigCodeDTO> configCodeDTOs = configCodeService.queryByType(type);
         if (configCodeDTOs.stream().noneMatch(configCodeDTO -> configCodeDTO.getCode().equals(code))) {
