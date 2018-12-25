@@ -188,7 +188,7 @@ public class MachineFactory {
      */
     private Action<String, String> initialAction(Long organizationId, String serviceCode) {
         return context -> {
-            logger.info("stateMachine instance execute initialAction:{}", context.getEvent());
+            logger.info("stateMachine instance execute initialAction");
 //                instanceService.postAction()
         };
     }

@@ -97,6 +97,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public List<TransformInfo> queryListTransform(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long statusId) {
+        Boolean isNeedFilter = false;
         List<StateMachineTransform> stateMachineTransforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, statusId);
         //获取节点信息
         List<StateMachineNode> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
@@ -109,16 +110,24 @@ public class InstanceServiceImpl implements InstanceService {
             transformInfo.setStartStatusId(nodeMap.get(transform.getStartNodeId()));
             transformInfo.setEndStatusId(nodeMap.get(transform.getEndNodeId()));
             //获取转换的条件配置
-            transformInfo.setConditions(configMaps.get(transform.getId()) == null ? Collections.EMPTY_LIST : configMaps.get(transform.getId()));
+            List<StateMachineConfigDTO> conditionConfigs = configMaps.get(transform.getId());
+            if (conditionConfigs == null) {
+                transformInfo.setConditions(Collections.EMPTY_LIST);
+            } else {
+                transformInfo.setConditions(conditionConfigs);
+                isNeedFilter = true;
+            }
             transformInfos.add(transformInfo);
         }
         //调用对应服务，根据条件校验转换，过滤掉可用的转换
-        try {
-            ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getFilterTransformURI(serviceCode, instanceId), transformInfos);
-            transformInfos = listEntity.getBody();
-        } catch (Exception e) {
-            LOGGER.error(EXCEPTION, e);
-            transformInfos = Collections.emptyList();
+        if (isNeedFilter) {
+            try {
+                ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getFilterTransformURI(serviceCode, instanceId), transformInfos);
+                transformInfos = listEntity.getBody();
+            } catch (Exception e) {
+                LOGGER.error(EXCEPTION, e);
+                transformInfos = Collections.emptyList();
+            }
         }
         return transformInfos;
     }
@@ -128,14 +137,18 @@ public class InstanceServiceImpl implements InstanceService {
         StateMachineTransform transform = transformMapper.queryById(organizationId, transformId);
         List<StateMachineConfigDTO> conditionConfigs = condition(organizationId, transformId);
         List<StateMachineConfigDTO> validatorConfigs = validator(organizationId, transformId);
-        ExecuteResult executeResult;
+        ExecuteResult executeResult = new ExecuteResult(true, null, null);
         //调用对应服务，执行条件和验证，返回是否成功
         try {
-            inputDTO.setConfigs(conditionConfigs);
-            executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigConditionURI(serviceCode, null, transform.getConditionStrategy()), inputDTO).getBody();
+            if (!conditionConfigs.isEmpty()) {
+                inputDTO.setConfigs(conditionConfigs);
+                executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigConditionURI(serviceCode, null, transform.getConditionStrategy()), inputDTO).getBody();
+            }
             if (executeResult.getSuccess()) {
-                inputDTO.setConfigs(validatorConfigs);
-                executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigValidatorURI(serviceCode, null), inputDTO).getBody();
+                if (!validatorConfigs.isEmpty()) {
+                    inputDTO.setConfigs(validatorConfigs);
+                    executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigValidatorURI(serviceCode, null), inputDTO).getBody();
+                }
             }
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
@@ -299,7 +312,7 @@ public class InstanceServiceImpl implements InstanceService {
         if (transformType != null) {
             stringBuilder.append("&transform_type=").append(transformType);
         }
-        LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
+        LOGGER.info("uri:{}", stringBuilder.toString());
         try {
             uri = new URI(stringBuilder.toString());
         } catch (URISyntaxException e) {
