@@ -57,16 +57,6 @@ public class StateMachineTransformController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "校验转换名字是否未被使用")
-    @GetMapping(value = "/check_name")
-    public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
-                                             @RequestParam Long stateMachineId,
-                                             @RequestParam(value = "transform_id", required = false) Long transformId,
-                                             @RequestParam("name") String name) {
-        return new ResponseEntity<>(transformService.checkName(organizationId, stateMachineId, transformId, name), HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取转换（草稿）")
     @GetMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformDTO> queryById(@PathVariable("organization_id") Long organizationId,

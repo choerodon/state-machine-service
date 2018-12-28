@@ -52,9 +52,6 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     @ChangeStateMachineStatus
     @Transactional(rollbackFor = Exception.class)
     public StateMachineTransformDTO create(Long organizationId, Long stateMachineId, StateMachineTransformDTO transformDTO) {
-        if (!checkName(organizationId, stateMachineId, null, transformDTO.getName())) {
-            throw new CommonException("error.name.exist");
-        }
         transformDTO.setStateMachineId(stateMachineId);
         StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setType(TransformType.CUSTOM);
@@ -100,20 +97,6 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         int isDelete = transformDraftMapper.deleteByPrimaryKey(transformId);
         if (isDelete != 1) {
             throw new CommonException("error.stateMachineTransform.delete");
-        }
-        return true;
-    }
-
-    @Override
-    public Boolean checkName(Long organizationId, Long stateMachineId, Long transformId, String name) {
-        StateMachineTransformDraft transform = new StateMachineTransformDraft();
-        transform.setStateMachineId(stateMachineId);
-        transform.setOrganizationId(organizationId);
-        transform.setName(name);
-        transform = transformDraftMapper.selectOne(transform);
-        if (transform != null) {
-            //若传了id，则为更新校验（更新校验不校验本身），不传为创建校验
-            return transform.getId().equals(transformId);
         }
         return true;
     }

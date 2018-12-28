@@ -50,16 +50,6 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
     Long getInitTransform(Long organizationId, Long stateMachineId);
 
     /**
-     * 校验转换名字是否未被使用
-     *
-     * @param stateMachineId 状态机id
-     * @param transformId    转换id
-     * @param name           名称
-     * @return
-     */
-    Boolean checkName(Long organizationId, Long stateMachineId, Long transformId, String name);
-
-    /**
      * 根据id获取转换
      *
      * @param organizationId
