@@ -15,7 +15,7 @@ public class CustomExtraDataManager implements ExtraDataManager {
     public ExtraData getData() {
         ChoerodonRouteData choerodonRouteData = new ChoerodonRouteData();
         choerodonRouteData.setName("state");
-        choerodonRouteData.setPath("/2/**");
+        choerodonRouteData.setPath("/state/**");
         choerodonRouteData.setServiceId("state-machine-service");
         extraData.put(ExtraData.ZUUL_ROUTE_DATA, choerodonRouteData);
         return extraData;
