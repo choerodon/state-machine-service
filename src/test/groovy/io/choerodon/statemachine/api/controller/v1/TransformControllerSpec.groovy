@@ -194,7 +194,6 @@ class TransformControllerSpec extends Specification {
         name   | startNodeId | endNodeId | stateMachineId || expRequest | expResponse
         "新转换"  | 2L          | 3L        | 1L             || true       | true
         "新转换"  | null        | 3L        | 1L             || true       | false
-        "初始转换" | 2L          | 3L        | 1L             || true       | false
         "新转换"  | 2L          | 3L        | 2L             || true       | false
         null   | 2L          | 3L        | 1L             || true       | false
         "新转换"  | 2L          | 3L        | null           || false      | false
@@ -259,42 +258,6 @@ class TransformControllerSpec extends Specification {
         null           | 1L          || false      | false
         2L             | 1L          || true       | false
         1L             | 2L          || true       | false
-    }
-
-    def "checkName"() {
-        given: '准备工作'
-        def url = baseUrl + "/check_name?1=1"
-        if (stateMachineId != null) {
-            url = url + "&stateMachineId=" + stateMachineId
-        }
-        if (transformId != null) {
-            url = url + "&transform_id=" + transformId
-        }
-        if (name != null) {
-            url = url + "&name=" + name
-        }
-        when: '校验转换名字是否未被使用'
-        def entity = restTemplate.exchange(url, HttpMethod.GET, null, Object, testOrganizationId)
-
-        then: '状态码为200，更新成功'
-        def actRequest = false
-        def actResponse = false
-        if (entity != null) {
-            if (entity.getStatusCode().is2xxSuccessful()) {
-                actRequest = true
-                if (entity.getBody() != null && entity.getBody() instanceof Boolean) {
-                    actResponse = entity.getBody()
-                }
-            }
-        }
-        actRequest == expRequest
-        actResponse == expResponse
-        where: '测试用例：'
-        stateMachineId | transformId | name   || expRequest | expResponse
-        1L             | null        | '新转换'  || true       | true
-        1L             | null        | '初始转换' || true       | false
-        1L             | 1L          | '初始转换' || true       | true
-        null           | 1L          | '初始转换' || false       | false
     }
 
     def "queryById"() {

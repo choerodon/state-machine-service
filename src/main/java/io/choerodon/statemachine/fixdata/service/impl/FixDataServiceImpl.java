@@ -294,7 +294,6 @@ public class FixDataServiceImpl implements FixDataService {
     @Override
     public Map<Long, List<Status>> queryAllStatus() {
         List<Status> issueTypes = statusMapper.selectAll();
-        Map<Long, List<Status>> orgMaps = issueTypes.stream().collect(Collectors.groupingBy(Status::getOrganizationId));
-        return orgMaps;
+        return issueTypes.stream().collect(Collectors.groupingBy(Status::getOrganizationId));
     }
 }

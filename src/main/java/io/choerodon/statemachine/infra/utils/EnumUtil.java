@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.infra.utils;
 
+import io.choerodon.core.exception.CommonException;
+
 import java.lang.reflect.Field;
 
 /**
@@ -8,24 +10,26 @@ import java.lang.reflect.Field;
  */
 public class EnumUtil {
 
-    private EnumUtil(){
+    private EnumUtil() {
     }
+
     /**
      * 枚举类通用校验
+     *
      * @param cls
      * @param statusType
      * @return
      */
-    public static Boolean contain(Class cls,String statusType){
+    public static Boolean contain(Class cls, String statusType) {
         Field[] fields = cls.getDeclaredFields();
-        for(Field field:fields){
+        for (Field field : fields) {
             try {
                 String type = String.valueOf(field.get(cls));
-                if(type.equals(statusType)){
+                if (type.equals(statusType)) {
                     return true;
                 }
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                throw new CommonException("error.enumUtil.contain", e);
             }
         }
         return false;
