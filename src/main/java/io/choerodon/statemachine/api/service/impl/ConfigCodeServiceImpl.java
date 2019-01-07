@@ -9,7 +9,6 @@ import io.choerodon.statemachine.app.assembler.ConfigCodeAssembler;
 import io.choerodon.statemachine.domain.ConfigCode;
 import io.choerodon.statemachine.domain.StateMachineConfigDraft;
 import io.choerodon.statemachine.infra.enums.ConfigType;
-import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.mapper.ConfigCodeMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineConfigDraftMapper;
 import io.choerodon.statemachine.infra.utils.EnumUtil;

@@ -91,8 +91,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
-        ExecuteResult executeResult = machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
-        return executeResult;
+        return machineFactory.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
     }
 
     @Override
@@ -112,7 +111,7 @@ public class InstanceServiceImpl implements InstanceService {
             //获取转换的条件配置
             List<StateMachineConfigDTO> conditionConfigs = configMaps.get(transform.getId());
             if (conditionConfigs == null) {
-                transformInfo.setConditions(Collections.EMPTY_LIST);
+                transformInfo.setConditions(Collections.emptyList());
             } else {
                 transformInfo.setConditions(conditionConfigs);
                 isNeedFilter = true;
@@ -144,11 +143,9 @@ public class InstanceServiceImpl implements InstanceService {
                 inputDTO.setConfigs(conditionConfigs);
                 executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigConditionURI(serviceCode, null, transform.getConditionStrategy()), inputDTO).getBody();
             }
-            if (executeResult.getSuccess()) {
-                if (!validatorConfigs.isEmpty()) {
-                    inputDTO.setConfigs(validatorConfigs);
-                    executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigValidatorURI(serviceCode, null), inputDTO).getBody();
-                }
+            if (executeResult.getSuccess() && !validatorConfigs.isEmpty()) {
+                inputDTO.setConfigs(validatorConfigs);
+                executeResult = customFeignClientAdaptor.executeConfig(getExecuteConfigValidatorURI(serviceCode, null), inputDTO).getBody();
             }
         } catch (Exception e) {
             LOGGER.error(EXCEPTION, e);
@@ -312,9 +309,10 @@ public class InstanceServiceImpl implements InstanceService {
         if (transformType != null) {
             stringBuilder.append("&transform_type=").append(transformType);
         }
-        LOGGER.info("uri:{}", stringBuilder.toString());
+        String uriStr = stringBuilder.toString();
+        LOGGER.debug("uri:{}", uriStr);
         try {
-            uri = new URI(stringBuilder.toString());
+            uri = new URI(uriStr);
         } catch (URISyntaxException e) {
             LOGGER.error(EXCEPTION, e);
         }

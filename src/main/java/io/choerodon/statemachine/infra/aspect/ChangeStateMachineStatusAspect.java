@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional(rollbackFor = Exception.class)
 public class ChangeStateMachineStatusAspect {
-    private static final Logger logger = LoggerFactory.getLogger(ChangeStateMachineStatusAspect.class);
     @Autowired
     private StateMachineMapper stateMachineMapper;
     @Autowired
@@ -57,9 +56,8 @@ public class ChangeStateMachineStatusAspect {
 
         try {
             return pjp.proceed();
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
+        } catch (Throwable e) {
+            throw new CommonException("error.changeStateMachineStatusAspect.proceed", e);
         }
-        return null;
     }
 }

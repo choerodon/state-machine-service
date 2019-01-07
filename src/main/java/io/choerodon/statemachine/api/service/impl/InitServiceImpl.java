@@ -20,8 +20,6 @@ import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StateMachineTransformDraftMapper;
 import io.choerodon.statemachine.infra.mapper.StatusMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,8 +51,7 @@ public class InitServiceImpl implements InitService {
     @Autowired
     private SagaClient sagaClient;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InitServiceImpl.class);
-
+    private final static String ERROR_STATEMACHINE_CREATE = "error.stateMachine.create";
 
     @Override
     public List<Status> initStatus(Long organizationId) {
@@ -92,7 +89,7 @@ public class InitServiceImpl implements InitService {
         Long stateMachineId;
         if (selects.isEmpty()) {
             if (stateMachineMapper.insert(stateMachine) != 1) {
-                throw new CommonException("error.stateMachine.create");
+                throw new CommonException(ERROR_STATEMACHINE_CREATE);
             }
             //创建状态机节点和转换
             createStateMachineDetail(organizationId, stateMachine.getId());
@@ -114,7 +111,7 @@ public class InitServiceImpl implements InitService {
         stateMachine.setStatus(StateMachineStatus.CREATE);
         stateMachine.setDefault(false);
         if (stateMachineMapper.insert(stateMachine) != 1) {
-            throw new CommonException("error.stateMachine.create");
+            throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
         createStateMachineDetail(organizationId, stateMachine.getId());
@@ -136,7 +133,7 @@ public class InitServiceImpl implements InitService {
         stateMachine.setStatus(StateMachineStatus.CREATE);
         stateMachine.setDefault(false);
         if (stateMachineMapper.insert(stateMachine) != 1) {
-            throw new CommonException("error.stateMachine.create");
+            throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
         createStateMachineDetail(organizationId, stateMachine.getId());
