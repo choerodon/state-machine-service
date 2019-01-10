@@ -17,7 +17,7 @@ All notable changes about state-machine-service will be documented in this file.
 
 ### Added
 
-- The state-machine instance recovery strategy, avoid the instance of the consumption of resources
+- The state-machine instance recovery strategy, avoid the instance of the consumption of resources.
 - Added all the unit tests.
 
 ### Changed  
@@ -30,8 +30,8 @@ All notable changes about state-machine-service will be documented in this file.
 
 ### Added
 
-- Organization level add status maintenance
-- Organization level add state-machine maintenance
+- Organization level add status maintenance.
+- Organization level add state-machine maintenance.
 - The state-machine configuration add all-transform, configure all the transform of node, all nodes can be transformed to the current node, apply for agile.
 
 ### Fixed
