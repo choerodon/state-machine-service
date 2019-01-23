@@ -4,9 +4,9 @@ import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
-import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -103,4 +103,13 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @return
      */
     Boolean fixDeleteIllegalTransforms(Long organizationId);
+
+    /**
+     * 根据状态机id列表查询出这些状态机每个状态对应的转换列表
+     *
+     * @param organizationId
+     * @param stateMachineIds
+     * @return
+     */
+    Map<Long, Map<Long, List<StateMachineTransform>>> queryStatusTransformsMap(Long organizationId, List<Long> stateMachineIds);
 }

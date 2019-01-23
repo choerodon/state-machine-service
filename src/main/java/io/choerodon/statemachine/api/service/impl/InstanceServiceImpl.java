@@ -213,7 +213,7 @@ public class InstanceServiceImpl implements InstanceService {
     @Override
     public Map<Long, Long> queryInitStatusIds(Long organizationId, List<Long> stateMachineIds) {
         if (!stateMachineIds.isEmpty()) {
-            return nodeDeployMapper.queryByStateMachineIds(stateMachineIds, organizationId).stream()
+            return nodeDeployMapper.queryInitByStateMachineIds(stateMachineIds, organizationId).stream()
                     .collect(Collectors.toMap(StateMachineNode::getStateMachineId, StateMachineNode::getStatusId));
         } else {
             return new HashMap<>();

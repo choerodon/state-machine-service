@@ -37,4 +37,6 @@ public interface StateMachineTransformMapper extends BaseMapper<StateMachineTran
      * @return
      */
     int fixDeleteIllegalTransforms(@Param("organizationId") Long organizationId);
+    
+    List<StateMachineTransform> queryByStateMachineIds(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds);
 }

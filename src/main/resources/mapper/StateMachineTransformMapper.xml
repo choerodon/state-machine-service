@@ -32,4 +32,14 @@
         )
     </select>
 
+    <select id="queryByStateMachineIds" resultType="io.choerodon.statemachine.domain.StateMachineTransform">
+        SELECT
+        *
+        FROM state_machine_transform smt
+        where smt.organization_id = #{organizationId}
+        and smt.state_machine_id in
+        <foreach collection="stateMachineIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

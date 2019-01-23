@@ -13,14 +13,17 @@ import io.choerodon.statemachine.infra.annotation.ChangeStateMachineStatus;
 import io.choerodon.statemachine.infra.enums.ConfigType;
 import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
 import io.choerodon.statemachine.infra.enums.TransformType;
-import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.mapper.*;
 import io.choerodon.statemachine.infra.utils.EnumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -244,5 +247,32 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     public Boolean fixDeleteIllegalTransforms(Long organizationId) {
         transformDeployMapper.fixDeleteIllegalTransforms(organizationId);
         return true;
+    }
+
+    @Override
+    public Map<Long, Map<Long, List<StateMachineTransform>>> queryStatusTransformsMap(Long organizationId, List<Long> stateMachineIds) {
+        if (stateMachineIds == null || stateMachineIds.isEmpty()) {
+            return null;
+        }
+        Map<Long, Map<Long, List<StateMachineTransform>>> resultMap = new HashMap<>(stateMachineIds.size());
+        List<StateMachineTransform> allTransforms = transformDeployMapper.queryByStateMachineIds(organizationId, stateMachineIds);
+        Map<Long, List<StateMachineTransform>> transformStateMachineIdMap = allTransforms.stream().collect(Collectors.groupingBy(StateMachineTransform::getStateMachineId));
+        List<StateMachineNode> allNodes = nodeDeployMapper.queryByStateMachineIds(organizationId, stateMachineIds);
+        Map<Long, List<StateMachineNode>> nodeStateMachineIdMap = allNodes.stream().collect(Collectors.groupingBy(StateMachineNode::getStateMachineId));
+        for (Long stateMachineId : stateMachineIds) {
+            List<StateMachineTransform> transforms = transformStateMachineIdMap.get(stateMachineId) != null ? transformStateMachineIdMap.get(stateMachineId) : new ArrayList<>();
+            List<StateMachineTransform> typeAll = transforms.stream().filter(x -> x.getType().equals(TransformType.ALL)).collect(Collectors.toList());
+            Map<Long, List<StateMachineTransform>> startListMap = transforms.stream().collect(Collectors.groupingBy(StateMachineTransform::getStartNodeId));
+            List<StateMachineNode> nodes = nodeStateMachineIdMap.get(stateMachineId) != null ? nodeStateMachineIdMap.get(stateMachineId) : new ArrayList<>();
+            Map<Long, List<StateMachineTransform>> statusMap = new HashMap<>(nodes.size());
+            for (StateMachineNode node : nodes) {
+                List<StateMachineTransform> nodeTransforms = startListMap.get(node.getId()) != null ? startListMap.get(node.getId()) : new ArrayList<>();
+                nodeTransforms.addAll(typeAll);
+                statusMap.put(node.getStatusId(), nodeTransforms);
+            }
+            resultMap.put(stateMachineId, statusMap);
+        }
+
+        return resultMap;
     }
 }
