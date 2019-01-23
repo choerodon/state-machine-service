@@ -34,8 +34,10 @@
 
     <select id="queryByStateMachineIds" resultType="io.choerodon.statemachine.domain.StateMachineTransform">
         SELECT
-        *
+        smt.*,
+        smn.status_id as endStatusId
         FROM state_machine_transform smt
+        LEFT JOIN state_machine_node smn ON smn.id = smt.end_node_id
         where smt.organization_id = #{organizationId}
         and smt.state_machine_id in
         <foreach collection="stateMachineIds" item="id" open="(" separator="," close=")">

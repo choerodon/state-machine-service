@@ -7,6 +7,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * @author peng.jiang,dinghuang123@gmail.com
@@ -31,6 +32,17 @@ public class StateMachineTransform extends AuditDomain {
     private String style;
     private String conditionStrategy;
     private Long organizationId;
+
+    @Transient
+    private Long endStatusId;
+
+    public Long getEndStatusId() {
+        return endStatusId;
+    }
+
+    public void setEndStatusId(Long endStatusId) {
+        this.endStatusId = endStatusId;
+    }
 
     public Long getId() {
         return id;
