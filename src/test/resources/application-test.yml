@@ -23,16 +23,9 @@ eureka:
   client:
     enabled: false # 关闭eureka
 choerodon:
-  ldap:
-    userNameType: 0
-  devops:
-    message: true
   saga:
     consumer:
-      enabled: true # 是否启用消费端
-      thread-num: 5  # 消费线程数
-      max-poll-size: 200 # 每次拉取的最大消息数量
-      poll-interval-ms: 1000 # 拉取消息的间隔(毫秒)，默认1000毫秒
+      enabled: false # 是否启用消费端
   eureka:
     event:
       max-cache-size: 300 # 存储的最大失败数量

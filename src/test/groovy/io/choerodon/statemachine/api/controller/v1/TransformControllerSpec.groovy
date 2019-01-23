@@ -191,12 +191,12 @@ class TransformControllerSpec extends Specification {
         actRequest == expRequest
         actResponse == expResponse
         where: '测试用例：'
-        name   | startNodeId | endNodeId | stateMachineId || expRequest | expResponse
-        "新转换"  | 2L          | 3L        | 1L             || true       | true
-        "新转换"  | null        | 3L        | 1L             || true       | false
-        "新转换"  | 2L          | 3L        | 2L             || true       | false
-        null   | 2L          | 3L        | 1L             || true       | false
-        "新转换"  | 2L          | 3L        | null           || false      | false
+        name  | startNodeId | endNodeId | stateMachineId || expRequest | expResponse
+        "新转换" | 2L          | 3L        | 1L             || true       | true
+        "新转换" | null        | 3L        | 1L             || true       | false
+        "新转换" | 2L          | 3L        | 2L             || true       | false
+        null  | 2L          | 3L        | 1L             || true       | false
+        "新转换" | 2L          | 3L        | null           || false      | false
     }
 
     def "update"() {
@@ -401,5 +401,31 @@ class TransformControllerSpec extends Specification {
         where: '测试用例：'
         expRequest | expResponse
         true       | true
+    }
+
+    def "queryStatusTransformsMap"() {
+        given: '准备工作'
+        List<Long> stateMachineIds = new ArrayList<>()
+        stateMachineIds.add(stateMachineId)
+        when: '根据状态机id列表查询出这些状态机每个状态对应的转换列表'
+        HttpEntity<List<Long>> httpEntity = new HttpEntity<>(stateMachineIds)
+        def entity = restTemplate.exchange(baseUrl + '/query_status_transforms_map', HttpMethod.POST, httpEntity, Map, testOrganizationId)
+
+        then: '状态码为200，更新成功'
+        def actRequest = false
+        def actResponse = false
+        if (entity != null) {
+            if (entity.getStatusCode().is2xxSuccessful()) {
+                actRequest = true
+                if (entity.getBody() != null && entity.getBody().size() != null) {
+                    actResponse = true
+                }
+            }
+        }
+        actRequest == expRequest
+        actResponse == expResponse
+        where: '测试用例：'
+        stateMachineId || expRequest | expResponse
+        1L             || true       | true
     }
 }

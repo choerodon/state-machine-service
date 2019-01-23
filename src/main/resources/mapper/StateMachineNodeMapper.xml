@@ -92,7 +92,7 @@
         WHERE SMN.state_machine_id = #{stateMachineId}
     </select>
 
-    <select id="queryByStateMachineIds" resultType="io.choerodon.statemachine.domain.StateMachineNode">
+    <select id="queryInitByStateMachineIds" resultType="io.choerodon.statemachine.domain.StateMachineNode">
         SELECT
         *
         FROM state_machine_node smn
@@ -131,4 +131,15 @@
         WHERE organization_id = #{organizationId}
         AND id = #{id}
     </update>
+
+    <select id="queryByStateMachineIds" resultType="io.choerodon.statemachine.domain.StateMachineNode">
+        SELECT
+        *
+        FROM state_machine_node smn
+        where smn.organization_id = #{organizationId}
+        and smn.state_machine_id in
+        <foreach collection="stateMachineIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

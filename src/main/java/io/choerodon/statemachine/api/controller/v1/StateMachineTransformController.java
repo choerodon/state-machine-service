@@ -5,12 +5,16 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
 import io.choerodon.statemachine.api.validator.StateMachineTransformValidator;
+import io.choerodon.statemachine.domain.StateMachineTransform;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -95,5 +99,13 @@ public class StateMachineTransformController extends BaseController {
     @GetMapping(value = "/fix_delete_illegal_transforms")
     public ResponseEntity<Boolean> fixDeleteIllegalTransforms(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(transformService.fixDeleteIllegalTransforms(organizationId), HttpStatus.CREATED);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "根据状态机id列表查询出这些状态机每个状态对应的转换列表")
+    @PostMapping(value = "/query_status_transforms_map")
+    public ResponseEntity<Map<Long, Map<Long, List<StateMachineTransform>>>> queryStatusTransformsMap(@PathVariable("organization_id") Long organizationId,
+                                                                                                      @RequestBody List<Long> stateMachineIds) {
+        return new ResponseEntity<>(transformService.queryStatusTransformsMap(organizationId, stateMachineIds), HttpStatus.CREATED);
     }
 }
