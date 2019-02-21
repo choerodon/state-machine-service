@@ -54,7 +54,7 @@ public class InitServiceImpl implements InitService {
     private final static String ERROR_STATEMACHINE_CREATE = "error.stateMachine.create";
 
     @Override
-    public List<Status> initStatus(Long organizationId) {
+    public synchronized List<Status> initStatus(Long organizationId) {
         List<Status> initStatuses = new ArrayList<>();
         for (InitStatus initStatus : InitStatus.values()) {
             Status status = new Status();

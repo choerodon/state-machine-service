@@ -41,21 +41,6 @@ public class StatusController extends BaseController {
     @Autowired
     private StateValidator stateValidator;
 
-//    @Permission(level = ResourceLevel.ORGANIZATION)
-//    @ApiOperation(value = "分页查询状态列表")
-//    @CustomPageRequest
-//    @GetMapping("/organizations/{organization_id}/status")
-//    public ResponseEntity<Page<StatusDTO>> pagingQuery(@ApiIgnore
-//                                                       @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
-//                                                       @PathVariable("organization_id") Long organizationId,
-//                                                       @RequestParam(required = false) String name,
-//                                                       @RequestParam(required = false) String description,
-//                                                       @RequestParam(required = false) String type,
-//                                                       @RequestParam(required = false) String[] param) {
-//        return new ResponseEntity<>(statusService.pageQuery(pageRequest, new StatusDTO(name, description, type, organizationId),
-//                param != null ? Arrays.stream(param).collect(Collectors.joining(",")) : null), HttpStatus.OK);
-//    }
-
     @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "分页查询状态列表")
     @CustomPageRequest

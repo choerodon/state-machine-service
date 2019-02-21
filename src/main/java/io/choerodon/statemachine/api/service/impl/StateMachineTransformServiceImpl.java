@@ -56,7 +56,14 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     @Transactional(rollbackFor = Exception.class)
     public StateMachineTransformDTO create(Long organizationId, Long stateMachineId, StateMachineTransformDTO transformDTO) {
         transformDTO.setStateMachineId(stateMachineId);
-        StateMachineTransformDraft transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
+        StateMachineTransformDraft transform = new StateMachineTransformDraft();
+        transform.setStartNodeId(transformDTO.getStartNodeId());
+        transform.setEndNodeId(transformDTO.getEndNodeId());
+        transform.setName(transformDTO.getName());
+        if (!transformDraftMapper.select(transform).isEmpty()) {
+            throw new CommonException("error.stateMachineTransform.exist");
+        }
+        transform = stateMachineTransformAssembler.toTarget(transformDTO, StateMachineTransformDraft.class);
         transform.setType(TransformType.CUSTOM);
         transform.setOrganizationId(organizationId);
         transform.setConditionStrategy(TransformConditionStrategy.ALL);
@@ -241,6 +248,21 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
             throw new CommonException("error.updateConditionStrategy.updateOptional");
         }
         return true;
+    }
+
+    @Override
+    public Boolean checkName(Long organizationId, Long stateMachineId, Long startNodeId, Long endNodeId, String name) {
+        StateMachineTransformDraft transformDraft = new StateMachineTransformDraft();
+        transformDraft.setOrganizationId(organizationId);
+        transformDraft.setName(name);
+        transformDraft.setStartNodeId(startNodeId);
+        transformDraft.setEndNodeId(endNodeId);
+        transformDraft.setStateMachineId(stateMachineId);
+        if(transformDraftMapper.select(transformDraft).isEmpty()){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     @Override

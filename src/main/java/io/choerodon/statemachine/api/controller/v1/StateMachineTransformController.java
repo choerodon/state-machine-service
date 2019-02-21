@@ -1,6 +1,8 @@
 package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.core.base.BaseController;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -92,6 +95,19 @@ public class StateMachineTransformController extends BaseController {
                                                            @PathVariable("transform_id") Long transformId,
                                                            @RequestParam("condition_strategy") String conditionStrategy) {
         return new ResponseEntity<>(transformService.updateConditionStrategy(organizationId, transformId, conditionStrategy), HttpStatus.CREATED);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @ApiOperation(value = "校验转换名字在起始终点相同条件下是否未被使用")
+    @GetMapping(value = "/check_name")
+    public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
+                                             @RequestParam("startNodeId") Long startNodeId,
+                                             @RequestParam("endNodeId") Long endNodeId,
+                                             @RequestParam("stateMachineId") Long stateMachineId,
+                                             @RequestParam("name") String name) {
+        return Optional.ofNullable(transformService.checkName(organizationId, stateMachineId, startNodeId, endNodeId, name))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.transformName.check"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
