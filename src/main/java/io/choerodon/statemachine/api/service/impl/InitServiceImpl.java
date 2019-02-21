@@ -158,7 +158,7 @@ public class InitServiceImpl implements InitService {
         initStatuses = initOrganization(organizationId, initStatuses);
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
-        Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x));
+        Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x, (code1,code2)->code1));
         for (InitNode initNode : InitNode.values()) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
             node.setStateMachineId(stateMachineId);
