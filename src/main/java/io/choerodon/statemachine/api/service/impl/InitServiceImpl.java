@@ -54,7 +54,7 @@ public class InitServiceImpl implements InitService {
     private final static String ERROR_STATEMACHINE_CREATE = "error.stateMachine.create";
 
     @Override
-    public List<Status> initStatus(Long organizationId) {
+    public synchronized List<Status> initStatus(Long organizationId) {
         List<Status> initStatuses = new ArrayList<>();
         for (InitStatus initStatus : InitStatus.values()) {
             Status status = new Status();
@@ -158,7 +158,7 @@ public class InitServiceImpl implements InitService {
         initStatuses = initOrganization(organizationId, initStatuses);
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
-        Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x));
+        Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x, (code1,code2)->code1));
         for (InitNode initNode : InitNode.values()) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
             node.setStateMachineId(stateMachineId);

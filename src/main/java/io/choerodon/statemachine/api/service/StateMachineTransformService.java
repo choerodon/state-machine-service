@@ -97,6 +97,16 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
     Boolean updateConditionStrategy(Long organizationId, Long transformId, String conditionStrategy);
 
     /**
+     * 校验名字是否重复
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @param name
+     * @return
+     */
+    Boolean checkName(Long organizationId, Long stateMachineId, Long startNodeId, Long endNodeId, String name);
+
+    /**
      * 修复0.12.0发布后，敏捷移除节点，但没移除转换
      *
      * @param organizationId
