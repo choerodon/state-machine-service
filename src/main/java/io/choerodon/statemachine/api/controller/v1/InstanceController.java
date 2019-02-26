@@ -4,6 +4,7 @@ import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.InputDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
@@ -83,11 +84,19 @@ public class InstanceController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "创建实例时，获取状态机的初始转换，包括转换的configs")
+    @GetMapping(value = "/query_init_transform")
+    public ResponseEntity<StateMachineTransformDTO> queryInitTransform(@PathVariable("organization_id") Long organizationId,
+                                                                       @RequestParam("state_machine_id") Long stateMachineId) {
+        return new ResponseEntity<>(instanceService.queryInitTransform(organizationId, stateMachineId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "手动清理状态机实例")
     @GetMapping(value = "/cleanInstance")
     @Transactional(rollbackFor = Exception.class)
     public void cleanInstance(@PathVariable("organization_id") Long organizationId,
-                         @RequestParam("is_clean_all") Boolean isCleanAll) {
+                              @RequestParam("is_clean_all") Boolean isCleanAll) {
         if (isCleanAll) {
             instanceCache.cleanAllInstances();
         } else {

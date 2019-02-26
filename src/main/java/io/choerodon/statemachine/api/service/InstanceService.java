@@ -1,8 +1,9 @@
 package io.choerodon.statemachine.api.service;
 
 import io.choerodon.statemachine.api.dto.ExecuteResult;
-import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
 import io.choerodon.statemachine.api.dto.InputDTO;
+import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import org.springframework.statemachine.StateContext;
 
@@ -117,4 +118,13 @@ public interface InstanceService {
      * @return Map
      */
     Map<Long, Long> queryInitStatusIds(Long organizationId, List<Long> stateMachineIds);
+
+    /**
+     * 创建实例时，获取状态机的初始转换
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @return
+     */
+    StateMachineTransformDTO queryInitTransform(Long organizationId, Long stateMachineId);
 }

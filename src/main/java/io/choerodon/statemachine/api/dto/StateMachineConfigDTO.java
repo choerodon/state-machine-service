@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
 /**
- * @author peng.jiang,dinghuang123@gmail.com
+ * @author peng.jiang, dinghuang123@gmail.com
  */
 public class StateMachineConfigDTO {
 
@@ -11,7 +11,6 @@ public class StateMachineConfigDTO {
     private String code;
     private String type;
     private Long organizationId;
-
     /**
      * code名称
      */

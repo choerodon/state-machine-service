@@ -47,7 +47,7 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @param stateMachineId
      * @return
      */
-    Long getInitTransform(Long organizationId, Long stateMachineId);
+    StateMachineTransform getInitTransform(Long organizationId, Long stateMachineId);
 
     /**
      * 根据id获取转换

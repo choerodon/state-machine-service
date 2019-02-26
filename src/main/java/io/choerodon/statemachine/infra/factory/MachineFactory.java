@@ -121,7 +121,7 @@ public class MachineFactory {
         //存入instanceId，以便执行guard和action
         instance.getExtendedState().getVariables().put(INPUT_DTO, inputDTO);
         //执行初始转换
-        Long initTransformId = transformService.getInitTransform(organizationId, stateMachineId);
+        Long initTransformId = transformService.getInitTransform(organizationId, stateMachineId).getId();
         instance.sendEvent(initTransformId.toString());
 
         //缓存实例

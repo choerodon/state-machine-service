@@ -17,7 +17,9 @@
         LEFT JOIN config_code cc on cc.code = smc.code
         WHERE smc.organization_id = #{organizationId}
         and smc.transform_id = #{transformId}
-        and smc.type = #{type}
+        <if test="type != null">
+            and smc.type = #{type}
+        </if>
     </select>
 
     <select id="queryWithCodeInfoByTransformIds" resultType="io.choerodon.statemachine.domain.StateMachineConfig">

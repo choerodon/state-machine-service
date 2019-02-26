@@ -4,6 +4,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.InputDTO;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
+import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.InstanceService;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
 import io.choerodon.statemachine.api.service.StateMachineTransformService;
@@ -118,7 +119,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
             transformInfos.add(transformInfo);
         }
-        //调用对应服务，根据条件校验转换，过滤掉可用的转换
+        //调用对应服务，根据条件校验转换，过滤掉不可用的转换
         if (isNeedFilter) {
             try {
                 ResponseEntity<List<TransformInfo>> listEntity = customFeignClientAdaptor.filterTransformsByConfig(getFilterTransformURI(serviceCode, instanceId), transformInfos);
@@ -317,5 +318,27 @@ public class InstanceServiceImpl implements InstanceService {
             LOGGER.error(EXCEPTION, e);
         }
         return uri;
+    }
+
+    /**
+     * 创建实例时，获取状态机的初始转换
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @return
+     */
+    @Override
+    public StateMachineTransformDTO queryInitTransform(Long organizationId, Long stateMachineId) {
+        //获取初始转换
+        StateMachineTransform initTransform = transformService.getInitTransform(organizationId, stateMachineId);
+        StateMachineTransformDTO stateMachineTransformDTO = stateMachineTransformAssembler.toTarget(initTransform, StateMachineTransformDTO.class);
+        //获取转换配置
+        List<StateMachineConfigDTO> configDTOS = configService.queryByTransformId(organizationId, initTransform.getId(), null, false);
+        Map<String, List<StateMachineConfigDTO>> configMap = configDTOS.stream().collect(Collectors.groupingBy(StateMachineConfigDTO::getType));
+        stateMachineTransformDTO.setConditions(configMap.get(ConfigType.CONDITION));
+        stateMachineTransformDTO.setTriggers(configMap.get(ConfigType.TRIGGER));
+        stateMachineTransformDTO.setValidators(configMap.get(ConfigType.VALIDATOR));
+        stateMachineTransformDTO.setPostpositions(configMap.get(ConfigType.ACTION));
+        return stateMachineTransformDTO;
     }
 }
