@@ -73,7 +73,7 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
 
     @Override
     public List<StateMachineConfigDTO> queryByTransformId(Long organizationId, Long transformId, String type, Boolean isDraft) {
-        if (!EnumUtil.contain(ConfigType.class, type)) {
+        if (type != null && !EnumUtil.contain(ConfigType.class, type)) {
             throw new CommonException("error.status.type.illegal");
         }
 
@@ -93,11 +93,11 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
         if (!EnumUtil.contain(ConfigType.class, type)) {
             throw new CommonException("error.status.type.illegal");
         }
-        if(transformIds!=null&&!transformIds.isEmpty()){
+        if (transformIds != null && !transformIds.isEmpty()) {
             List<StateMachineConfig> configs = configDeployMapper.queryWithCodeInfoByTransformIds(organizationId, type, transformIds);
             List<StateMachineConfigDTO> configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
             return configDTOS;
-        }else{
+        } else {
             return Collections.EMPTY_LIST;
         }
 

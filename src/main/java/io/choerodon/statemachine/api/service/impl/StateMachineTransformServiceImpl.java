@@ -134,7 +134,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
-    public Long getInitTransform(Long organizationId, Long stateMachineId) {
+    public StateMachineTransform getInitTransform(Long organizationId, Long stateMachineId) {
         StateMachineTransform transform = new StateMachineTransform();
         transform.setStateMachineId(stateMachineId);
         transform.setOrganizationId(organizationId);
@@ -143,7 +143,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         if (transforms.isEmpty()) {
             throw new CommonException("error.initTransform.null");
         }
-        return transforms.get(0).getId();
+        return transforms.get(0);
     }
 
     @Override

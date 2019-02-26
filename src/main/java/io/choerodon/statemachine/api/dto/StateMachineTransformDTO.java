@@ -3,7 +3,8 @@ package io.choerodon.statemachine.api.dto;
 import java.util.List;
 
 /**
- * @author peng.jiang, dinghuang123@gmail.com
+ * @author shinan.chen
+ * @since 2019/2/19
  */
 public class StateMachineTransformDTO {
     private Long id;
@@ -21,6 +22,7 @@ public class StateMachineTransformDTO {
     private String style;
     private String conditionStrategy;
     private Long organizationId;
+    private Long endStatusId;
 
     private StateMachineNodeDTO startNodeDTO;
     private StateMachineNodeDTO endNodeDTO;
@@ -171,5 +173,13 @@ public class StateMachineTransformDTO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getEndStatusId() {
+        return endStatusId;
+    }
+
+    public void setEndStatusId(Long endStatusId) {
+        this.endStatusId = endStatusId;
     }
 }
