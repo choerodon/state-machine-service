@@ -35,7 +35,7 @@ public class DemoEventHandler {
             description = "demo创建组织事件",
             sagaCode = REGISTER_ORG,
             seq = 50)
-    public String OrgCreatedForDemoInit(String data) {
+    public OrganizationRegisterEventPayload OrgCreatedForDemoInit(String data) {
         LOGGER.info("demo消费创建组织消息{}", data);
         OrganizationRegisterEventPayload organizationEventPayload = JSONObject.parseObject(data, OrganizationRegisterEventPayload.class);
         Long organizationId = organizationEventPayload.getOrganization().getId();
@@ -43,6 +43,6 @@ public class DemoEventHandler {
         initService.initStatus(organizationId);
         //初始化默认状态机
         initService.initDefaultStateMachine(organizationId);
-        return data;
+        return organizationEventPayload;
     }
 }
