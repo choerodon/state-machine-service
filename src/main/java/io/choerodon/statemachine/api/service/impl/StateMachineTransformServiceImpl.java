@@ -258,9 +258,9 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         transformDraft.setStartNodeId(startNodeId);
         transformDraft.setEndNodeId(endNodeId);
         transformDraft.setStateMachineId(stateMachineId);
-        if(transformDraftMapper.select(transformDraft).isEmpty()){
+        if (transformDraftMapper.select(transformDraft).isEmpty()) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -290,6 +290,10 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
             for (StateMachineNode node : nodes) {
                 List<StateMachineTransform> nodeTransforms = startListMap.get(node.getId()) != null ? startListMap.get(node.getId()) : new ArrayList<>();
                 nodeTransforms.addAll(typeAll);
+                //增加一个自身状态的转换（用于拖动时的转换显示）
+                StateMachineTransform self = new StateMachineTransform();
+                self.setEndStatusId(node.getStatusId());
+                nodeTransforms.add(self);
                 statusMap.put(node.getStatusId(), nodeTransforms);
             }
             resultMap.put(stateMachineId, statusMap);
