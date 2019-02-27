@@ -22,8 +22,8 @@ public class DemoEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoEventHandler.class);
 
-    private static final String DEMO_STATEMACHINE_ORG_CREATE_EVENT = "demo-stateMachine-org-create-event";
     private static final String REGISTER_STATEMACHINE_INIT_ORG = "register-stateMachine-init-org";
+    private static final String REGISTER_ORG = "register-org";
 
     @Autowired
     private InitService initService;
@@ -31,9 +31,9 @@ public class DemoEventHandler {
     /**
      * 创建组织事件
      */
-    @SagaTask(code = DEMO_STATEMACHINE_ORG_CREATE_EVENT,
+    @SagaTask(code = REGISTER_STATEMACHINE_INIT_ORG,
             description = "demo创建组织事件",
-            sagaCode = REGISTER_STATEMACHINE_INIT_ORG,
+            sagaCode = REGISTER_ORG,
             seq = 50)
     public String OrgCreatedForDemoInit(String data) {
         LOGGER.info("demo消费创建组织消息{}", data);
