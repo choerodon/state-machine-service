@@ -3,10 +3,13 @@
 <mapper namespace="io.choerodon.statemachine.infra.mapper.StateMachineTransformMapper">
 
     <select id="queryById" resultType="io.choerodon.statemachine.domain.StateMachineTransform">
-        SELECT *
-        FROM state_machine_transform
-        WHERE organization_id = #{organizationId}
-        and id = #{id}
+        SELECT
+        smt.*,
+        smn.status_id as endStatusId
+        FROM state_machine_transform smt
+        LEFT JOIN state_machine_node smn ON smn.id = smt.end_node_id
+        where smt.organization_id = #{organizationId}
+        and smt.id = #{id}
     </select>
 
     <update id="deleteByNodeId">
