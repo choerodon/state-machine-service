@@ -122,4 +122,12 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
      * @return
      */
     Map<Long, Map<Long, List<StateMachineTransform>>> queryStatusTransformsMap(Long organizationId, List<Long> stateMachineIds);
+
+    /**
+     * 敏捷获取转换
+     * @param organizationId
+     * @param transformId
+     * @return
+     */
+    StateMachineTransform queryDeployTransformForAgile(Long organizationId, Long transformId);
 }

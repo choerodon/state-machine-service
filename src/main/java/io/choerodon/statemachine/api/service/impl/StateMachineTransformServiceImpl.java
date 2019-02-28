@@ -301,4 +301,9 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
         return resultMap;
     }
+
+    @Override
+    public StateMachineTransform queryDeployTransformForAgile(Long organizationId, Long transformId) {
+        return transformDeployMapper.queryById(organizationId,transformId);
+    }
 }

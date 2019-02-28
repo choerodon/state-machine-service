@@ -124,4 +124,15 @@ public class StateMachineTransformController extends BaseController {
                                                                                                       @RequestBody List<Long> stateMachineIds) {
         return new ResponseEntity<>(transformService.queryStatusTransformsMap(organizationId, stateMachineIds), HttpStatus.CREATED);
     }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @ApiOperation(value = "敏捷获取转换")
+    @GetMapping(value = "/query_deploy_transform")
+    public ResponseEntity<StateMachineTransform> queryDeployTransformForAgile(@PathVariable("organization_id") Long organizationId,
+                                                                              @RequestParam("transformId") Long transformId) {
+        return Optional.ofNullable(transformService.queryDeployTransformForAgile(organizationId, transformId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.stateMachineTransform.queryDeployTransformForAgile"));
+    }
 }
