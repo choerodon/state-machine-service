@@ -5,9 +5,10 @@ package io.choerodon.statemachine.infra.enums;
  * @date 2018/10/23
  */
 public enum InitStatus {
-    STATUS1("待处理", "create", StatusType.TODO),
-    STATUS2("处理中", "processing", StatusType.DOING),
-    STATUS3("已完成", "complete", StatusType.DONE);
+    PREPARE("准备", "prepare", StatusType.PREPARE),
+    CREATE("待处理", "create", StatusType.TODO),
+    PROCESSING("处理中", "processing", StatusType.DOING),
+    COMPLETE("已完成", "complete", StatusType.DONE);
     String name;
     String code;
     String type;

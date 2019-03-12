@@ -90,7 +90,7 @@ class InstanceControllerSpec extends Specification {
             stateMachineMapper.insert(stateMachine)
 
             //创建初始状态机节点和转换
-            initService.createStateMachineDetail(testOrganizationId, 10L)
+            initService.createStateMachineDetail(testOrganizationId, 10L, "default")
             //新增一个状态
             Status status = new Status()
             status.setId(10L)

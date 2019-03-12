@@ -232,9 +232,9 @@ public class FixDataServiceImpl implements FixDataService {
     @Override
     public Boolean createStatus(List<StatusForMoveDataDO> statusForMoveDataDOList) {
         Map<String, String> codeMap = new HashMap<>(3);
-        codeMap.put(InitStatus.STATUS1.getName(), InitStatus.STATUS1.getCode());
-        codeMap.put(InitStatus.STATUS2.getName(), InitStatus.STATUS2.getCode());
-        codeMap.put(InitStatus.STATUS3.getName(), InitStatus.STATUS3.getCode());
+        codeMap.put(InitStatus.CREATE.getName(), InitStatus.CREATE.getCode());
+        codeMap.put(InitStatus.PROCESSING.getName(), InitStatus.PROCESSING.getCode());
+        codeMap.put(InitStatus.COMPLETE.getName(), InitStatus.COMPLETE.getCode());
         Map<Long, List<String>> statusCheckMap = new HashMap<>();
         List<Status> statusList = new ArrayList<>();
         for (StatusForMoveDataDO statusForMoveDataDO : statusForMoveDataDOList) {
