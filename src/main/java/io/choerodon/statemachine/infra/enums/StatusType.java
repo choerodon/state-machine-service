@@ -9,6 +9,10 @@ public class StatusType {
     }
 
     /**
+     * 准备【用于项目群】
+     */
+    public static final String PREPARE = "prepare";
+    /**
      * 待处理
      */
     public static final String TODO = "todo";

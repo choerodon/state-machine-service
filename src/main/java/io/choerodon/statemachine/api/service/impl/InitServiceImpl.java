@@ -92,7 +92,7 @@ public class InitServiceImpl implements InitService {
                 throw new CommonException(ERROR_STATEMACHINE_CREATE);
             }
             //创建状态机节点和转换
-            createStateMachineDetail(organizationId, stateMachine.getId());
+            createStateMachineDetail(organizationId, stateMachine.getId(), "default");
             stateMachineId = stateMachine.getId();
         } else {
             stateMachineId = selects.get(0).getId();
@@ -114,11 +114,12 @@ public class InitServiceImpl implements InitService {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
-        createStateMachineDetail(organizationId, stateMachine.getId());
+        createStateMachineDetail(organizationId, stateMachine.getId(), SchemeApplyType.AGILE);
         //发布状态机
         Long stateMachineId = stateMachine.getId();
         stateMachineService.deploy(organizationId, stateMachineId, false);
-        sendSagaToAgile(projectEvent, stateMachineId);
+        //敏捷创建完状态机后需要到敏捷创建列
+        sendSagaToAgileByCreateProject(projectEvent, stateMachineId);
         return stateMachineId;
     }
 
@@ -136,10 +137,33 @@ public class InitServiceImpl implements InitService {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
-        createStateMachineDetail(organizationId, stateMachine.getId());
+        createStateMachineDetail(organizationId, stateMachine.getId(), SchemeApplyType.TEST);
         //发布状态机
         Long stateMachineId = stateMachine.getId();
         stateMachineService.deploy(organizationId, stateMachineId, false);
+        return stateMachineId;
+    }
+
+    @Override
+    public Long initPRStateMachine(Long organizationId, ProjectEvent projectEvent) {
+        String projectCode = projectEvent.getProjectCode();
+        //初始化状态机
+        StateMachine stateMachine = new StateMachine();
+        stateMachine.setOrganizationId(organizationId);
+        stateMachine.setName(projectCode + "默认状态机【项目群】");
+        stateMachine.setDescription(projectCode + "默认状态机【项目群】");
+        stateMachine.setStatus(StateMachineStatus.CREATE);
+        stateMachine.setDefault(false);
+        if (stateMachineMapper.insert(stateMachine) != 1) {
+            throw new CommonException(ERROR_STATEMACHINE_CREATE);
+        }
+        //创建状态机节点和转换
+        createStateMachineDetail(organizationId, stateMachine.getId(), SchemeApplyType.PROGRAM);
+        //发布状态机
+        Long stateMachineId = stateMachine.getId();
+        stateMachineService.deploy(organizationId, stateMachineId, false);
+        //项目群创建完状态机后需要到敏捷创建列
+        sendSagaToAgileByCreateProgram(projectEvent, stateMachineId);
         return stateMachineId;
     }
 
@@ -150,7 +174,7 @@ public class InitServiceImpl implements InitService {
      * @param stateMachineId
      */
     @Override
-    public void createStateMachineDetail(Long organizationId, Long stateMachineId) {
+    public void createStateMachineDetail(Long organizationId, Long stateMachineId, String applyType) {
         Status select = new Status();
         select.setOrganizationId(organizationId);
         List<Status> initStatuses = statusMapper.select(select);
@@ -158,8 +182,8 @@ public class InitServiceImpl implements InitService {
         initStatuses = initOrganization(organizationId, initStatuses);
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
-        Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x, (code1,code2)->code1));
-        for (InitNode initNode : InitNode.values()) {
+        Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x, (code1, code2) -> code1));
+        for (InitNode initNode : InitNode.list(applyType)) {
             StateMachineNodeDraft node = new StateMachineNodeDraft();
             node.setStateMachineId(stateMachineId);
             if (initNode.getType().equals(NodeType.START)) {
@@ -180,7 +204,7 @@ public class InitServiceImpl implements InitService {
             nodeMap.put(initNode.getCode(), node);
         }
         //初始化转换
-        for (InitTransform initTransform : InitTransform.values()) {
+        for (InitTransform initTransform : InitTransform.list(applyType)) {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
             transform.setStateMachineId(stateMachineId);
             transform.setName(initTransform.getName());
@@ -226,13 +250,24 @@ public class InitServiceImpl implements InitService {
 
     @Override
     @Saga(code = "project-create-state-machine", description = "创建项目发送消息至agile", inputSchemaClass = ProjectCreateAgilePayload.class)
-    public void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId) {
+    public void sendSagaToAgileByCreateProject(ProjectEvent projectEvent, Long stateMachineId) {
         List<StatusPayload> statusPayloads = stateMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
         Long projectId = projectEvent.getProjectId();
         ProjectCreateAgilePayload projectCreateAgilePayload = new ProjectCreateAgilePayload();
         projectCreateAgilePayload.setProjectEvent(projectEvent);
         projectCreateAgilePayload.setStatusPayloads(statusPayloads);
         sagaClient.startSaga("project-create-state-machine", new StartInstanceDTO(JSON.toJSONString(projectCreateAgilePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
+    }
+
+    @Override
+    @Saga(code = "program-create-state-machine", description = "创建项目群发送消息至agile", inputSchemaClass = ProjectCreateAgilePayload.class)
+    public void sendSagaToAgileByCreateProgram(ProjectEvent projectEvent, Long stateMachineId) {
+        List<StatusPayload> statusPayloads = stateMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+        Long projectId = projectEvent.getProjectId();
+        ProjectCreateAgilePayload projectCreateAgilePayload = new ProjectCreateAgilePayload();
+        projectCreateAgilePayload.setProjectEvent(projectEvent);
+        projectCreateAgilePayload.setStatusPayloads(statusPayloads);
+        sagaClient.startSaga("program-create-state-machine", new StartInstanceDTO(JSON.toJSONString(projectCreateAgilePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
     }
 
 

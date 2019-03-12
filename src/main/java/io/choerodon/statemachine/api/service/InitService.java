@@ -43,8 +43,19 @@ public interface InitService {
      */
     Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent);
 
-    void sendSagaToAgile(ProjectEvent projectEvent, Long stateMachineId);
+    /**
+     * 初始化项目群状态机
+     *
+     * @param organizationId
+     * @param projectEvent
+     * @return
+     */
+    Long initPRStateMachine(Long organizationId, ProjectEvent projectEvent);
 
-    void createStateMachineDetail(Long organizationId, Long stateMachineId);
+    void sendSagaToAgileByCreateProject(ProjectEvent projectEvent, Long stateMachineId);
+
+    void sendSagaToAgileByCreateProgram(ProjectEvent projectEvent, Long stateMachineId);
+
+    void createStateMachineDetail(Long organizationId, Long stateMachineId, String applyType);
 }
 

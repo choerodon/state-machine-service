@@ -158,6 +158,8 @@ public class StateMachineController extends BaseController {
             stateMachineId = initService.initAGStateMachine(organizationId, projectEvent);
         } else if (applyType.equals(SchemeApplyType.TEST)) {
             stateMachineId = initService.initTEStateMachine(organizationId, projectEvent);
+        } else if (applyType.equals(SchemeApplyType.PROGRAM)){
+            stateMachineId = initService.initPRStateMachine(organizationId, projectEvent);
         }
         return new ResponseEntity<>(stateMachineId, HttpStatus.CREATED);
     }
