@@ -14,6 +14,7 @@
         <id property="name" column="st_name"/>
         <id property="description" column="st_description"/>
         <id property="type" column="st_type"/>
+        <id property="code" column="st_code"/>
         <id property="organizationId" column="st_organization_id"/>
         <id property="objectVersionNumber" column="st_object_version_number"/>
         <collection property="stateMachineInfoList" autoMapping="true" ofType="io.choerodon.statemachine.domain.StateMachineInfo">
@@ -48,6 +49,7 @@
         st.id as st_id,
         st.name as st_name,
         st.description as st_description,
+        st.code as st_code,
         st.type as st_type,
         st.organization_id as st_organization_id,
         st.object_version_number as st_object_version_number,

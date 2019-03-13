@@ -16,7 +16,6 @@ public class StatusDTO {
     private String type;
     private Long organizationId;
     private Long objectVersionNumber;
-    private Boolean canDelete;
 
     public StatusDTO() {
     }
@@ -74,14 +73,6 @@ public class StatusDTO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
-    }
-
-    public Boolean getCanDelete() {
-        return canDelete;
-    }
-
-    public void setCanDelete(Boolean canDelete) {
-        this.canDelete = canDelete;
     }
 
     public String getCode() {
