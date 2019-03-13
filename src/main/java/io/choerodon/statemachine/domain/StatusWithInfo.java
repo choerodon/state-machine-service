@@ -16,6 +16,8 @@ public class StatusWithInfo {
 
     private String type;
 
+    private String code;
+
     private Long organizationId;
 
     private Long objectVersionNumber;
@@ -64,6 +66,14 @@ public class StatusWithInfo {
 
     public void setStateMachineInfoList(List<StateMachineInfo> stateMachineInfoList) {
         this.stateMachineInfoList = stateMachineInfoList;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public List<StateMachineInfo> getStateMachineInfoList() {

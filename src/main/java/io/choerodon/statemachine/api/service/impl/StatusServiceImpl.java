@@ -7,11 +7,13 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StatusService;
-import io.choerodon.statemachine.domain.*;
+import io.choerodon.statemachine.domain.StateMachineInfo;
+import io.choerodon.statemachine.domain.StateMachineNode;
+import io.choerodon.statemachine.domain.Status;
+import io.choerodon.statemachine.domain.StatusWithInfo;
 import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.NodeType;
 import io.choerodon.statemachine.infra.enums.StatusType;
-import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.mapper.*;
 import io.choerodon.statemachine.infra.utils.EnumUtil;
@@ -173,6 +175,9 @@ public class StatusServiceImpl implements StatusService {
         if (draftUsed != 0 || deployUsed != 0) {
             throw new CommonException("error.status.delete");
         }
+        if (status.getCode() != null) {
+            throw new CommonException("error.status.illegal");
+        }
         int isDelete = statusMapper.deleteByPrimaryKey(statusId);
         if (isDelete != 1) {
             throw new CommonException("error.status.delete");
@@ -284,10 +289,10 @@ public class StatusServiceImpl implements StatusService {
         if (res == null) {
             throw new RemoveStatusException("error.status.exist");
         }
-        if(res.getType().equals(NodeType.INIT)){
+        if (res.getType().equals(NodeType.INIT)) {
             throw new RemoveStatusException("error.status.illegal");
         }
-        if(res.getId()!=null){
+        if (res.getId() != null) {
             //删除节点
             nodeDeployMapper.deleteByPrimaryKey(res.getId());
             //删除节点关联的转换
