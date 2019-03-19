@@ -161,7 +161,7 @@ class StatusControllerSpec extends Specification {
 
         where: '测试用例：'
         name  | type    | param || isSuccess | size
-        null  | null    | null  || true      | 6
+        null  | null    | null  || true      | 5
         '待处理' | null    | null  || true      | 1
         null  | null    | '待处理' || true      | 1
         null  | "done"  | null  || true      | 1

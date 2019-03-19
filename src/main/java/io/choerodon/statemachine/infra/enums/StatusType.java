@@ -8,10 +8,10 @@ public class StatusType {
     private StatusType() {
     }
 
-    /**
-     * 准备【用于项目群】
-     */
-    public static final String PREPARE = "prepare";
+//    /**
+//     * 准备【用于项目群】
+//     */
+//    public static final String PREPARE = "prepare";
     /**
      * 待处理
      */
