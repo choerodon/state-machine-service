@@ -20,6 +20,7 @@
         <collection property="stateMachineInfoList" autoMapping="true" ofType="io.choerodon.statemachine.domain.StateMachineInfo">
             <id property="stateMachineId" column="smddn_state_machine_id"/>
             <id property="stateMachineName" column="smddn_name"/>
+            <id property="stateMachineStatus" column="smddn_status"/>
         </collection>
     </resultMap>
 
@@ -54,13 +55,14 @@
         st.organization_id as st_organization_id,
         st.object_version_number as st_object_version_number,
         smddn.state_machine_id as smddn_state_machine_id,
-        smddn.name as smddn_name
+        smddn.name as smddn_name,
+        smddn.status as smddn_status
         from status st
-        left join (select smn.status_id, smn.state_machine_id, sm.name
+        left join (select smn.status_id, smn.state_machine_id, sm.name, sm.status
                    from state_machine_node smn, state_machine sm
                    where smn.state_machine_id = sm.id
                    union all
-                   select smnd.status_id, smnd.state_machine_id, sm.name
+                   select smnd.status_id, smnd.state_machine_id, sm.name, sm.status
                    from state_machine_node_draft smnd, state_machine sm
                    where smnd.state_machine_id = sm.id) smddn on st.id = smddn.status_id
         where st.organization_id = #{organizationId}
