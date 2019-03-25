@@ -17,12 +17,6 @@
         WHERE start_node_id = #{nodeId} OR end_node_id = #{nodeId}
     </update>
 
-    <delete id="fixDeleteIllegalTransforms">
-        DELETE FROM state_machine_transform
-        WHERE end_node_id NOT IN ( SELECT n.id FROM state_machine_node n )
-	    AND organization_id = #{organizationId}
-    </delete>
-
     <select id="queryByStartNodeIdOrType" resultType="io.choerodon.statemachine.domain.StateMachineTransform">
         SELECT *
         FROM state_machine_transform

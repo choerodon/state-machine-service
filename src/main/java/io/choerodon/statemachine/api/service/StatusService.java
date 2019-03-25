@@ -4,8 +4,6 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.domain.Status;
-import io.choerodon.statemachine.domain.StatusWithInfo;
-import io.choerodon.statemachine.fixdata.dto.StatusForMoveDataDO;
 
 import java.util.List;
 import java.util.Map;

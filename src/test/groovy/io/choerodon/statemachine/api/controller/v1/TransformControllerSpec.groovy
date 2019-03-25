@@ -380,29 +380,6 @@ class TransformControllerSpec extends Specification {
         null        | TransformConditionStrategy.ALL || false      | false
     }
 
-    def "fixDeleteIllegalTransforms"() {
-        given: '准备工作'
-        when: '修复0.12.0发布后，敏捷移除节点，但没移除转换'
-        def entity = restTemplate.exchange(baseUrl + '/fix_delete_illegal_transforms', HttpMethod.GET, null, Object, testOrganizationId)
-
-        then: '状态码为200，更新成功'
-        def actRequest = false
-        def actResponse = false
-        if (entity != null) {
-            if (entity.getStatusCode().is2xxSuccessful()) {
-                actRequest = true
-                if (entity.getBody() != null && entity.getBody() instanceof Boolean) {
-                    actResponse = entity.getBody()
-                }
-            }
-        }
-        actRequest == expRequest
-        actResponse == expResponse
-        where: '测试用例：'
-        expRequest | expResponse
-        true       | true
-    }
-
     def "queryStatusTransformsMap"() {
         given: '准备工作'
         List<Long> stateMachineIds = new ArrayList<>()

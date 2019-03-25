@@ -111,13 +111,6 @@ public class StateMachineTransformController extends BaseController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "修复0.12.0发布后，敏捷移除节点，但没移除转换")
-    @GetMapping(value = "/fix_delete_illegal_transforms")
-    public ResponseEntity<Boolean> fixDeleteIllegalTransforms(@PathVariable("organization_id") Long organizationId) {
-        return new ResponseEntity<>(transformService.fixDeleteIllegalTransforms(organizationId), HttpStatus.CREATED);
-    }
-
-    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据状态机id列表查询出这些状态机每个状态对应的转换列表")
     @PostMapping(value = "/query_status_transforms_map")
     public ResponseEntity<Map<Long, Map<Long, List<StateMachineTransform>>>> queryStatusTransformsMap(@PathVariable("organization_id") Long organizationId,

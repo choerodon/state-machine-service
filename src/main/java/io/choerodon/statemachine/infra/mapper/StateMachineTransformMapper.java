@@ -29,14 +29,6 @@ public interface StateMachineTransformMapper extends BaseMapper<StateMachineTran
      * @return
      */
     List<StateMachineTransform> queryByStartNodeIdOrType(@Param("organizationId") Long organizationId, @Param("stateMachineId") Long stateMachineId, @Param("startNodeId") Long startNodeId,@Param("transformType") String transformType);
-
-    /**
-     * 修复0.12.0发布后，敏捷移除节点，但没移除转换
-     *
-     * @param organizationId
-     * @return
-     */
-    int fixDeleteIllegalTransforms(@Param("organizationId") Long organizationId);
     
     List<StateMachineTransform> queryByStateMachineIds(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds);
 }
