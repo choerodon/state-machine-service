@@ -37,48 +37,24 @@ public enum InitNode {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public Long getPositionX() {
         return positionX;
-    }
-
-    public void setPositionX(Long positionX) {
-        this.positionX = positionX;
     }
 
     public Long getPositionY() {
         return positionY;
     }
 
-    public void setPositionY(Long positionY) {
-        this.positionY = positionY;
-    }
-
     public Long getWidth() {
         return width;
-    }
-
-    public void setWidth(Long width) {
-        this.width = width;
     }
 
     public Long getHeight() {
         return height;
     }
 
-    public void setHeight(Long height) {
-        this.height = height;
-    }
-
     public String getType() {
         return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public static List<InitNode> list(String schemeApplyType) {
@@ -98,6 +74,8 @@ public enum InitNode {
                 result.add(InitNode.PROGRAM2);
                 result.add(InitNode.PROGRAM3);
                 result.add(InitNode.PROGRAM4);
+                break;
+            default:
                 break;
         }
         return result;

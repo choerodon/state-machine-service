@@ -38,11 +38,12 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     private StateMachineConfigAssembler stateMachineConfigAssembler;
 
     private ModelMapper modelMapper = new ModelMapper();
+    private static final String ERROR_STATUS_TYPE_ILLEGAL = "error.status.type.illegal";
 
     @Override
     public StateMachineConfigDTO create(Long organizationId, Long stateMachineId, Long transformId, StateMachineConfigDTO configDTO) {
         if (!EnumUtil.contain(ConfigType.class, configDTO.getType())) {
-            throw new CommonException("error.status.type.illegal");
+            throw new CommonException(ERROR_STATUS_TYPE_ILLEGAL);
         }
         //验证configCode
         checkCode(transformId, configDTO.getType(), configDTO.getCode());
@@ -74,7 +75,7 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     @Override
     public List<StateMachineConfigDTO> queryByTransformId(Long organizationId, Long transformId, String type, Boolean isDraft) {
         if (type != null && !EnumUtil.contain(ConfigType.class, type)) {
-            throw new CommonException("error.status.type.illegal");
+            throw new CommonException(ERROR_STATUS_TYPE_ILLEGAL);
         }
 
         List<StateMachineConfigDTO> configDTOS;
@@ -91,14 +92,13 @@ public class StateMachineConfigServiceImpl extends BaseServiceImpl<StateMachineC
     @Override
     public List<StateMachineConfigDTO> queryDeployByTransformIds(Long organizationId, String type, List<Long> transformIds) {
         if (!EnumUtil.contain(ConfigType.class, type)) {
-            throw new CommonException("error.status.type.illegal");
+            throw new CommonException(ERROR_STATUS_TYPE_ILLEGAL);
         }
         if (transformIds != null && !transformIds.isEmpty()) {
             List<StateMachineConfig> configs = configDeployMapper.queryWithCodeInfoByTransformIds(organizationId, type, transformIds);
-            List<StateMachineConfigDTO> configDTOS = stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
-            return configDTOS;
+            return stateMachineConfigAssembler.toTargetList(configs, StateMachineConfigDTO.class);
         } else {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
     }

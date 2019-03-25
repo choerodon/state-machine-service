@@ -37,7 +37,9 @@ import java.util.stream.Collectors;
 public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> implements StateMachineService {
 
     private static final Logger logger = LoggerFactory.getLogger(StateMachineServiceImpl.class);
-    private final String STATE_MACHINE_CREATE = "state_machine_create";
+    private static final String ERROR_STATEMACHINENODE_CREATE = "error.stateMachineNode.create";
+    private static final String STATUS = "status";
+
     @Autowired
     private StateMachineMapper stateMachineMapper;
     @Autowired
@@ -118,7 +120,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         startNode.setType(NodeType.START);
         int isStartNodeInsert = nodeDraftMapper.insert(startNode);
         if (isStartNodeInsert != 1) {
-            throw new CommonException("error.stateMachineNode.create");
+            throw new CommonException(ERROR_STATEMACHINENODE_CREATE);
         }
 
         //创建默认的初始节点
@@ -135,7 +137,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         initNode.setOrganizationId(organizationId);
         int isNodeInsert = nodeDraftMapper.insert(initNode);
         if (isNodeInsert != 1) {
-            throw new CommonException("error.stateMachineNode.create");
+            throw new CommonException(ERROR_STATEMACHINENODE_CREATE);
         }
 
         //创建默认的转换
@@ -159,10 +161,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(name);
         StateMachine res = stateMachineMapper.selectOne(stateMachine);
-        if (res != null && !stateMachineId.equals(res.getId())) {
-            return true;
-        }
-        return false;
+        return res != null && !stateMachineId.equals(res.getId());
     }
 
     @Override
@@ -253,11 +252,23 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             }
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        int stateMachineDeploy = updateOptional(stateMachine, "status");
+        int stateMachineDeploy = updateOptional(stateMachine, STATUS);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deploy");
         }
+        handleDeployData(organizationId, stateMachineId);
 
+        //清理内存中的旧状态机构建器与实例
+        instanceCache.cleanStateMachine(stateMachineId);
+
+        //是否同步状态到其他服务:发saga
+        if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
+            sagaService.deployStateMachine(organizationId, stateMachineId, changeMap);
+        }
+        return true;
+    }
+
+    private void handleDeployData(Long organizationId, Long stateMachineId) {
         //删除上一版本的节点
         StateMachineNode nodeDeploy = new StateMachineNode();
         nodeDeploy.setStateMachineId(stateMachineId);
@@ -301,16 +312,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             List<StateMachineConfig> configDeploys = modelMapper.map(configs, new TypeToken<List<StateMachineConfig>>() {
             }.getType());
             configDeploys.forEach(c -> configDeployMapper.insert(c));
-
         }
-        //清理内存中的旧状态机构建器与实例
-        instanceCache.cleanStateMachine(stateMachineId);
-
-        //是否同步状态到其他服务:发saga
-        if (isStartSaga && !oldStatus.equals(StateMachineStatus.CREATE)) {
-            sagaService.deployStateMachine(organizationId, stateMachineId, changeMap);
-        }
-        return true;
     }
 
     /**
@@ -331,16 +333,12 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         List<Long> addIds = new ArrayList<>(newIds);
         addIds.removeAll(oldIds);
         List<Status> addStatuses = new ArrayList<>(addIds.size());
-        addIds.forEach(addId -> {
-            addStatuses.add(draftMap.get(addId));
-        });
+        addIds.forEach(addId -> addStatuses.add(draftMap.get(addId)));
         //删除的节点
         List<Long> deleteIds = new ArrayList<>(oldIds);
         deleteIds.removeAll(newIds);
         List<Status> deleteStatuses = new ArrayList<>(deleteIds.size());
-        deleteIds.forEach(deleteId -> {
-            deleteStatuses.add(deployMap.get(deleteId));
-        });
+        deleteIds.forEach(deleteId -> deleteStatuses.add(deployMap.get(deleteId)));
 
         changeMap.put("addList", addStatuses);
         changeMap.put("deleteList", deleteStatuses);
@@ -457,7 +455,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             throw new CommonException("error.stateMachine.deleteDraft.noFound");
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        int stateMachineDeploy = updateOptional(stateMachine, "status");
+        int stateMachineDeploy = updateOptional(stateMachine, STATUS);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deleteDraft");
         }
@@ -477,6 +475,18 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         config.setOrganizationId(organizationId);
         configDraftMapper.delete(config);
         //写入活跃的节点到草稿中，id一致
+        deleteDraftHandleNode(organizationId, stateMachineId);
+
+        //写入活跃的转换到草稿中，id一致
+        deleteDraftHandleTransform(organizationId, stateMachineId);
+
+        //写入活跃的配置到草稿中，id一致
+        deleteDraftHandleConfig(stateMachineId);
+
+        return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
+    }
+
+    private void deleteDraftHandleNode(Long organizationId, Long stateMachineId) {
         StateMachineNode nodeDeploy = new StateMachineNode();
         nodeDeploy.setStateMachineId(stateMachineId);
         nodeDeploy.setOrganizationId(organizationId);
@@ -486,11 +496,13 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             for (StateMachineNodeDraft insertNode : nodes) {
                 int nodeInsert = nodeDraftMapper.insert(insertNode);
                 if (nodeInsert != 1) {
-                    throw new CommonException("error.stateMachineNode.create");
+                    throw new CommonException(ERROR_STATEMACHINENODE_CREATE);
                 }
             }
         }
-        //写入活跃的转换到草稿中，id一致
+    }
+
+    private void deleteDraftHandleTransform(Long organizationId, Long stateMachineId) {
         StateMachineTransform transformDeploy = new StateMachineTransform();
         transformDeploy.setStateMachineId(stateMachineId);
         transformDeploy.setOrganizationId(organizationId);
@@ -505,7 +517,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 }
             }
         }
-        //写入活跃的配置到草稿中，id一致
+    }
+
+    private void deleteDraftHandleConfig(Long stateMachineId) {
         StateMachineConfig configDeploy = new StateMachineConfig();
         configDeploy.setStateMachineId(stateMachineId);
         List<StateMachineConfig> configDeploys = configDeployMapper.select(configDeploy);
@@ -519,7 +533,6 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 }
             }
         }
-        return queryStateMachineWithConfigById(organizationId, stateMachine.getId(), false);
     }
 
     @Override
@@ -554,7 +567,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-            int stateMachineUpdate = updateOptional(stateMachine, "status");
+            int stateMachineUpdate = updateOptional(stateMachine, STATUS);
             if (stateMachineUpdate != 1) {
                 throw new CommonException("error.stateMachine.update");
             }
@@ -567,10 +580,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(name);
         StateMachine res = stateMachineMapper.selectOne(stateMachine);
-        if (res == null) {
-            return false;
-        }
-        return true;
+        return res != null;
     }
 
     @Override
@@ -598,7 +608,7 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 //更新状态机状态为create
                 Long stateMachineId = stateMachine.getId();
                 stateMachine.setStatus(StateMachineStatus.CREATE);
-                updateOptional(stateMachine, "status");
+                updateOptional(stateMachine, STATUS);
                 //删除发布节点
                 StateMachineNode node = new StateMachineNode();
                 node.setStateMachineId(stateMachineId);
@@ -636,26 +646,22 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             List<StatusDTO> status = new ArrayList<>();
             if (stateMachine.getStatus().equals(StateMachineStatus.CREATE)) {
                 List<StateMachineNodeDraft> nodeDrafts = nodeDraftMapper.selectByStateMachineId(stateMachine.getId());
-                nodeDrafts.forEach(nodeDraft -> {
-                    if (!nodeDraft.getType().equals(NodeType.START)) {
-                        StatusDTO statusDTO = statusMap.get(nodeDraft.getStatusId());
-                        if (statusDTO != null) {
-                            status.add(statusDTO);
-                        } else {
-                            logger.warn("warn nodeDraftId:{} notFound", nodeDraft.getId());
-                        }
+                nodeDrafts.stream().filter(x -> !x.getType().equals(NodeType.START)).forEach(nodeDraft -> {
+                    StatusDTO statusDTO = statusMap.get(nodeDraft.getStatusId());
+                    if (statusDTO != null) {
+                        status.add(statusDTO);
+                    } else {
+                        logger.warn("warn nodeDraftId:{} notFound", nodeDraft.getId());
                     }
                 });
             } else {
                 List<StateMachineNode> nodeDeploys = nodeDeployMapper.selectByStateMachineId(stateMachine.getId());
-                nodeDeploys.forEach(nodeDeploy -> {
-                    if (!nodeDeploy.getType().equals(NodeType.START)) {
-                        StatusDTO statusDTO = statusMap.get(nodeDeploy.getStatusId());
-                        if (statusDTO != null) {
-                            status.add(statusDTO);
-                        } else {
-                            logger.warn("warn nodeDraftId:{} notFound", nodeDeploy.getId());
-                        }
+                nodeDeploys.stream().filter(x -> !x.getType().equals(NodeType.START)).forEach(nodeDeploy -> {
+                    StatusDTO statusDTO = statusMap.get(nodeDeploy.getStatusId());
+                    if (statusDTO != null) {
+                        status.add(statusDTO);
+                    } else {
+                        logger.warn("warn nodeDraftId:{} notFound", nodeDeploy.getId());
                     }
                 });
             }

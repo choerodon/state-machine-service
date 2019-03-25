@@ -35,48 +35,24 @@ public enum InitTransform {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getStartNodeCode() {
         return startNodeCode;
     }
 
-    public void setStartNodeCode(String startNodeCode) {
-        this.startNodeCode = startNodeCode;
-    }
-
     public String getEndNodeCode() {
         return endNodeCode;
-    }
-
-    public void setEndNodeCode(String endNodeCode) {
-        this.endNodeCode = endNodeCode;
     }
 
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getConditionStrategy() {
         return conditionStrategy;
-    }
-
-    public void setConditionStrategy(String conditionStrategy) {
-        this.conditionStrategy = conditionStrategy;
     }
 
     public static List<InitTransform> list(String schemeApplyType) {
@@ -96,6 +72,8 @@ public enum InitTransform {
                 result.add(InitTransform.TRANSTFORMALL2);
                 result.add(InitTransform.TRANSTFORMALL3);
                 result.add(InitTransform.TRANSTFORMALL4);
+                break;
+            default:
                 break;
         }
         return result;

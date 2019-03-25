@@ -5,9 +5,8 @@ import io.choerodon.statemachine.infra.feign.fallback.UserFeignClientFallback;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @author shinan.chen
@@ -19,6 +18,6 @@ public interface UserFeignClient {
     /**
      * 按照id查询项目
      */
-    @RequestMapping(value = "/v1/projects/{project_id}", method = RequestMethod.GET)
+    @GetMapping(value = "/v1/projects/{project_id}")
     ResponseEntity<ProjectDTO> queryProject(@PathVariable(name = "project_id") Long projectId);
 }

@@ -60,6 +60,10 @@ public class InstanceServiceImpl implements InstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
     private static final String EXCEPTION = "Exception:{}";
+    private static final String HTTP = "http://";
+    private static final String URI = "uri:{}";
+    private static final String AND_TARGET_STATUS_ID = "&target_status_id=";
+
 
     @Override
     public ExecuteResult startInstance(Long organizationId, String serviceCode, Long stateMachineId, InputDTO inputDTO) {
@@ -71,7 +75,7 @@ public class InstanceServiceImpl implements InstanceService {
         try {
             executeResult = machineFactory.startInstance(organizationId, serviceCode, stateMachineId, inputDTO);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             executeResult = new ExecuteResult(false, null, "创建状态机实例失败");
         }
         return executeResult;
@@ -231,11 +235,11 @@ public class InstanceServiceImpl implements InstanceService {
     private URI getFilterTransformURI(String serviceCode, Long instanceId) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/filter_transform").append("?1=1");
+        stringBuilder.append(HTTP).append(serviceCode).append("/v1").append("/statemachine/filter_transform").append("?1=1");
         if (instanceId != null) {
             stringBuilder.append("&instance_id=").append(instanceId);
         }
-        LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
+        LOGGER.info(URI, Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
         try {
             uri = new URI(stringBuilder.toString());
         } catch (URISyntaxException e) {
@@ -255,14 +259,14 @@ public class InstanceServiceImpl implements InstanceService {
     private URI getExecuteConfigConditionURI(String serviceCode, Long targetStatusId, String conditionStrategy) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_condition").append("?1=1");
+        stringBuilder.append(HTTP).append(serviceCode).append("/v1").append("/statemachine/execute_config_condition").append("?1=1");
         if (targetStatusId != null) {
-            stringBuilder.append("&target_status_id=").append(targetStatusId);
+            stringBuilder.append(AND_TARGET_STATUS_ID).append(targetStatusId);
         }
         if (conditionStrategy != null) {
             stringBuilder.append("&condition_strategy=").append(conditionStrategy);
         }
-        LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
+        LOGGER.info(URI, Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
         try {
             uri = new URI(stringBuilder.toString());
         } catch (URISyntaxException e) {
@@ -280,11 +284,11 @@ public class InstanceServiceImpl implements InstanceService {
     private URI getExecuteConfigValidatorURI(String serviceCode, Long targetStatusId) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_validator").append("?1=1");
+        stringBuilder.append(HTTP).append(serviceCode).append("/v1").append("/statemachine/execute_config_validator").append("?1=1");
         if (targetStatusId != null) {
-            stringBuilder.append("&target_status_id=").append(targetStatusId);
+            stringBuilder.append(AND_TARGET_STATUS_ID).append(targetStatusId);
         }
-        LOGGER.info("uri:{}", Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
+        LOGGER.info(URI, Optional.of(stringBuilder).map(result -> stringBuilder.toString()));
         try {
             uri = new URI(stringBuilder.toString());
         } catch (URISyntaxException e) {
@@ -303,15 +307,15 @@ public class InstanceServiceImpl implements InstanceService {
     private URI getExecuteConfigPostActionURI(String serviceCode, Long targetStatusId, String transformType) {
         URI uri = null;
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("http://").append(serviceCode).append("/v1").append("/statemachine/execute_config_action").append("?1=1");
+        stringBuilder.append(HTTP).append(serviceCode).append("/v1").append("/statemachine/execute_config_action").append("?1=1");
         if (targetStatusId != null) {
-            stringBuilder.append("&target_status_id=").append(targetStatusId);
+            stringBuilder.append(AND_TARGET_STATUS_ID).append(targetStatusId);
         }
         if (transformType != null) {
             stringBuilder.append("&transform_type=").append(transformType);
         }
         String uriStr = stringBuilder.toString();
-        LOGGER.debug("uri:{}", uriStr);
+        LOGGER.debug(URI, uriStr);
         try {
             uri = new URI(uriStr);
         } catch (URISyntaxException e) {

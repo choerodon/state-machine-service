@@ -3,15 +3,11 @@ package io.choerodon.statemachine.api.eventhandler;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 import io.choerodon.statemachine.api.service.InitService;
-import io.choerodon.statemachine.domain.event.OrganizationEventPayload;
 import io.choerodon.statemachine.domain.event.OrganizationRegisterEventPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static io.choerodon.statemachine.infra.utils.SagaTopic.Organization.ORG_CREATE;
-import static io.choerodon.statemachine.infra.utils.SagaTopic.Organization.TASK_ORG_CREATE;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/27.
@@ -35,7 +31,7 @@ public class DemoEventHandler {
             description = "demo创建组织事件",
             sagaCode = REGISTER_ORG,
             seq = 50)
-    public OrganizationRegisterEventPayload OrgCreatedForDemoInit(String data) {
+    public OrganizationRegisterEventPayload orgCreatedForDemoInit(String data) {
         LOGGER.info("demo消费创建组织消息{}", data);
         OrganizationRegisterEventPayload organizationEventPayload = JSONObject.parseObject(data, OrganizationRegisterEventPayload.class);
         Long organizationId = organizationEventPayload.getOrganization().getId();

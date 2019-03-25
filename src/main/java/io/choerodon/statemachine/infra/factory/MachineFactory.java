@@ -174,7 +174,7 @@ public class MachineFactory {
             }
             return (ExecuteResult) executeResult;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return new ExecuteResult(false, null, "执行转换失败");
         }
 
@@ -187,10 +187,10 @@ public class MachineFactory {
      * @return
      */
     private Action<String, String> initialAction(Long organizationId, String serviceCode) {
-        return context -> {
-            logger.info("stateMachine instance execute initialAction");
+        return context ->
+                logger.info("stateMachine instance execute initialAction,organizationId:{},serviceCode:{}", organizationId, serviceCode);
 //                instanceService.postAction()
-        };
+
     }
 
     /**
@@ -221,7 +221,7 @@ public class MachineFactory {
         return context -> {
             Long transformId = Long.parseLong(context.getEvent());
             InputDTO inputDTO = (InputDTO) context.getExtendedState().getVariables().get(INPUT_DTO);
-            logger.error("stateMachine instance execute transform error,instanceId:{},transformId:{}", inputDTO.getInstanceId(), transformId);
+            logger.error("stateMachine instance execute transform error,organizationId:{},serviceCode:{},instanceId:{},transformId:{}", organizationId, serviceCode, inputDTO.getInstanceId(), transformId);
             // do something
         };
     }
