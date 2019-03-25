@@ -11,6 +11,16 @@ public class StateMachineInfo {
 
     private String stateMachineName;
 
+    private String stateMachineStatus;
+
+    public String getStateMachineStatus() {
+        return stateMachineStatus;
+    }
+
+    public void setStateMachineStatus(String stateMachineStatus) {
+        this.stateMachineStatus = stateMachineStatus;
+    }
+
     public Long getStateMachineId() {
         return stateMachineId;
     }
