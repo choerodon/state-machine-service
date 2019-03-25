@@ -107,14 +107,6 @@ public interface StateMachineTransformService extends BaseService<StateMachineTr
     Boolean checkName(Long organizationId, Long stateMachineId, Long startNodeId, Long endNodeId, String name);
 
     /**
-     * 修复0.12.0发布后，敏捷移除节点，但没移除转换
-     *
-     * @param organizationId
-     * @return
-     */
-    Boolean fixDeleteIllegalTransforms(Long organizationId);
-
-    /**
      * 根据状态机id列表查询出这些状态机每个状态对应的转换列表
      *
      * @param organizationId

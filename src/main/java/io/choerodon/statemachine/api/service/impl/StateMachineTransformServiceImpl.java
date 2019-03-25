@@ -266,12 +266,6 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
     }
 
     @Override
-    public Boolean fixDeleteIllegalTransforms(Long organizationId) {
-        transformDeployMapper.fixDeleteIllegalTransforms(organizationId);
-        return true;
-    }
-
-    @Override
     public Map<Long, Map<Long, List<StateMachineTransform>>> queryStatusTransformsMap(Long organizationId, List<Long> stateMachineIds) {
         if (stateMachineIds == null || stateMachineIds.isEmpty()) {
             return null;
