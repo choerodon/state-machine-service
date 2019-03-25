@@ -14,7 +14,6 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
 @Service
@@ -30,13 +29,13 @@ public class RegisterInstanceServiceImpl implements RegisterInstanceService {
 
     @Override
     public void instanceDownConsumer(final EurekaEventPayload payload) {
-        logger.info("服务下线："+payload.getAppName());
+        logger.info("服务下线：{}", payload.getAppName());
     }
 
     @Override
     public void instanceUpConsumer(final EurekaEventPayload payload) {
-        logger.info("服务上线："+payload.getAppName());
-        if(Arrays.stream(targetServices).anyMatch(x->x.equals(payload.getAppName()))){
+        logger.info("服务上线：{}", payload.getAppName());
+        if (Arrays.stream(targetServices).anyMatch(x -> x.equals(payload.getAppName()))) {
             PropertyData propertyData = fetchPropertyData(payload.getInstanceAddress());
             if (propertyData == null) {
                 throw new RemoteAccessException("error.instanceUpConsumer.fetchPropertyData");

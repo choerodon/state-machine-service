@@ -2,7 +2,6 @@ package io.choerodon.statemachine.infra.feign;
 
 import io.choerodon.statemachine.domain.event.DeployStateMachinePayload;
 import io.choerodon.statemachine.infra.feign.dto.ChangeStatus;
-import io.choerodon.statemachine.infra.feign.dto.RemoveStatusWithProject;
 import io.choerodon.statemachine.infra.feign.fallback.IssueFeignClientFallback;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +20,12 @@ import java.util.Map;
 public interface IssueFeignClient {
     /**
      * 查询状态机关联的项目id列表
+     *
+     * @param organizationId
+     * @param stateMachineId
+     * @return
      */
-    @RequestMapping(value = "/v1/organizations/{organization_id}/state_machine/query_project_ids_map", method = RequestMethod.GET)
+    @GetMapping(value = "/v1/organizations/{organization_id}/state_machine/query_project_ids_map")
     ResponseEntity<Map<String, List<Long>>> queryProjectIdsMap(@PathVariable("organization_id") Long organizationId,
                                                                @RequestParam("stateMachineId") Long stateMachineId);
 

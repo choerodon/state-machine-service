@@ -258,11 +258,7 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
         transformDraft.setStartNodeId(startNodeId);
         transformDraft.setEndNodeId(endNodeId);
         transformDraft.setStateMachineId(stateMachineId);
-        if (transformDraftMapper.select(transformDraft).isEmpty()) {
-            return true;
-        } else {
-            return false;
-        }
+        return transformDraftMapper.select(transformDraft).isEmpty();
     }
 
     @Override
@@ -298,6 +294,6 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
 
     @Override
     public StateMachineTransform queryDeployTransformForAgile(Long organizationId, Long transformId) {
-        return transformDeployMapper.queryById(organizationId,transformId);
+        return transformDeployMapper.queryById(organizationId, transformId);
     }
 }

@@ -51,7 +51,7 @@ public class InitServiceImpl implements InitService {
     @Autowired
     private SagaClient sagaClient;
 
-    private final static String ERROR_STATEMACHINE_CREATE = "error.stateMachine.create";
+    private static final String ERROR_STATEMACHINE_CREATE = "error.stateMachine.create";
 
     @Override
     public synchronized List<Status> initStatus(Long organizationId) {
@@ -183,26 +183,8 @@ public class InitServiceImpl implements InitService {
         //初始化节点
         Map<String, StateMachineNodeDraft> nodeMap = new HashMap<>();
         Map<String, Status> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(Status::getCode, x -> x, (code1, code2) -> code1));
-        for (InitNode initNode : InitNode.list(applyType)) {
-            StateMachineNodeDraft node = new StateMachineNodeDraft();
-            node.setStateMachineId(stateMachineId);
-            if (initNode.getType().equals(NodeType.START)) {
-                node.setStatusId(0L);
-            } else {
-                node.setStatusId(statusMap.get(initNode.getCode()).getId());
-            }
-            node.setPositionX(initNode.getPositionX());
-            node.setPositionY(initNode.getPositionY());
-            node.setWidth(initNode.getWidth());
-            node.setHeight(initNode.getHeight());
-            node.setType(initNode.getType());
-            node.setOrganizationId(organizationId);
-            int isNodeInsert = nodeDraftMapper.insert(node);
-            if (isNodeInsert != 1) {
-                throw new CommonException("error.stateMachineNode.create");
-            }
-            nodeMap.put(initNode.getCode(), node);
-        }
+        handleNode(organizationId, stateMachineId, applyType, nodeMap, statusMap);
+
         //初始化转换
         for (InitTransform initTransform : InitTransform.list(applyType)) {
             StateMachineTransformDraft transform = new StateMachineTransformDraft();
@@ -231,6 +213,29 @@ public class InitServiceImpl implements InitService {
                     throw new CommonException("error.stateMachineNode.allStatusTransformId.update");
                 }
             }
+        }
+    }
+
+    private void handleNode(Long organizationId, Long stateMachineId, String applyType, Map<String, StateMachineNodeDraft> nodeMap, Map<String, Status> statusMap) {
+        for (InitNode initNode : InitNode.list(applyType)) {
+            StateMachineNodeDraft node = new StateMachineNodeDraft();
+            node.setStateMachineId(stateMachineId);
+            if (initNode.getType().equals(NodeType.START)) {
+                node.setStatusId(0L);
+            } else {
+                node.setStatusId(statusMap.get(initNode.getCode()).getId());
+            }
+            node.setPositionX(initNode.getPositionX());
+            node.setPositionY(initNode.getPositionY());
+            node.setWidth(initNode.getWidth());
+            node.setHeight(initNode.getHeight());
+            node.setType(initNode.getType());
+            node.setOrganizationId(organizationId);
+            int isNodeInsert = nodeDraftMapper.insert(node);
+            if (isNodeInsert != 1) {
+                throw new CommonException("error.stateMachineNode.create");
+            }
+            nodeMap.put(initNode.getCode(), node);
         }
     }
 

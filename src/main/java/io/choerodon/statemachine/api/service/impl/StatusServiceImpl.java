@@ -7,7 +7,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StatusService;
-import io.choerodon.statemachine.domain.StateMachineInfo;
 import io.choerodon.statemachine.domain.StateMachineNode;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.StatusWithInfo;
@@ -49,57 +48,12 @@ public class StatusServiceImpl implements StatusService {
 
     private ModelMapper modelMapper = new ModelMapper();
 
-//    @Override
-//    public Page<StatusDTO> pageQuery(PageRequest pageRequest, StatusDTO statusDTO, String param) {
-//        Status status = modelMapper.map(statusDTO, Status.class);
-//        Page<Status> page = PageHelper.doPageAndSort(pageRequest,
-//                () -> statusMapper.fulltextSearch(status, param));
-//        List<Status> statuses = page.getContent();
-//        List<StatusDTO> statusDTOs = modelMapper.map(statuses, new TypeToken<List<StatusDTO>>() {
-//        }.getType());
-//        for (StatusDTO dto : statusDTOs) {
-//            //该状态已被草稿状态机使用个数
-//            Long draftUsed = nodeDraftMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
-//            //该状态已被发布状态机使用个数
-//            Long deployUsed = nodeDeployMapper.checkStateDelete(dto.getOrganizationId(), dto.getId());
-//            if (draftUsed == 0 && deployUsed == 0) {
-//                dto.setCanDelete(true);
-//            } else {
-//                dto.setCanDelete(false);
-//            }
-//        }
-//        Page<StatusDTO> returnPage = new Page<>();
-//        returnPage.setContent(statusDTOs);
-//        returnPage.setNumber(page.getNumber());
-//        returnPage.setNumberOfElements(page.getNumberOfElements());
-//        returnPage.setSize(page.getSize());
-//        returnPage.setTotalElements(page.getTotalElements());
-//        returnPage.setTotalPages(page.getTotalPages());
-//        return returnPage;
-//    }
-
-    private void removeDuplicate(List<StatusWithInfo> statuses) {
-        for (StatusWithInfo statusWithInfo : statuses) {
-            List<StateMachineInfo> stateMachineInfoList = statusWithInfo.getStateMachineInfoList();
-            List<StateMachineInfo> res = new ArrayList<>();
-            List<Long> ids = new ArrayList<>();
-            for (StateMachineInfo stateMachineInfo : stateMachineInfoList) {
-                if (!ids.contains(stateMachineInfo.getStateMachineId())) {
-                    res.add(stateMachineInfo);
-                    ids.add(stateMachineInfo.getStateMachineId());
-                }
-            }
-            statusWithInfo.setStateMachineInfoList(res);
-        }
-    }
-
     @Override
     public Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO) {
         Page<Long> statusIdsPage = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.selectStatusIds(organizationId, statusSearchDTO));
         List<StatusWithInfoDTO> statusWithInfoDTOList = new ArrayList<>();
         if (!statusIdsPage.getContent().isEmpty()) {
             List<StatusWithInfo> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getContent());
-//        removeDuplicate(statuses);
             statusWithInfoDTOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoDTO>>() {
             }.getType());
         }
@@ -141,10 +95,7 @@ public class StatusServiceImpl implements StatusService {
         status.setOrganizationId(organizationId);
         status.setName(name);
         Status res = statusMapper.selectOne(status);
-        if (res != null && !statusId.equals(res.getId())) {
-            return true;
-        }
-        return false;
+        return res != null && !statusId.equals(res.getId());
     }
 
     @Override
