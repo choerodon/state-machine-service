@@ -38,4 +38,11 @@ databaseChangeLog(logicalFilePath: 'script/db/status.groovy') {
             column(name: "organization_id", type: "BIGINT UNSIGNED")
         }
     }
+    changeSet(id: '2019-03-12-fix-add-status-prepare', author: 'shinan.chenX@gmail') {
+        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+            "insert into status(name,code,description,type,organization_id) " +
+                    "select '准备' as name,'prepare' as code, '准备' as description,'prepare' as type,organization_id " +
+                    "from status where code='create'"
+        }
+    }
 }
