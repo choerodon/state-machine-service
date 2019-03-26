@@ -1,20 +1,28 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author shinan.chen
  * @date 2018/10/24
  */
 public class StatusDTO {
-
+    @ApiModelProperty(value = "状态id")
     private Long id;
+    @ApiModelProperty(value = "名称")
     private String name;
     /**
      * code是用来识别是否是初始化状态
      */
+    @ApiModelProperty(value = "编码")
     private String code;
+    @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "状态类型（todo/doing/done/none/prepare）")
     private String type;
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public StatusDTO() {

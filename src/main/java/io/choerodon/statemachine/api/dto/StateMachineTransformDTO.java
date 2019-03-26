@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,28 +9,43 @@ import java.util.List;
  * @since 2019/2/19
  */
 public class StateMachineTransformDTO {
+    @ApiModelProperty(value = "转换id")
     private Long id;
+    @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "状态机id")
     private Long stateMachineId;
+    @ApiModelProperty(value = "起始节点id")
     private Long startNodeId;
+    @ApiModelProperty(value = "目标节点id")
     private Long endNodeId;
-    /**
-     * 页面方案id
-     */
+    @ApiModelProperty(value = "页面路径")
     private String url;
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
+    @ApiModelProperty(value = "转换类型（transform_init/transform_all/transform_custom）")
     private String type;
+    @ApiModelProperty(value = "样式")
     private String style;
+    @ApiModelProperty(value = "条件策略（condition_all/condition_one）")
     private String conditionStrategy;
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
+    @ApiModelProperty(value = "目标节点的状态id")
     private Long endStatusId;
-
+    @ApiModelProperty(value = "起始节点对象")
     private StateMachineNodeDTO startNodeDTO;
+    @ApiModelProperty(value = "目标节点对象")
     private StateMachineNodeDTO endNodeDTO;
+    @ApiModelProperty(value = "条件列表")
     private List<StateMachineConfigDTO> conditions;
+    @ApiModelProperty(value = "验证列表")
     private List<StateMachineConfigDTO> validators;
+    @ApiModelProperty(value = "触发器列表")
     private List<StateMachineConfigDTO> triggers;
+    @ApiModelProperty(value = "后置动作列表")
     private List<StateMachineConfigDTO> postpositions;
 
     public Long getId() {

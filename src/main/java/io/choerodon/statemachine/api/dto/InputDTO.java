@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,9 +9,13 @@ import java.util.List;
  * @date 2018/11/8
  */
 public class InputDTO {
+    @ApiModelProperty(value = "实例id（issueId）")
     private Long instanceId;
+    @ApiModelProperty(value = "反射的方法")
     private String invokeCode;
+    @ApiModelProperty(value = "输入数据的json")
     private String input;
+    @ApiModelProperty(value = "状态机配置列表")
     private List<StateMachineConfigDTO> configs;
 
     public String getInvokeCode() {

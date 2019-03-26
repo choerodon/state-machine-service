@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +10,9 @@ import java.util.List;
  * @date 2018/10/9
  */
 public class PropertyData {
+    @ApiModelProperty(value = "服务名称")
     private String serviceName;
+    @ApiModelProperty(value = "状态机配置列表")
     private List<ConfigCodeDTO> list = new ArrayList<>();
 
     public List<ConfigCodeDTO> getList() {
