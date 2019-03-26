@@ -1,17 +1,24 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author shinan.chen
  * @date 2018/10/9
  */
 public class ConfigCodeDTO {
+    @ApiModelProperty(value = "配置编码")
     private String code;
+    @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "配置类型（config_condition/config_validator/config_trigger/config_action）")
     private String type;
+    @ApiModelProperty(value = "微服务名称")
     private String service;
 
-    public  ConfigCodeDTO(){
+    public ConfigCodeDTO() {
     }
 
     public ConfigCodeDTO(String code, String name, String description, String type) {

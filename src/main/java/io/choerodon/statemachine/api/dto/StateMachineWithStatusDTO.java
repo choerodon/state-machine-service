@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,13 +9,17 @@ import java.util.List;
  * @since 2018/11/20
  */
 public class StateMachineWithStatusDTO {
-
+    @ApiModelProperty(value = "状态机id")
     private Long id;
+    @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "状态机状态（state_machine_draft/state_machine_active/state_machine_create）")
     private String status;
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "状态机中的状态列表")
     private List<StatusDTO> statusDTOS;
 
     public StateMachineWithStatusDTO() {

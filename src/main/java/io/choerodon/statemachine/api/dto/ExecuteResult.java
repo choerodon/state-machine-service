@@ -1,13 +1,18 @@
 package io.choerodon.statemachine.api.dto;
 
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author shinan.chen
  * @date 2018/9/19
  */
 public class ExecuteResult {
+    @ApiModelProperty(value = "是否执行成功")
     Boolean isSuccess;
+    @ApiModelProperty(value = "结果状态id")
     Long resultStatusId;
+    @ApiModelProperty(value = "错误信息")
     String errorMessage;
 
     public ExecuteResult() {

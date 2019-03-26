@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
 import io.choerodon.statemachine.domain.StateMachineInfo;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
@@ -9,21 +10,21 @@ import java.util.List;
  * Email: fuqianghuang01@gmail.com
  */
 public class StatusWithInfoDTO {
-
+    @ApiModelProperty(value = "状态id")
     private Long id;
-
+    @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "描述")
     private String description;
-
+    @ApiModelProperty(value = "状态类型（todo/doing/done/none/prepare）")
     private String type;
-
+    @ApiModelProperty(value = "编码")
     private String code;
-
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "用到该状态的状态机列表")
     private List<StateMachineInfo> stateMachineInfoList;
 
     public Long getId() {

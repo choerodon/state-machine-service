@@ -1,23 +1,26 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
 public class StateMachineConfigDTO {
-
+    @ApiModelProperty(value = "状态机配置id")
     private Long id;
+    @ApiModelProperty(value = "转换id")
     private Long transformId;
+    @ApiModelProperty(value = "状态机id")
     private Long stateMachineId;
+    @ApiModelProperty(value = "配置编码")
     private String code;
+    @ApiModelProperty(value = "配置类型（config_condition/config_validator/config_trigger/config_action）")
     private String type;
+    @ApiModelProperty(value = "组织id")
     private Long organizationId;
-    /**
-     * code名称
-     */
+    @ApiModelProperty(value = "配置编码名称")
     private String codeName;
-    /**
-     * code描述
-     */
+    @ApiModelProperty(value = "配置编码描述")
     private String codeDescription;
 
     public Long getId() {

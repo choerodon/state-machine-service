@@ -1,5 +1,7 @@
 package io.choerodon.statemachine.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,15 +9,15 @@ import java.util.List;
  * Email: fuqianghuang01@gmail.com
  */
 public class LookupTypeWithValuesDTO {
-
+    @ApiModelProperty(value = "类型编码")
     private String typeCode;
-
+    @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "描述")
     private String description;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "值列表")
     private List<LookupValueDTO> lookupValues;
 
     public String getTypeCode() {

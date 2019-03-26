@@ -1,21 +1,22 @@
 package io.choerodon.statemachine.api.dto;
 
 
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/09/27.
  * Email: fuqianghuang01@gmail.com
  */
 public class LookupValueDTO {
-
+    @ApiModelProperty(value = "值编码")
     private String valueCode;
-
+    @ApiModelProperty(value = "类型编码")
     private String typeCode;
-
+    @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "描述")
     private String description;
-
+    @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
 
     public String getValueCode() {
