@@ -6,7 +6,7 @@ import io.choerodon.statemachine.api.dto.InputDTO;
 import io.choerodon.statemachine.infra.config.FeignConfiguration;
 import io.choerodon.statemachine.infra.feign.dto.TransformInfo;
 import io.choerodon.statemachine.infra.feign.fallback.CustomFeignClientAdaptorFallBack;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
@@ -16,7 +16,7 @@ import java.util.List;
  * @author shinan.chen
  * @date 2018/9/17
  */
-@FeignClient(name="customFeignClient",fallback = CustomFeignClientAdaptorFallBack.class, configuration = FeignConfiguration.class)
+@FeignClient(name = "customFeignClient", fallback = CustomFeignClientAdaptorFallBack.class, configuration = FeignConfiguration.class)
 public interface CustomFeignClientAdaptor {
 
     @RequestLine("GET")
@@ -24,6 +24,7 @@ public interface CustomFeignClientAdaptor {
 
     /**
      * 调用对应服务，通过条件验证过滤掉转换
+     *
      * @param baseUri
      * @param transforms
      * @return
@@ -33,6 +34,7 @@ public interface CustomFeignClientAdaptor {
 
     /**
      * 调用对应服务，执行条件，验证，后置处理
+     *
      * @param baseUri
      * @param inputDTO
      * @return
