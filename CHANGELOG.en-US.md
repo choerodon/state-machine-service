@@ -1,6 +1,12 @@
 # Changelog
 All notable changes about state-machine-service will be documented in this file.
 
+## [0.16.0] - 2019-04-19
+
+### Added  
+
+- Added Preparation phase status
+
 ## [0.13.0] - 2019-01-11
 
 ### Changed  
