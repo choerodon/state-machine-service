@@ -29,6 +29,11 @@ preJob:
 deployment:
   managementPort: 8385
 
+service:
+  enabled: false
+  type: ClusterIP
+  port: 8384
+
 env:
   open:
     SPRING_CLOUD_CONFIG_ENABLED: true
