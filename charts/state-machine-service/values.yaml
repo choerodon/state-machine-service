@@ -1,4 +1,4 @@
-# Default values for manager-service.
+# Default values for state-machine-service.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -6,70 +6,56 @@ replicaCount: 1
 
 image:
   repository: registry.cn-hangzhou.aliyuncs.com/choerodon-agile/state-machine-service
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 preJob:
-  image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/dbtool:0.6.1
+  timeout: 300
+  image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/dbtool:0.6.2
   preConfig:
+    enable: true
     configFile: application.yml
-    mysql:
-      host: hapcloud-mysql.db.svc
-      port: 3306
-      database: manager_service
-      username: root
-      password: handhand
+    configType: k8s
+    registerHost: http://register-server.c7n-system:8000
+    datasource:
+      url: jdbc:mysql://localhost:3306/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+      username: username
+      password: password
   preInitDB:
-    mysql:
-      host: kanban-mysql.db.svc
-      port: 3308
-      database: state_machine_service
-      username: root
-      password: handhand
-
+    enable: true
+    datasource:
+      url: jdbc:mysql://localhost:3306/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+      username: username
+      password: password
 deployment:
   managementPort: 8385
-
-env:
-  open:
-    ## register-server 
-    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://register-server.c7nf-staging:8000/eureka/
-    ## config-server
-    SPRING_CLOUD_CONFIG_ENABLED: true
-    SPRING_CLOUD_CONFIG_URI: http://config-server.c7nf-staging:8010
-    ## mysql
-    SPRING_DATASOURCE_URL: jdbc:mysql://kanban-mysql.db.svc:3308/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: handhand
-    # skywalking 代理端配置
-    SKYWALKING_OPTS: >-
-      -javaagent:/agent/skywalking-agent.jar
-      -Dskywalking.agent.application_code=state-machine-service
-      -Dskywalking.agent.sample_n_per_3_secs=1
-      -Dskywalking.collector.backend_service=oap.skywalking:11800
-
-
-metrics:
-  path: /prometheus
-  group: spring-boot
-
-logs:
- parser: spring-boot
-
-persistence:
-  enabled: false
-  ## A manually managed Persistent Volume and Claim
-  ## Requires persistence.enabled: true
-  ## If defined, PVC must be created manually before volume will be bound
-  # existingClaim:
-  # subPath:
 
 service:
   enabled: false
   type: ClusterIP
   port: 8384
-  
-ingress:
-  enabled: false
+
+env:
+  open:
+    SPRING_CLOUD_CONFIG_ENABLED: true
+    SPRING_CLOUD_CONFIG_URI: http://register-server.c7n-system:8000
+    SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/state_machine_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    SPRING_DATASOURCE_USERNAME: username
+    SPRING_DATASOURCE_PASSWORD: password
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://register-server.c7n-system:8000/eureka/
+    # 清理permission表中的旧接口和role_permission表中角色和权限层级不匹配的脏数据
+    CHOERODON_CLEANPERMISSION: false
+    # skywalking 代理端配置
+#    SKYWALKING_OPTS: >-
+#      -javaagent:/agent/skywalking-agent.jar
+#      -Dskywalking.agent.application_code=iam-service
+#      -Dskywalking.agent.sample_n_per_3_secs=-1
+#      -Dskywalking.collector.backend_service=oap.skywalking:11800
+metrics:
+  path: /actuator/prometheus
+  group: spring-boot
+
+logs:
+  parser: spring-boot
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -82,4 +68,3 @@ resources:
   requests:
     # cpu: 100m
     memory: 1.5Gi
-

@@ -13,10 +13,10 @@ spring:
       uri: localhost:8010
       enabled: false
 management:
-  port: 8385
-  security:
-    enabled: false
-security:
-  basic:
-    enabled: false
+  server:
+    port: 8385
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
