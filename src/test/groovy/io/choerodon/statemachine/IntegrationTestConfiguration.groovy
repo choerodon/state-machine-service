@@ -1,7 +1,6 @@
 package io.choerodon.statemachine
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.choerodon.asgard.saga.feign.SagaClient
 import io.choerodon.core.oauth.CustomUserDetails
 import io.choerodon.liquibase.LiquibaseConfig
 import io.choerodon.liquibase.LiquibaseExecutor
@@ -67,7 +66,7 @@ class IntegrationTestConfiguration {
             @Override
             ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
                 httpRequest.getHeaders()
-                        .add('JWT_Token', createJWT(key, objectMapper))
+                        .add('Authorization', createJWT(key, objectMapper))
                 return clientHttpRequestExecution.execute(httpRequest, bytes)
             }
         }])

@@ -1,10 +1,11 @@
 package io.choerodon.statemachine.api.controller.v1;
 
+import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.enums.ResourceType;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -13,7 +14,6 @@ import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.api.validator.StateValidator;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.swagger.annotation.CustomPageRequest;
-import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class StatusController extends BaseController {
     @Autowired
     private StateValidator stateValidator;
 
-    @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(type = ResourceType.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "分页查询状态列表")
     @CustomPageRequest
     @PostMapping("/organizations/{organization_id}/status/list")
@@ -56,7 +56,7 @@ public class StatusController extends BaseController {
                 .orElseThrow(() -> new CommonException("error.statusList.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "创建状态")
     @PostMapping("/organizations/{organization_id}/status")
     public ResponseEntity<StatusDTO> create(@PathVariable("organization_id") Long organizationId,
@@ -65,7 +65,7 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.create(organizationId, statusDTO), HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "更新状态")
     @PutMapping(value = "/organizations/{organization_id}/status/{status_id}")
     public ResponseEntity<StatusDTO> update(@PathVariable("organization_id") Long organizationId,
@@ -77,7 +77,7 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.update(statusDTO), HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "删除状态")
     @DeleteMapping(value = "/organizations/{organization_id}/status/{status_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
@@ -85,7 +85,7 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.delete(organizationId, statusId), HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "根据id查询状态对象")
     @GetMapping(value = "/organizations/{organization_id}/status/{status_id}")
     public ResponseEntity<StatusInfoDTO> queryStatusById(@PathVariable("organization_id") Long organizationId,
@@ -93,7 +93,7 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.queryStatusById(organizationId, statusId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "查询状态机下的所有状态")
     @PostMapping(value = "/organizations/{organization_id}/status/query_by_state_machine_id")
     public ResponseEntity<List<StatusDTO>> queryByStateMachineIds(@PathVariable("organization_id") Long organizationId,
@@ -101,14 +101,14 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.queryByStateMachineIds(organizationId, stateMachineIds), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "查询组织下的所有状态")
     @GetMapping(value = "/organizations/{organization_id}/status/query_all")
     public ResponseEntity<List<StatusDTO>> queryAllStatus(@PathVariable("organization_id") Long organizationId) {
         return new ResponseEntity<>(statusService.queryAllStatus(organizationId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "查询组织下的所有状态,返回map")
     @GetMapping(value = "/organizations/{organization_id}/status/list_map")
     public ResponseEntity<Map<Long, StatusMapDTO>> queryAllStatusMap(
@@ -117,7 +117,7 @@ public class StatusController extends BaseController {
         return new ResponseEntity<>(statusService.queryAllStatusMap(organizationId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(type = ResourceType.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "校验状态名字是否未被使用")
     @GetMapping(value = "/organizations/{organization_id}/status/check_name")
     public ResponseEntity<StatusCheckDTO> checkName(@PathVariable("organization_id") Long organizationId,
@@ -128,7 +128,7 @@ public class StatusController extends BaseController {
 
     }
 
-    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "校验状态名字是否未被使用,项目层")
     @GetMapping(value = "/projects/{project_id}/status/project_check_name")
     public ResponseEntity<StatusCheckDTO> checkName(@PathVariable("project_id") Long projectId,
@@ -139,7 +139,7 @@ public class StatusController extends BaseController {
                 .orElseThrow(() -> new CommonException("error.statusName.check"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "根据ids批量查询状态")
     @PostMapping(value = "/status/batch")
     public ResponseEntity<Map<Long, Status>> batchStatusGet(@ApiParam(value = "状态ids", required = true)
@@ -149,7 +149,7 @@ public class StatusController extends BaseController {
                 .orElseThrow(() -> new CommonException("error.status.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "【敏捷】新增状态")
     @PostMapping(value = "/organizations/{organization_id}/status/create_status_for_agile")
     public ResponseEntity<StatusDTO> createStatusForAgile(@PathVariable("organization_id") Long organizationId,
@@ -160,7 +160,7 @@ public class StatusController extends BaseController {
                 .orElseThrow(() -> new CommonException("error.status.get"));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "【敏捷】移除状态")
     @DeleteMapping(value = "/organizations/{organization_id}/status/remove_status_for_agile")
     public ResponseEntity removeStatusForAgile(@ApiParam(value = "组织id", required = true)

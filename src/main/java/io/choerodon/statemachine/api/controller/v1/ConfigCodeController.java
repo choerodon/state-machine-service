@@ -1,11 +1,11 @@
 package io.choerodon.statemachine.api.controller.v1;
 
+import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.enums.ResourceType;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.statemachine.api.dto.ConfigCodeDTO;
 import io.choerodon.statemachine.api.service.ConfigCodeService;
-import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class ConfigCodeController extends BaseController {
     @Autowired
     private ConfigCodeService configCodeService;
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(type = ResourceType.ORGANIZATION)
     @ApiOperation(value = "获取未配置的条件，验证，后置动作等列表")
     @GetMapping(value = "/{transform_id}")
     public ResponseEntity<List<ConfigCodeDTO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,
