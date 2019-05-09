@@ -159,13 +159,6 @@
             <version>${choerodon.starters.version}</version>
         </dependency>
     </dependencies>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>Choerodon Release</id>
-            <name>Choerodon Release Repository</name>
-            <url>https://nexus.choerodon.com.cn/repository/choerodon-release</url>
-        </pluginRepository>
-    </pluginRepositories>
     <build>
         <finalName>app</finalName>
     </build>
