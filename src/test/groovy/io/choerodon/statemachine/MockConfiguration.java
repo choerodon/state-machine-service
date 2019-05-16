@@ -2,9 +2,10 @@ package io.choerodon.statemachine;
 
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.asgard.saga.feign.SagaClientCallback;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.statemachine.api.dto.ExecuteResult;
 import io.choerodon.statemachine.api.dto.InputDTO;
+import io.choerodon.statemachine.api.service.impl.InitServiceImpl;
 import io.choerodon.statemachine.infra.enums.TransformConditionStrategy;
 import io.choerodon.statemachine.infra.enums.TransformType;
 import io.choerodon.statemachine.infra.feign.CustomFeignClientAdaptor;
@@ -32,10 +33,11 @@ import java.util.Map;
 @Configuration
 public class MockConfiguration {
     @Bean
-    @Primary
     SagaClient sagaClient() {
-        SagaClient sagaClient = Mockito.mock(SagaClientCallback.class);
+        SagaClient sagaClient = Mockito.mock(SagaClient.class);
         Mockito.when(sagaClient.startSaga(Matchers.anyString(), Matchers.any(StartInstanceDTO.class))).thenReturn(null);
+        InitServiceImpl initService = ApplicationContextHelper.getSpringFactory().getBean(InitServiceImpl.class);
+        initService.setSagaClient(sagaClient);
         return sagaClient;
     }
 
@@ -68,9 +70,9 @@ public class MockConfiguration {
     IssueFeignClient issueFeignClient() {
         IssueFeignClient issueFeignClient = Mockito.mock(IssueFeignClient.class);
         Map<String, Object> result = new HashMap<>(2);
-        result.put("canDelete",true);
-        result.put("count",0);
-        Mockito.when(issueFeignClient.checkDeleteNode(Matchers.any(Long.class), Matchers.any(Long.class),Matchers.any(Long.class))).thenReturn(new ResponseEntity(result, HttpStatus.OK));
+        result.put("canDelete", true);
+        result.put("count", 0);
+        Mockito.when(issueFeignClient.checkDeleteNode(Matchers.any(Long.class), Matchers.any(Long.class), Matchers.any(Long.class))).thenReturn(new ResponseEntity(result, HttpStatus.OK));
 
 //        List<TransformInfo> transformInfos = new ArrayList<>();
 //        TransformInfo transformInfo = new TransformInfo();

@@ -51,6 +51,10 @@ public class InitServiceImpl implements InitService {
     @Autowired
     private SagaClient sagaClient;
 
+    public void setSagaClient(SagaClient sagaClient) {
+        this.sagaClient = sagaClient;
+    }
+
     private static final String ERROR_STATEMACHINE_CREATE = "error.stateMachine.create";
 
     @Override

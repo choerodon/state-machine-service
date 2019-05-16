@@ -12,12 +12,14 @@
     <parent>
         <groupId>io.choerodon</groupId>
         <artifactId>choerodon-framework-parent</artifactId>
-        <version>0.9.0.RELEASE</version>
+        <version>0.11.0.RELEASE</version>
     </parent>
 
     <!--choerodon-starters dependency-->
     <properties>
-        <choerodon.starters.version>0.10.0.RELEASE</choerodon.starters.version>
+        <choerodon.starters.version>0.11.0.RELEASE</choerodon.starters.version>
+        <choerodon.serviceBuild>true</choerodon.serviceBuild>
+        <choerodon.mainClass>io.choerodon.statemachine.StateMachineServiceApplication</choerodon.mainClass>
     </properties>
     <dependencies>
         <!--spring boot-->
@@ -43,7 +45,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-config-client</artifactId>
         </dependency>
-
         <!--choerodon starters-->
         <dependency>
             <groupId>io.choerodon</groupId>
@@ -65,13 +66,11 @@
             <artifactId>choerodon-starter-mybatis-mapper</artifactId>
             <version>${choerodon.starters.version}</version>
         </dependency>
-
         <!--mysql-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-asgard</artifactId>
@@ -83,11 +82,10 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.47</version>
         </dependency>
-
         <!-- 添加cpu监控 -->
         <dependency>
             <groupId>io.choerodon</groupId>
-            <artifactId>choerodon-starter-hitoa</artifactId>
+            <artifactId>choerodon-starter-metric</artifactId>
             <version>${choerodon.starters.version}</version>
         </dependency>
         <!-- test -->
@@ -96,20 +94,17 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <!--状态机-->
         <dependency>
             <groupId>org.springframework.statemachine</groupId>
             <artifactId>spring-statemachine-core</artifactId>
             <version>2.0.2.RELEASE</version>
         </dependency>
-
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
             <version>2.1.0</version>
         </dependency>
-
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -147,66 +142,30 @@
             <version>2.2</version>
             <scope>test</scope>
         </dependency>
-
         <!-- feign -->
         <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-feign-replay</artifactId>
             <version>${choerodon.starters.version}</version>
         </dependency>
-
         <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-core</artifactId>
             <version>${choerodon.starters.version}</version>
         </dependency>
-
         <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-eureka-event</artifactId>
             <version>${choerodon.starters.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.choerodon</groupId>
+            <artifactId>choerodon-starter-actuator</artifactId>
+            <version>${choerodon.starters.version}</version>
+        </dependency>
     </dependencies>
-
     <build>
         <finalName>app</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>addTestSources</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Spec.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
     </build>
-
 </project>
 

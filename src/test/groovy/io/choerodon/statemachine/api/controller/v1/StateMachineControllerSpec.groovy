@@ -1,5 +1,6 @@
 package io.choerodon.statemachine.api.controller.v1
 
+import io.choerodon.asgard.saga.dto.StartInstanceDTO
 import io.choerodon.asgard.saga.feign.SagaClient
 import io.choerodon.core.domain.Page
 import io.choerodon.statemachine.IntegrationTestConfiguration
@@ -11,6 +12,8 @@ import io.choerodon.statemachine.domain.*
 import io.choerodon.statemachine.domain.event.ProjectEvent
 import io.choerodon.statemachine.infra.enums.StateMachineStatus
 import io.choerodon.statemachine.infra.mapper.*
+import org.mockito.Matchers
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -51,7 +54,7 @@ class StateMachineControllerSpec extends Specification {
     StateMachineService stateMachineService
     @Autowired
     InitService initService
-    @Autowired
+    @Shared
     SagaClient sagaClient
     @Shared
     def needInit = true
@@ -98,6 +101,9 @@ class StateMachineControllerSpec extends Specification {
             stateMachineDTO2 = stateMachineService.create(testOrganizationId, stateMachineDTO2)
             stateMachineList.add(stateMachineDTO2)
             stateMachineIds.add(stateMachineDTO2.getId())
+
+            sagaClient = Mockito.mock(SagaClient.class);
+            Mockito.when(sagaClient.startSaga(Matchers.anyString(), Matchers.any(StartInstanceDTO.class))).thenReturn(null);
         }
     }
     /**
