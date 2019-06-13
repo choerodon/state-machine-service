@@ -1,6 +1,6 @@
 package io.choerodon.statemachine.infra.mapper;
 
-import io.choerodon.mybatis.common.BaseMapper;
+import io.choerodon.mybatis.common.Mapper;
 import io.choerodon.statemachine.domain.StateMachineConfigDraft;
 import org.apache.ibatis.annotations.Param;
 
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StateMachineConfigDraftMapper extends BaseMapper<StateMachineConfigDraft> {
+public interface StateMachineConfigDraftMapper extends Mapper<StateMachineConfigDraft> {
 
     StateMachineConfigDraft queryById(@Param("organizationId") Long organizationId, @Param("id") Long id);
 

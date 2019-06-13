@@ -2,7 +2,7 @@ package io.choerodon.statemachine.api.controller.v1
 
 import io.choerodon.asgard.saga.dto.StartInstanceDTO
 import io.choerodon.asgard.saga.feign.SagaClient
-import io.choerodon.core.domain.Page
+import io.choerodon.core.domain.PageInfo
 import io.choerodon.statemachine.IntegrationTestConfiguration
 import io.choerodon.statemachine.api.dto.StateMachineDTO
 import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO
@@ -152,7 +152,7 @@ class StateMachineControllerSpec extends Specification {
             url = url + "&param=" + param
         }
         when: '分页查询'
-        ParameterizedTypeReference<Page<StateMachineDTO>> typeRef = new ParameterizedTypeReference<Page<StateMachineDTO>>() {
+        ParameterizedTypeReference<PageInfo<StateMachineDTO>> typeRef = new ParameterizedTypeReference<PageInfo<StateMachineDTO>>() {
         }
         def entity = restTemplate.exchange(url, HttpMethod.GET, null, typeRef, testOrganizationId)
 

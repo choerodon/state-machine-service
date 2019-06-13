@@ -1,9 +1,11 @@
 package io.choerodon.statemachine.api.service.impl;
 
-import io.choerodon.core.domain.Page;
+import io.choerodon.base.domain.PageRequest;
+
+import com.github.pagehelper.PageInfo;
+
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.entity.Criteria;
 import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
@@ -18,6 +20,8 @@ import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
+
+import com.github.pagehelper.PageHelper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -34,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Transactional(rollbackFor = Exception.class)
-public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> implements StateMachineService {
+public class StateMachineServiceImpl implements StateMachineService {
 
     private static final Logger logger = LoggerFactory.getLogger(StateMachineServiceImpl.class);
     private static final String ERROR_STATEMACHINENODE_CREATE = "error.stateMachineNode.create";
@@ -76,21 +80,14 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public Page<StateMachineDTO> pageQuery(PageRequest pageRequest, StateMachineDTO stateMachineDTO, String param) {
+    public PageInfo<StateMachineDTO> pageQuery(PageRequest pageRequest, StateMachineDTO stateMachineDTO, String param) {
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
-        Page<StateMachine> page = PageHelper.doPageAndSort(pageRequest,
-                () -> stateMachineMapper.fulltextSearch(stateMachine, param));
-        List<StateMachine> schemes = page.getContent();
+        PageInfo<StateMachine> page = PageHelper.startPage(pageRequest.getPage(),
+                pageRequest.getSize(),pageRequest.getSort().toSql()).doSelectPageInfo(() -> stateMachineMapper.fulltextSearch(stateMachine, param));
+        List<StateMachine> schemes = page.getList();
         List<StateMachineDTO> stateMachineDTOS = modelMapper.map(schemes, new TypeToken<List<StateMachineDTO>>() {
         }.getType());
-        Page<StateMachineDTO> returnPage = new Page<>();
-        returnPage.setContent(stateMachineDTOS);
-        returnPage.setNumber(page.getNumber());
-        returnPage.setNumberOfElements(page.getNumberOfElements());
-        returnPage.setSize(page.getSize());
-        returnPage.setTotalElements(page.getTotalElements());
-        returnPage.setTotalPages(page.getTotalPages());
-        return returnPage;
+        return new PageInfo<>(stateMachineDTOS);
     }
 
     @Override
@@ -252,7 +249,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             }
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        int stateMachineDeploy = updateOptional(stateMachine, STATUS);
+        Criteria criteria = new Criteria();
+        criteria.update(STATUS);
+        int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deploy");
         }
@@ -455,7 +454,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
             throw new CommonException("error.stateMachine.deleteDraft.noFound");
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        int stateMachineDeploy = updateOptional(stateMachine, STATUS);
+        Criteria criteria = new Criteria();
+        criteria.update(STATUS);
+        int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deleteDraft");
         }
@@ -567,7 +568,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
         StateMachine stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-            int stateMachineUpdate = updateOptional(stateMachine, STATUS);
+            Criteria criteria = new Criteria();
+            criteria.update(STATUS);
+            int stateMachineUpdate = stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
             if (stateMachineUpdate != 1) {
                 throw new CommonException("error.stateMachine.update");
             }
@@ -608,7 +611,9 @@ public class StateMachineServiceImpl extends BaseServiceImpl<StateMachine> imple
                 //更新状态机状态为create
                 Long stateMachineId = stateMachine.getId();
                 stateMachine.setStatus(StateMachineStatus.CREATE);
-                updateOptional(stateMachine, STATUS);
+                Criteria criteria = new Criteria();
+                criteria.update(STATUS);
+                stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
                 //删除发布节点
                 StateMachineNode node = new StateMachineNode();
                 node.setStateMachineId(stateMachineId);

@@ -1,6 +1,6 @@
 package io.choerodon.statemachine.infra.feign.dto;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -15,7 +15,7 @@ public class ProjectDTO {
 
     private Long id;
 
-    @NotEmpty(message = "error.project.name.empty")
+    @javax.validation.constraints.NotEmpty(message = "error.project.name.empty")
     @Size(min = 1, max = 32, message = "error.project.code.size")
     private String name;
 

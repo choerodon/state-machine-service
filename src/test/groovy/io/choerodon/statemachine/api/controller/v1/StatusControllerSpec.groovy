@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.api.controller.v1
 
 import io.choerodon.asgard.saga.feign.SagaClient
-import io.choerodon.core.domain.Page
+import io.choerodon.core.domain.PageInfo
 import io.choerodon.statemachine.IntegrationTestConfiguration
 import io.choerodon.statemachine.api.dto.*
 import io.choerodon.statemachine.api.service.InitService
@@ -151,7 +151,7 @@ class StatusControllerSpec extends Specification {
         searchDTO.setParam(param)
         when: '分页查询'
         HttpEntity<StatusSearchDTO> httpEntity = new HttpEntity<>(searchDTO)
-        ParameterizedTypeReference<Page<StatusWithInfoDTO>> typeRef = new ParameterizedTypeReference<Page<StatusWithInfoDTO>>() {
+        ParameterizedTypeReference<PageInfo<StatusWithInfoDTO>> typeRef = new ParameterizedTypeReference<PageInfo<StatusWithInfoDTO>>() {
         }
         def entity = restTemplate.exchange(baseUrl + "/list?page=0&size=10", HttpMethod.POST, httpEntity, typeRef, testOrganizationId)
 

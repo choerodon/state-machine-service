@@ -1,20 +1,16 @@
 package io.choerodon.statemachine.domain;
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-
 import javax.persistence.*;
+
+import io.choerodon.mybatis.entity.BaseDTO;
 
 /**
  * @author peng.jiang,dinghuang123@gmail.com
  */
-@ModifyAudit
-@VersionAudit
 @Table(name = "state_machine_node_draft")
-public class StateMachineNodeDraft extends AuditDomain {
+public class StateMachineNodeDraft extends BaseDTO {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long stateMachineId;
     private Long statusId;

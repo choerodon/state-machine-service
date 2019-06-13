@@ -1,8 +1,6 @@
 package io.choerodon.statemachine.domain;
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.entity.BaseDTO;
 
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -10,10 +8,8 @@ import javax.persistence.Transient;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-@ModifyAudit
-@VersionAudit
 @Table(name = "state_machine_config")
-public class StateMachineConfig extends AuditDomain {
+public class StateMachineConfig extends BaseDTO {
     private Long id;
     private Long transformId;
     private Long stateMachineId;

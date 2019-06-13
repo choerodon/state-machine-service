@@ -1,7 +1,7 @@
 package io.choerodon.statemachine.api.service;
 
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.base.domain.PageRequest;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.domain.Status;
 
@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public interface StatusService {
 
-    Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO);
+    PageInfo<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO);
 
     /**
      * 创建状态

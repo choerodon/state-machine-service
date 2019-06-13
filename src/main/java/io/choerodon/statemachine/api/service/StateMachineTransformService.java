@@ -1,9 +1,7 @@
 package io.choerodon.statemachine.api.service;
 
-import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.domain.StateMachineTransform;
-import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +9,7 @@ import java.util.Map;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StateMachineTransformService extends BaseService<StateMachineTransformDraft> {
+public interface StateMachineTransformService {
 
     /**
      * 创建转换

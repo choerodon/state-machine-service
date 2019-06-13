@@ -1,9 +1,10 @@
 package io.choerodon.statemachine.api.service.impl;
 
-import io.choerodon.core.domain.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+import io.choerodon.base.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StateMachineNodeService;
 import io.choerodon.statemachine.api.service.StatusService;
@@ -16,6 +17,7 @@ import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.mapper.*;
 import io.choerodon.statemachine.infra.utils.EnumUtil;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,22 +51,16 @@ public class StatusServiceImpl implements StatusService {
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public Page<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO) {
-        Page<Long> statusIdsPage = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.selectStatusIds(organizationId, statusSearchDTO));
+    public PageInfo<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO) {
+        PageInfo<Long> statusIdsPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), pageRequest.getSort().toSql())
+                .doSelectPageInfo(() -> statusMapper.selectStatusIds(organizationId, statusSearchDTO));
         List<StatusWithInfoDTO> statusWithInfoDTOList = new ArrayList<>();
-        if (!statusIdsPage.getContent().isEmpty()) {
-            List<StatusWithInfo> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getContent());
+        if (!statusIdsPage.getList().isEmpty()) {
+            List<StatusWithInfo> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getList());
             statusWithInfoDTOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoDTO>>() {
             }.getType());
         }
-        Page<StatusWithInfoDTO> returnPage = new Page<>();
-        returnPage.setContent(statusWithInfoDTOList);
-        returnPage.setNumber(statusIdsPage.getNumber());
-        returnPage.setNumberOfElements(statusIdsPage.getNumberOfElements());
-        returnPage.setSize(statusIdsPage.getSize());
-        returnPage.setTotalElements(statusIdsPage.getTotalElements());
-        returnPage.setTotalPages(statusIdsPage.getTotalPages());
-        return returnPage;
+        return new PageInfo<>(statusWithInfoDTOList);
     }
 
     @Override

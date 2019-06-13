@@ -1,13 +1,13 @@
 package io.choerodon.statemachine.infra.mapper;
 
-import io.choerodon.mybatis.common.BaseMapper;
+import io.choerodon.mybatis.common.Mapper;
 import io.choerodon.statemachine.domain.StateMachineTransformDraft;
 import org.apache.ibatis.annotations.Param;
 
 /**
  * @author peng.jiang,dinghuang123@gmail.com
  */
-public interface StateMachineTransformDraftMapper extends BaseMapper<StateMachineTransformDraft> {
+public interface StateMachineTransformDraftMapper extends Mapper<StateMachineTransformDraft> {
 
     /**
      * 删除节点时，删除关联的转换
