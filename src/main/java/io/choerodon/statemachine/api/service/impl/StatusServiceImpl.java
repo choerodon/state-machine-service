@@ -17,6 +17,7 @@ import io.choerodon.statemachine.infra.enums.StatusType;
 import io.choerodon.statemachine.infra.exception.RemoveStatusException;
 import io.choerodon.statemachine.infra.mapper.*;
 import io.choerodon.statemachine.infra.utils.EnumUtil;
+import io.choerodon.statemachine.infra.utils.PageUtil;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -60,7 +61,7 @@ public class StatusServiceImpl implements StatusService {
             statusWithInfoDTOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoDTO>>() {
             }.getType());
         }
-        return new PageInfo<>(statusWithInfoDTOList);
+        return PageUtil.buildPageInfoWithPageInfoList(statusIdsPage, statusWithInfoDTOList);
     }
 
     @Override

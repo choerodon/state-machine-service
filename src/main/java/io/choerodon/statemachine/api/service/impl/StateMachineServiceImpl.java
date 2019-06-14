@@ -20,6 +20,7 @@ import io.choerodon.statemachine.infra.cache.InstanceCache;
 import io.choerodon.statemachine.infra.enums.*;
 import io.choerodon.statemachine.infra.factory.MachineFactory;
 import io.choerodon.statemachine.infra.mapper.*;
+import io.choerodon.statemachine.infra.utils.PageUtil;
 
 import com.github.pagehelper.PageHelper;
 import org.modelmapper.ModelMapper;
@@ -83,11 +84,11 @@ public class StateMachineServiceImpl implements StateMachineService {
     public PageInfo<StateMachineDTO> pageQuery(PageRequest pageRequest, StateMachineDTO stateMachineDTO, String param) {
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
         PageInfo<StateMachine> page = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize(),pageRequest.getSort().toSql()).doSelectPageInfo(() -> stateMachineMapper.fulltextSearch(stateMachine, param));
+                pageRequest.getSize(), pageRequest.getSort().toSql()).doSelectPageInfo(() -> stateMachineMapper.fulltextSearch(stateMachine, param));
         List<StateMachine> schemes = page.getList();
         List<StateMachineDTO> stateMachineDTOS = modelMapper.map(schemes, new TypeToken<List<StateMachineDTO>>() {
         }.getType());
-        return new PageInfo<>(stateMachineDTOS);
+        return PageUtil.buildPageInfoWithPageInfoList(page, stateMachineDTOS);
     }
 
     @Override
