@@ -1,6 +1,6 @@
 package io.choerodon.statemachine.infra.mapper;
 
-import io.choerodon.mybatis.common.BaseMapper;
+import io.choerodon.mybatis.common.Mapper;
 import io.choerodon.statemachine.api.dto.StatusSearchDTO;
 import io.choerodon.statemachine.domain.Status;
 import io.choerodon.statemachine.domain.StatusWithInfo;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StatusMapper extends BaseMapper<Status> {
+public interface StatusMapper extends Mapper<Status> {
 
     List<Long> selectStatusIds(@Param("organizationId") Long organizationId, @Param("statusSearchDTO") StatusSearchDTO statusSearchDTO);
 

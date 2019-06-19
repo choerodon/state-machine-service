@@ -1,15 +1,13 @@
 package io.choerodon.statemachine.api.service;
 
-import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineConfigDTO;
-import io.choerodon.statemachine.domain.StateMachineConfigDraft;
 
 import java.util.List;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StateMachineConfigService extends BaseService<StateMachineConfigDraft> {
+public interface StateMachineConfigService {
 
     /**
      * 创建配置（草稿）

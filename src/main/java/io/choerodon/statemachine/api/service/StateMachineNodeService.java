@@ -1,9 +1,7 @@
 package io.choerodon.statemachine.api.service;
 
-import io.choerodon.mybatis.service.BaseService;
 import io.choerodon.statemachine.api.dto.StateMachineNodeDTO;
 import io.choerodon.statemachine.api.dto.StatusDTO;
-import io.choerodon.statemachine.domain.StateMachineNodeDraft;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +9,7 @@ import java.util.Map;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StateMachineNodeService extends BaseService<StateMachineNodeDraft> {
+public interface StateMachineNodeService {
     /**
      * 创建状态节点
      *

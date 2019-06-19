@@ -1,18 +1,18 @@
 package io.choerodon.statemachine.api.service;
 
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.service.BaseService;
+import io.choerodon.base.domain.PageRequest;
 import io.choerodon.statemachine.api.dto.StateMachineDTO;
 import io.choerodon.statemachine.api.dto.StateMachineWithStatusDTO;
 import io.choerodon.statemachine.domain.StateMachine;
 
 import java.util.List;
 
+import com.github.pagehelper.PageInfo;
+
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StateMachineService extends BaseService<StateMachine> {
+public interface StateMachineService {
 
     /**
      * 分页查询状态机
@@ -22,7 +22,7 @@ public interface StateMachineService extends BaseService<StateMachine> {
      * @param params          模糊查询参数
      * @return 状态机列表
      */
-    Page<StateMachineDTO> pageQuery(PageRequest pageRequest, StateMachineDTO stateMachineDTO, String params);
+    PageInfo<StateMachineDTO> pageQuery(PageRequest pageRequest, StateMachineDTO stateMachineDTO, String params);
 
     /**
      * 创建状态机及配置

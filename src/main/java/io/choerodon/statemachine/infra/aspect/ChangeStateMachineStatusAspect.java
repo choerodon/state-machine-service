@@ -1,10 +1,12 @@
 package io.choerodon.statemachine.infra.aspect;
 
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.entity.Criteria;
 import io.choerodon.statemachine.api.service.StateMachineService;
 import io.choerodon.statemachine.domain.StateMachine;
 import io.choerodon.statemachine.infra.enums.StateMachineStatus;
 import io.choerodon.statemachine.infra.mapper.StateMachineMapper;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -49,7 +51,9 @@ public class ChangeStateMachineStatusAspect {
         }
         if (stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-            stateMachineService.updateOptional(stateMachine, "status");
+            Criteria criteria = new Criteria();
+            criteria.update("status");
+            stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
         }
 
         try {

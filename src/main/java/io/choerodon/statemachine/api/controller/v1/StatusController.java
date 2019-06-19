@@ -1,14 +1,14 @@
 package io.choerodon.statemachine.api.controller.v1;
 
 import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.domain.PageRequest;
+import io.choerodon.base.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
 import io.choerodon.core.base.BaseController;
-import io.choerodon.core.domain.Page;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.mybatis.annotation.SortDefault;
 import io.choerodon.statemachine.api.dto.*;
 import io.choerodon.statemachine.api.service.StatusService;
 import io.choerodon.statemachine.api.validator.StateValidator;
@@ -45,7 +45,7 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "分页查询状态列表")
     @CustomPageRequest
     @PostMapping("/organizations/{organization_id}/status/list")
-    public ResponseEntity<Page<StatusWithInfoDTO>> queryStatusList(@ApiIgnore
+    public ResponseEntity<PageInfo<StatusWithInfoDTO>> queryStatusList(@ApiIgnore
                                                                    @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                                    @ApiParam(value = "组织id", required = true)
                                                                    @PathVariable("organization_id") Long organizationId,

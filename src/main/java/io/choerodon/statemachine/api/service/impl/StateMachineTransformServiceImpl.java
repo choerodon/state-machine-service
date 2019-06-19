@@ -1,6 +1,7 @@
 package io.choerodon.statemachine.api.service.impl;
 
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.entity.Criteria;
 import io.choerodon.mybatis.service.BaseServiceImpl;
 import io.choerodon.statemachine.api.dto.StateMachineTransformDTO;
 import io.choerodon.statemachine.api.service.StateMachineConfigService;
@@ -243,7 +244,9 @@ public class StateMachineTransformServiceImpl extends BaseServiceImpl<StateMachi
             throw new CommonException("error.updateConditionStrategy.queryById.notFound");
         }
         transform.setConditionStrategy(conditionStrategy);
-        int update = updateOptional(transform, "conditionStrategy");
+        Criteria criteria = new Criteria();
+        criteria.update("conditionStrategy");
+        int update = transformDraftMapper.updateByPrimaryKeyOptions(transform, criteria);
         if (update != 1) {
             throw new CommonException("error.updateConditionStrategy.updateOptional");
         }
