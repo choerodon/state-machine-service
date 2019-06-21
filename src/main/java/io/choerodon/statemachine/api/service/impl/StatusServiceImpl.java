@@ -53,7 +53,7 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public PageInfo<StatusWithInfoDTO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchDTO statusSearchDTO) {
-        PageInfo<Long> statusIdsPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), pageRequest.getSort().toSql())
+        PageInfo<Long> statusIdsPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort()))
                 .doSelectPageInfo(() -> statusMapper.selectStatusIds(organizationId, statusSearchDTO));
         List<StatusWithInfoDTO> statusWithInfoDTOList = new ArrayList<>();
         if (!statusIdsPage.getList().isEmpty()) {
