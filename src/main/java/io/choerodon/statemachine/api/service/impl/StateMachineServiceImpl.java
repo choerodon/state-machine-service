@@ -84,7 +84,7 @@ public class StateMachineServiceImpl implements StateMachineService {
     public PageInfo<StateMachineDTO> pageQuery(PageRequest pageRequest, StateMachineDTO stateMachineDTO, String param) {
         StateMachine stateMachine = modelMapper.map(stateMachineDTO, StateMachine.class);
         PageInfo<StateMachine> page = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize(), pageRequest.getSort().toSql()).doSelectPageInfo(() -> stateMachineMapper.fulltextSearch(stateMachine, param));
+                pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> stateMachineMapper.fulltextSearch(stateMachine, param));
         List<StateMachine> schemes = page.getList();
         List<StateMachineDTO> stateMachineDTOS = modelMapper.map(schemes, new TypeToken<List<StateMachineDTO>>() {
         }.getType());
